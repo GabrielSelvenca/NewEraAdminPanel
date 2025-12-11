@@ -1,0 +1,5 @@
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\publish\NovaEraAdmin.exe
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\publish\NovaEraAdmin.dll
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\publish\NovaEraAdmin.deps.json
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\publish\NovaEraAdmin.runtimeconfig.json
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\publish\NovaEraAdmin.pdb

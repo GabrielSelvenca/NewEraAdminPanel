@@ -1,0 +1,14 @@
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\bin\Release\net9.0-windows\win-x64\NovaEraAdmin.exe
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\bin\Release\net9.0-windows\win-x64\NovaEraAdmin.deps.json
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\bin\Release\net9.0-windows\win-x64\NovaEraAdmin.runtimeconfig.json
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\bin\Release\net9.0-windows\win-x64\NovaEraAdmin.dll
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\bin\Release\net9.0-windows\win-x64\NovaEraAdmin.pdb
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.AssemblyInfoInputs.cache
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.AssemblyInfo.cs
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.csproj.CoreCompileInputs.cache
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.dll
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\refint\NovaEraAdmin.dll
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.pdb
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\NovaEraAdmin.genruntimeconfig.cache
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Release\net9.0-windows\win-x64\ref\NovaEraAdmin.dll
