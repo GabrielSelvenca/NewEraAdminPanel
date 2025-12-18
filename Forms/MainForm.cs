@@ -210,6 +210,9 @@ public class MainForm : Form
         var title = CreateTitle("Jogos e Produtos");
         title.Dock = DockStyle.Top;
         
+        // Grid (declarado primeiro para uso nos botões)
+        var grid = CreateGrid();
+        
         // Toolbar
         var toolbar = new FlowLayoutPanel
         {
@@ -222,13 +225,31 @@ public class MainForm : Form
         var btnSync = CreateButton("🔗 Sincronizar do Roblox", AccentGreen);
         btnSync.Click += (s, e) => ShowSyncDialog();
         
+        var btnAdd = CreateButton("➕ Novo Jogo", BgCard);
+        btnAdd.Click += (s, e) => ShowAddGameDialog();
+        
+        var btnDelete = CreateButton("🗑️ Deletar", Color.FromArgb(180, 60, 60));
+        btnDelete.Click += async (s, e) =>
+        {
+            if (grid.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Selecione um jogo para deletar!", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var gameId = (int)grid.SelectedRows[0].Cells["Id"].Value;
+            var gameName = grid.SelectedRows[0].Cells["Name"].Value?.ToString();
+            var confirm = MessageBox.Show($"Deletar o jogo \"{gameName}\" e todos os seus produtos?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirm == DialogResult.Yes)
+            {
+                await _client.DeleteAsync($"/api/games/{gameId}");
+                await LoadGames();
+            }
+        };
+        
         var btnRefresh = CreateButton("🔄 Atualizar", BgCard);
         btnRefresh.Click += async (s, e) => await LoadGames();
         
-        toolbar.Controls.AddRange(new Control[] { btnSync, btnRefresh });
-        
-        // Grid
-        var grid = CreateGrid();
+        toolbar.Controls.AddRange(new Control[] { btnSync, btnAdd, btnDelete, btnRefresh });
         grid.Columns.AddRange(new DataGridViewColumn[]
         {
             new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "ID", Width = 50 },
@@ -278,6 +299,9 @@ public class MainForm : Form
         var title = CreateTitle($"📦 {game.Name} - Produtos");
         title.Dock = DockStyle.Top;
         
+        // Grid (declarado primeiro para uso nos botões)
+        var grid = CreateGrid();
+        
         // Toolbar
         var toolbar = new FlowLayoutPanel
         {
@@ -290,31 +314,38 @@ public class MainForm : Form
         var btnBack = CreateButton("← Voltar", BgCard);
         btnBack.Click += async (s, e) => await LoadGames();
         
-        var btnSync = CreateButton("🔄 Re-sincronizar", AccentGreen);
-        btnSync.Click += async (s, e) =>
+        var btnAdd = CreateButton("➕ Novo Produto", BgCard);
+        btnAdd.Click += (s, e) => ShowAddProductDialog(gameId);
+        
+        var btnDelete = CreateButton("🗑️ Deletar", Color.FromArgb(180, 60, 60));
+        btnDelete.Click += async (s, e) =>
         {
-            if (string.IsNullOrEmpty(game.RobloxGameId))
+            if (grid.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Este jogo não tem Universe ID do Roblox!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Selecione um produto para deletar!", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            // Re-sync
-            await _client.PostAsync<SyncResponse>("/api/roblox/sync", new { placeIdOrUrl = game.RobloxGameId });
-            await ShowGameProducts(gameId);
-            MessageBox.Show("Produtos atualizados!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var productId = (int)grid.SelectedRows[0].Cells["Id"].Value;
+            var productName = grid.SelectedRows[0].Cells["Name"].Value?.ToString();
+            var confirm = MessageBox.Show($"Deletar o produto \"{productName}\"?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirm == DialogResult.Yes)
+            {
+                await _client.DeleteAsync($"/api/products/{productId}");
+                await ShowGameProducts(gameId);
+            }
         };
         
-        toolbar.Controls.AddRange(new Control[] { btnBack, btnSync });
+        toolbar.Controls.AddRange(new Control[] { btnBack, btnAdd, btnDelete });
         
-        // Grid
-        var grid = CreateGrid();
+        // Configura colunas do grid
         grid.Columns.AddRange(new DataGridViewColumn[]
         {
-            new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Nome", Width = 200 },
-            new DataGridViewTextBoxColumn { Name = "Robux", HeaderText = "Robux", Width = 80 },
-            new DataGridViewTextBoxColumn { Name = "Price", HeaderText = "Preço", Width = 100 },
-            new DataGridViewTextBoxColumn { Name = "GamepassId", HeaderText = "Gamepass ID", Width = 120 },
-            new DataGridViewTextBoxColumn { Name = "Active", HeaderText = "Status", Width = 80 }
+            new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "ID", Width = 50 },
+            new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Nome", Width = 180 },
+            new DataGridViewTextBoxColumn { Name = "Robux", HeaderText = "Robux", Width = 70 },
+            new DataGridViewTextBoxColumn { Name = "Price", HeaderText = "Preço", Width = 90 },
+            new DataGridViewTextBoxColumn { Name = "GamepassId", HeaderText = "Gamepass ID", Width = 100 },
+            new DataGridViewTextBoxColumn { Name = "Active", HeaderText = "Status", Width = 70 }
         });
         
         SetContent(panel);
@@ -327,8 +358,467 @@ public class MainForm : Form
         foreach (var p in products ?? [])
         {
             var price = p.Price.HasValue ? $"R$ {p.Price:F2}" : $"~R$ {p.RobuxAmount * 0.028m:F2}";
-            grid.Rows.Add(p.Name, p.RobuxAmount, price, p.RobloxGamepassId ?? "-", p.Active ? "✅" : "❌");
+            grid.Rows.Add(p.Id, p.Name, p.RobuxAmount, price, p.RobloxGamepassId ?? "-", p.Active ? "✅" : "❌");
         }
+    }
+
+    private void ShowAddGameDialog()
+    {
+        var dialog = new Form
+        {
+            Text = "Novo Jogo",
+            Size = new Size(500, 280),
+            StartPosition = FormStartPosition.CenterParent,
+            BackColor = BgDark,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MaximizeBox = false,
+            MinimizeBox = false
+        };
+
+        var lblInfo = new Label
+        {
+            Text = "Cole o link do jogo do Roblox para importar automaticamente\nou preencha manualmente os campos abaixo.",
+            Location = new Point(20, 20),
+            Size = new Size(440, 40),
+            ForeColor = TextSecondary
+        };
+        dialog.Controls.Add(lblInfo);
+
+        var y = 70;
+        var txtRobloxUrl = CreateDialogField(dialog, "Link do Roblox (para sincronizar gamepasses)", ref y);
+        
+        var lblOu = new Label
+        {
+            Text = "— OU crie manualmente —",
+            Location = new Point(20, y),
+            Size = new Size(440, 20),
+            ForeColor = TextSecondary,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        dialog.Controls.Add(lblOu);
+        y += 30;
+
+        var txtName = CreateDialogField(dialog, "Nome do Jogo (apenas se não usar link)", ref y);
+
+        var btnSync = new Button
+        {
+            Text = "🔄 Sincronizar do Roblox",
+            Location = new Point(20, y),
+            Size = new Size(200, 40),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = AccentGreen,
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 11, FontStyle.Bold),
+            Cursor = Cursors.Hand
+        };
+        btnSync.FlatAppearance.BorderSize = 0;
+
+        var btnManual = new Button
+        {
+            Text = "💾 Criar Manual",
+            Location = new Point(230, y),
+            Size = new Size(150, 40),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = BgCard,
+            ForeColor = TextPrimary,
+            Font = new Font("Segoe UI", 11),
+            Cursor = Cursors.Hand
+        };
+        btnManual.FlatAppearance.BorderSize = 0;
+
+        var lblStatus = new Label
+        {
+            Text = "",
+            Location = new Point(20, y + 50),
+            Size = new Size(440, 25),
+            ForeColor = TextSecondary
+        };
+        dialog.Controls.Add(lblStatus);
+
+        btnSync.Click += async (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(txtRobloxUrl.Text))
+            {
+                MessageBox.Show("Cole o link do jogo do Roblox!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            btnSync.Enabled = false;
+            btnManual.Enabled = false;
+            lblStatus.Text = "⏳ Buscando dados do Roblox...";
+
+            try
+            {
+                var result = await _client.PostAsync<SyncResponse>("/api/roblox/sync", new { placeIdOrUrl = txtRobloxUrl.Text.Trim() });
+
+                if (result?.Success == true)
+                {
+                    MessageBox.Show(
+                        $"✅ {result.Message}\n\n" +
+                        $"Gamepasses: {result.Stats?.GamepassesFound ?? 0}\n" +
+                        $"Adicionadas: {result.Stats?.Added ?? 0}\n" +
+                        $"Atualizadas: {result.Stats?.Updated ?? 0}",
+                        "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    dialog.Close();
+                    await LoadGames();
+                }
+                else
+                {
+                    lblStatus.Text = "Erro ao sincronizar";
+                    MessageBox.Show("Erro ao sincronizar. Verifique o link.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "";
+            }
+            finally
+            {
+                btnSync.Enabled = true;
+                btnManual.Enabled = true;
+            }
+        };
+
+        btnManual.Click += async (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(txtName.Text))
+            {
+                MessageBox.Show("Nome é obrigatório para criação manual!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var game = new { name = txtName.Text.Trim(), active = true };
+            var result = await _client.PostAsync<Game>("/api/games", game);
+            if (result != null)
+            {
+                MessageBox.Show("Jogo criado! Adicione os produtos manualmente.", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                dialog.Close();
+                await LoadGames();
+            }
+            else
+            {
+                MessageBox.Show("Erro ao criar jogo!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        dialog.Controls.Add(btnSync);
+        dialog.Controls.Add(btnManual);
+        dialog.ShowDialog();
+    }
+
+    private async void ShowAddProductDialog(int gameId)
+    {
+        // Busca o jogo para validar o criador
+        var game = await _client.GetAsync<Game>($"/api/games/{gameId}");
+        
+        var dialog = new Form
+        {
+            Text = "Novo Produto",
+            Size = new Size(480, 520),
+            StartPosition = FormStartPosition.CenterParent,
+            BackColor = BgDark,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MaximizeBox = false,
+            MinimizeBox = false
+        };
+
+        var y = 15;
+        
+        // === SEÇÃO: SINCRONIZAR VIA LINK ===
+        var lblSyncTitle = new Label
+        {
+            Text = "🔄 Importar da Gamepass (recomendado)",
+            Location = new Point(20, y),
+            Size = new Size(420, 20),
+            ForeColor = AccentGreen,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold)
+        };
+        dialog.Controls.Add(lblSyncTitle);
+        y += 25;
+        
+        var txtGamepassUrl = CreateDialogField(dialog, "Link ou ID da Gamepass", ref y);
+        
+        var btnSync = new Button
+        {
+            Text = "🔄 Importar Gamepass",
+            Location = new Point(20, y),
+            Size = new Size(420, 35),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = AccentGreen,
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold),
+            Cursor = Cursors.Hand
+        };
+        btnSync.FlatAppearance.BorderSize = 0;
+        dialog.Controls.Add(btnSync);
+        y += 45;
+        
+        // Separador
+        var lblSeparator = new Label
+        {
+            Text = "━━━━━━━━━━━━━━━ OU ━━━━━━━━━━━━━━━",
+            Location = new Point(20, y),
+            Size = new Size(420, 20),
+            ForeColor = TextSecondary,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        dialog.Controls.Add(lblSeparator);
+        y += 30;
+        
+        // === SEÇÃO: CRIAR MANUALMENTE ===
+        var lblManualTitle = new Label
+        {
+            Text = "✏️ Criar Manualmente",
+            Location = new Point(20, y),
+            Size = new Size(420, 20),
+            ForeColor = TextPrimary,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold)
+        };
+        dialog.Controls.Add(lblManualTitle);
+        y += 25;
+        
+        var txtName = CreateDialogField(dialog, "Nome do Produto *", ref y);
+        var txtRobux = CreateDialogField(dialog, "Quantidade de Robux *", ref y);
+        
+        // Preço calculado
+        var lblPriceLabel = new Label { Text = "Preço (R$) - calculado automaticamente", Location = new Point(20, y), ForeColor = TextSecondary, Font = new Font("Segoe UI", 9) };
+        dialog.Controls.Add(lblPriceLabel);
+        y += 20;
+        var lblPrice = new Label 
+        { 
+            Text = "R$ 0,00", 
+            Location = new Point(20, y), 
+            Size = new Size(420, 25),
+            ForeColor = AccentGreen, 
+            Font = new Font("Segoe UI", 11, FontStyle.Bold),
+            BackColor = BgCard,
+            Padding = new Padding(5)
+        };
+        dialog.Controls.Add(lblPrice);
+        y += 35;
+        
+        txtRobux.TextChanged += async (s, e) =>
+        {
+            if (int.TryParse(txtRobux.Text, out var robux) && robux > 0)
+            {
+                try
+                {
+                    var config = await _client.GetAsync<BotConfig>("/api/config");
+                    var pricePerK = config?.PricePerK ?? 27.99m;
+                    var calculatedPrice = (robux / 1000m) * pricePerK;
+                    lblPrice.Text = $"R$ {calculatedPrice:N2}";
+                }
+                catch { lblPrice.Text = "R$ --"; }
+            }
+            else { lblPrice.Text = "R$ 0,00"; }
+        };
+
+        var btnSave = new Button
+        {
+            Text = "💾 Criar Produto Manual",
+            Location = new Point(20, y),
+            Size = new Size(420, 40),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = BgCard,
+            ForeColor = TextPrimary,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold),
+            Cursor = Cursors.Hand
+        };
+        btnSave.FlatAppearance.BorderSize = 0;
+        dialog.Controls.Add(btnSave);
+
+        // === EVENTOS ===
+        
+        // Sincronizar via link
+        btnSync.Click += async (s, e) =>
+        {
+            var input = txtGamepassUrl.Text.Trim();
+            if (string.IsNullOrEmpty(input))
+            {
+                MessageBox.Show("Cole o link ou ID da gamepass!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            // Extrai o ID da gamepass
+            long gamepassId = 0;
+            if (long.TryParse(input, out var id))
+            {
+                gamepassId = id;
+            }
+            else if (input.Contains("game-pass") || input.Contains("gamepass"))
+            {
+                // Tenta extrair da URL: https://www.roblox.com/game-pass/123456/Name
+                var parts = input.Split('/');
+                foreach (var part in parts)
+                {
+                    if (long.TryParse(part, out var extractedId) && extractedId > 1000)
+                    {
+                        gamepassId = extractedId;
+                        break;
+                    }
+                }
+            }
+            
+            if (gamepassId == 0)
+            {
+                MessageBox.Show("Não foi possível extrair o ID da gamepass.\nUse o ID numérico ou o link completo.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
+            btnSync.Enabled = false;
+            btnSync.Text = "⏳ Buscando...";
+            
+            try
+            {
+                var gpInfo = await _client.GetAsync<GamepassInfo>($"/api/roblox/gamepass/{gamepassId}");
+                
+                if (gpInfo == null)
+                {
+                    MessageBox.Show("Gamepass não encontrada!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                
+                // Valida se pertence ao mesmo criador do jogo
+                if (!string.IsNullOrEmpty(game?.Creator) && !string.IsNullOrEmpty(gpInfo.CreatorName))
+                {
+                    if (!game.Creator.Equals(gpInfo.CreatorName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var confirm = MessageBox.Show(
+                            $"⚠️ Esta gamepass pertence a \"{gpInfo.CreatorName}\"\nmas o jogo é de \"{game.Creator}\".\n\nTem certeza que deseja continuar?",
+                            "Criador Diferente", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        if (confirm != DialogResult.Yes) return;
+                    }
+                }
+                
+                // Calcula preço
+                var robux = (int)(gpInfo.PriceInRobux ?? 0);
+                decimal price = 0;
+                try
+                {
+                    var config = await _client.GetAsync<BotConfig>("/api/config");
+                    var pricePerK = config?.PricePerK ?? 27.99m;
+                    price = (robux / 1000m) * pricePerK;
+                }
+                catch { }
+                
+                var product = new
+                {
+                    name = gpInfo.Name,
+                    gameId = gameId,
+                    type = 0,
+                    delivery = 1,
+                    robuxAmount = robux,
+                    price = price,
+                    robloxGamepassId = gamepassId.ToString(),
+                    imageUrl = gpInfo.ImageUrl,
+                    description = gpInfo.Description,
+                    active = true,
+                    displayOrder = 0
+                };
+                
+                var result = await _client.PostAsync<Product>("/api/products", product);
+                if (result != null)
+                {
+                    MessageBox.Show($"✅ Produto \"{gpInfo.Name}\" importado!\n\nRobux: {robux}\nPreço: R$ {price:N2}", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    dialog.Close();
+                    await ShowGameProducts(gameId);
+                }
+                else
+                {
+                    MessageBox.Show("Erro ao criar produto!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnSync.Enabled = true;
+                btnSync.Text = "🔄 Importar Gamepass";
+            }
+        };
+        
+        // Criar manualmente
+        btnSave.Click += async (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(txtName.Text))
+            {
+                MessageBox.Show("Nome é obrigatório!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            if (!int.TryParse(txtRobux.Text, out var robux) || robux <= 0)
+            {
+                MessageBox.Show("Quantidade de Robux é obrigatória!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            decimal price = 0;
+            try
+            {
+                var config = await _client.GetAsync<BotConfig>("/api/config");
+                var pricePerK = config?.PricePerK ?? 27.99m;
+                price = (robux / 1000m) * pricePerK;
+            }
+            catch { }
+
+            var product = new
+            {
+                name = txtName.Text.Trim(),
+                gameId = gameId,
+                type = 0,
+                delivery = 1,
+                robuxAmount = robux,
+                price = price,
+                active = true,
+                displayOrder = 0
+            };
+
+            var result = await _client.PostAsync<Product>("/api/products", product);
+            if (result != null)
+            {
+                MessageBox.Show("Produto criado com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                dialog.Close();
+                await ShowGameProducts(gameId);
+            }
+            else
+            {
+                MessageBox.Show("Erro ao criar produto!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        dialog.ShowDialog();
+    }
+
+    private TextBox CreateDialogField(Form dialog, string label, ref int y)
+    {
+        var lbl = new Label
+        {
+            Text = label,
+            Location = new Point(20, y),
+            Size = new Size(390, 20),
+            ForeColor = TextSecondary,
+            Font = new Font("Segoe UI", 9)
+        };
+        dialog.Controls.Add(lbl);
+        y += 20;
+
+        var txt = new TextBox
+        {
+            Location = new Point(20, y),
+            Width = 390,
+            Height = 30,
+            BackColor = BgCard,
+            ForeColor = TextPrimary,
+            Font = new Font("Segoe UI", 10),
+            BorderStyle = BorderStyle.FixedSingle
+        };
+        dialog.Controls.Add(txt);
+        y += 35;
+
+        return txt;
     }
 
     private void ShowSyncDialog()
@@ -346,7 +836,7 @@ public class MainForm : Form
 
         var lblInfo = new Label
         {
-            Text = "Cole o link do jogo do Roblox.\nO sistema importará automaticamente o nome, descrição e todas as gamepasses.",
+            Text = "Cole o link do jogo do Roblox.\nO sistema importará automaticamente o nome, descrição, ícone, banner e o criador.",
             Location = new Point(20, 20),
             Size = new Size(440, 40),
             ForeColor = TextSecondary
@@ -401,12 +891,16 @@ public class MainForm : Form
 
                 if (result?.Success == true)
                 {
-                    MessageBox.Show(
-                        $"✅ {result.Message}\n\n" +
-                        $"Gamepasses: {result.Stats?.GamepassesFound ?? 0}\n" +
-                        $"Adicionadas: {result.Stats?.Added ?? 0}\n" +
-                        $"Atualizadas: {result.Stats?.Updated ?? 0}",
-                        "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var game = result.Game;
+                    var msg = $"✅ Jogo importado com sucesso!\n\n" +
+                        $"📛 Nome: {game?.Name ?? "N/A"}\n" +
+                        $"👤 Criador: {game?.Creator ?? "N/A"}\n" +
+                        $"🖼️ Ícone: {(string.IsNullOrEmpty(game?.ImageUrl) ? "❌" : "✅")}\n" +
+                        $"🎨 Banner: {(string.IsNullOrEmpty(game?.BannerUrl) ? "❌" : "✅")}\n" +
+                        $"📝 Descrição: {(string.IsNullOrEmpty(game?.Description) ? "❌" : "✅")}\n\n" +
+                        $"⚠️ Adicione os produtos manualmente.";
+                    
+                    MessageBox.Show(msg, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     dialog.Close();
                     await LoadGames();
                 }
@@ -607,6 +1101,9 @@ public class SyncResponse
 
     [JsonPropertyName("message")]
     public string? Message { get; set; }
+
+    [JsonPropertyName("game")]
+    public Game? Game { get; set; }
 
     [JsonPropertyName("stats")]
     public SyncStats? Stats { get; set; }

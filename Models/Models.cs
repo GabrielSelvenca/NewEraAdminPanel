@@ -114,8 +114,11 @@ public class Game
     [JsonPropertyName("id")] public int Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
     [JsonPropertyName("robloxGameId")] public string? RobloxGameId { get; set; }
+    [JsonPropertyName("robloxPlaceId")] public string? RobloxPlaceId { get; set; }
     [JsonPropertyName("imageUrl")] public string? ImageUrl { get; set; }
+    [JsonPropertyName("bannerUrl")] public string? BannerUrl { get; set; }
     [JsonPropertyName("description")] public string? Description { get; set; }
+    [JsonPropertyName("creator")] public string? Creator { get; set; }
     [JsonPropertyName("active")] public bool Active { get; set; } = true;
     [JsonPropertyName("products")] public List<Product>? Products { get; set; }
 }
@@ -134,4 +137,16 @@ public class Product
     [JsonPropertyName("active")] public bool Active { get; set; } = true;
     [JsonPropertyName("displayOrder")] public int DisplayOrder { get; set; }
     [JsonPropertyName("gameId")] public int GameId { get; set; }
+}
+
+public class GamepassInfo
+{
+    [JsonPropertyName("id")] public long Id { get; set; }
+    [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("description")] public string? Description { get; set; }
+    [JsonPropertyName("priceInRobux")] public long? PriceInRobux { get; set; }
+    [JsonPropertyName("imageUrl")] public string? ImageUrl { get; set; }
+    [JsonPropertyName("creatorId")] public long CreatorId { get; set; }
+    [JsonPropertyName("creatorName")] public string? CreatorName { get; set; }
+    [JsonPropertyName("isForSale")] public bool IsForSale { get; set; }
 }
