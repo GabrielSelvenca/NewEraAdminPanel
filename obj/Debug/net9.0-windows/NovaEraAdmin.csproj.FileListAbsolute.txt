@@ -12,3 +12,4 @@ C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Debug\net9.0-wi
 C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Debug\net9.0-windows\NovaEraAdmin.pdb
 C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Debug\net9.0-windows\NovaEraAdmin.genruntimeconfig.cache
 C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Debug\net9.0-windows\ref\NovaEraAdmin.dll
+C:\Users\57059750827\Desktop\Project CS Studios\NovaEraAdmin\obj\Debug\net9.0-windows\NovaEraAdmin.sourcelink.json

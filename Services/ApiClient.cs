@@ -10,7 +10,7 @@ public class ApiClient
     private string? _token;
     private DateTime _tokenExpires;
 
-    public string BaseUrl { get; set; } = "http://localhost:5000";
+    public string BaseUrl { get; set; } = "https://neweraapi.squareweb.app";
     public string? Email { get; set; }
     public string? Password { get; set; }
     public string? UserName { get; private set; }

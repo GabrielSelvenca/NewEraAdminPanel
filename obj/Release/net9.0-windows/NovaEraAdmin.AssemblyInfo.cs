@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Nova Era")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee2b081007377d68bbc5b8bce5867ffb21f76be5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+68c9c7c41bf4cde9794282f8a6ac79fa10cc0ba8")]
 [assembly: System.Reflection.AssemblyProductAttribute("Nova Era Admin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NovaEraAdmin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj": {}
+    "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj": {}
   },
   "projects": {
-    "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj": {
+    "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj",
+        "projectUniqueName": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj",
         "projectName": "NovaEraAdmin",
-        "projectPath": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj",
-        "packagesPath": "C:\\Users\\gabri\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\obj\\",
+        "projectPath": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj",
+        "packagesPath": "C:\\Users\\57059750827\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\gabri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\57059750827\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -75,7 +75,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
