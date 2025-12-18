@@ -11,30 +11,34 @@ public class ApiClient
     private DateTime _tokenExpires;
 
     public string BaseUrl { get; set; } = "http://localhost:5000";
-    public string? ApiKey { get; set; }
-    public string? ApiSecret { get; set; }
+    public string? Email { get; set; }
+    public string? Password { get; set; }
+    public string? UserName { get; private set; }
+    public string? UserRole { get; private set; }
     public bool IsAuthenticated => !string.IsNullOrEmpty(_token) && DateTime.Now < _tokenExpires;
 
     public async Task<bool> LoginAsync()
     {
-        if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(ApiSecret))
+        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
             return false;
 
         try
         {
-            var payload = JsonSerializer.Serialize(new { apiKey = ApiKey, apiSecret = ApiSecret });
+            var payload = JsonSerializer.Serialize(new { email = Email, password = Password });
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync($"{BaseUrl}/api/auth/login", content);
+            var response = await _client.PostAsync($"{BaseUrl}/api/admin/login", content);
 
             if (!response.IsSuccessStatusCode) return false;
 
             var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<LoginResponse>(json);
+            var result = JsonSerializer.Deserialize<AdminLoginResponse>(json);
 
             if (result?.token == null) return false;
 
             _token = result.token;
             _tokenExpires = DateTime.Now.AddHours(23);
+            UserName = result.user?.name;
+            UserRole = result.user?.role;
             return true;
         }
         catch { return false; }
@@ -120,5 +124,6 @@ public class ApiClient
         await _client.PutAsync($"{BaseUrl}{endpoint}", content);
     }
 
-    private record LoginResponse(string? token, string? expiresAt);
+    private record AdminLoginResponse(string? token, AdminUserInfo? user, int? expiresIn);
+    private record AdminUserInfo(int id, string? email, string? name, string? role);
 }

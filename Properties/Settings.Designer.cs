@@ -26,18 +26,18 @@ internal sealed partial class Settings : global::System.Configuration.Applicatio
     [global::System.Configuration.UserScopedSettingAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Configuration.DefaultSettingValueAttribute("")]
-    public string ApiKey
+    public string Email
     {
-        get => ((string)(this["ApiKey"]));
-        set => this["ApiKey"] = value;
+        get => ((string)(this["Email"]));
+        set => this["Email"] = value;
     }
 
     [global::System.Configuration.UserScopedSettingAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Configuration.DefaultSettingValueAttribute("")]
-    public string ApiSecret
+    public string Password
     {
-        get => ((string)(this["ApiSecret"]));
-        set => this["ApiSecret"] = value;
+        get => ((string)(this["Password"]));
+        set => this["Password"] = value;
     }
 }
