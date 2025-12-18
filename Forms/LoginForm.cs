@@ -77,7 +77,7 @@ public class LoginForm : Form
         }
         else
         {
-            _statusLabel.Text = "❌ Email ou senha inválidos";
+            _statusLabel.Text = $"❌ {client.LastError ?? "Erro desconhecido"}";
             _statusLabel.ForeColor = Color.Red;
             _loginBtn.Enabled = true;
         }

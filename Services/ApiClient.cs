@@ -17,10 +17,17 @@ public class ApiClient
     public string? UserRole { get; private set; }
     public bool IsAuthenticated => !string.IsNullOrEmpty(_token) && DateTime.Now < _tokenExpires;
 
+    public string? LastError { get; private set; }
+
     public async Task<bool> LoginAsync()
     {
+        LastError = null;
+        
         if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+        {
+            LastError = "Email ou senha vazios";
             return false;
+        }
 
         try
         {
@@ -28,12 +35,21 @@ public class ApiClient
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             var response = await _client.PostAsync($"{BaseUrl}/api/admin/login", content);
 
-            if (!response.IsSuccessStatusCode) return false;
-
             var json = await response.Content.ReadAsStringAsync();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                LastError = $"API: {response.StatusCode} - {json}";
+                return false;
+            }
+
             var result = JsonSerializer.Deserialize<AdminLoginResponse>(json);
 
-            if (result?.token == null) return false;
+            if (result?.token == null)
+            {
+                LastError = "Token não retornado";
+                return false;
+            }
 
             _token = result.token;
             _tokenExpires = DateTime.Now.AddHours(23);
@@ -41,7 +57,11 @@ public class ApiClient
             UserRole = result.user?.role;
             return true;
         }
-        catch { return false; }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            return false;
+        }
     }
 
     public async Task<T?> GetAsync<T>(string endpoint)

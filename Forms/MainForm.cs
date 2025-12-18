@@ -49,12 +49,13 @@ public class MainForm : Form
         // Logo/Title
         var logo = new Label
         {
-            Text = "🎮 Nova Era",
-            Font = new Font("Segoe UI", 18, FontStyle.Bold),
+            Text = "🎮 Nova",
+            Font = new Font("Segoe UI", 20, FontStyle.Bold),
             ForeColor = AccentGreen,
             Dock = DockStyle.Top,
             Height = 60,
-            TextAlign = ContentAlignment.MiddleCenter
+            TextAlign = ContentAlignment.MiddleCenter,
+            Padding = new Padding(0)
         };
         
         // Menu buttons
