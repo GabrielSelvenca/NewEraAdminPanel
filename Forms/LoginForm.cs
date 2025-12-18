@@ -4,7 +4,8 @@ namespace NovaEraAdmin.Forms;
 
 public class LoginForm : Form
 {
-    private readonly TextBox _urlBox = new() { PlaceholderText = "URL da API", Width = 300 };
+    private const string API_URL = "https://neweraapi.squareweb.app";
+    
     private readonly TextBox _emailBox = new() { PlaceholderText = "Email", Width = 300 };
     private readonly TextBox _passwordBox = new() { PlaceholderText = "Senha", Width = 300, UseSystemPasswordChar = true };
     private readonly Button _loginBtn = new() { Text = "Entrar", Width = 300, Height = 40 };
@@ -32,17 +33,13 @@ public class LoginForm : Form
 
         var title = new Label { Text = "🔐 Nova Era Admin", Font = new Font("Segoe UI", 16, FontStyle.Bold), Width = 300, Height = 40 };
 
-        // URL padrão para produção
-        _urlBox.Text = string.IsNullOrEmpty(Properties.Settings.Default.ApiUrl) 
-            ? "https://neweraapi.squareweb.app" 
-            : Properties.Settings.Default.ApiUrl;
         _emailBox.Text = Properties.Settings.Default.Email;
         _passwordBox.Text = Properties.Settings.Default.Password;
         _rememberBox.Checked = !string.IsNullOrEmpty(_emailBox.Text);
 
         _loginBtn.Click += async (s, e) => await LoginAsync();
 
-        panel.Controls.AddRange([title, _urlBox, _emailBox, _passwordBox, _rememberBox, _loginBtn, _statusLabel]);
+        panel.Controls.AddRange([title, _emailBox, _passwordBox, _rememberBox, _loginBtn, _statusLabel]);
         Controls.Add(panel);
 
         AcceptButton = _loginBtn;
@@ -56,7 +53,7 @@ public class LoginForm : Form
 
         var client = new ApiClient
         {
-            BaseUrl = string.IsNullOrWhiteSpace(_urlBox.Text) ? "http://localhost:5000" : _urlBox.Text.Trim(),
+            BaseUrl = API_URL,
             Email = _emailBox.Text.Trim(),
             Password = _passwordBox.Text.Trim()
         };
@@ -65,7 +62,6 @@ public class LoginForm : Form
         {
             if (_rememberBox.Checked)
             {
-                Properties.Settings.Default.ApiUrl = client.BaseUrl;
                 Properties.Settings.Default.Email = client.Email;
                 Properties.Settings.Default.Password = client.Password;
                 Properties.Settings.Default.Save();

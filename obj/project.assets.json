@@ -64,61 +64,6 @@
           "buildTransitive/net8.0/_._": {}
         }
       }
-    },
-    "net9.0-windows7.0/win-x64": {
-      "System.Configuration.ConfigurationManager/9.0.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Diagnostics.EventLog": "9.0.0",
-          "System.Security.Cryptography.ProtectedData": "9.0.0"
-        },
-        "compile": {
-          "lib/net9.0/System.Configuration.ConfigurationManager.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net9.0/System.Configuration.ConfigurationManager.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net8.0/_._": {}
-        }
-      },
-      "System.Diagnostics.EventLog/9.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net9.0/System.Diagnostics.EventLog.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "runtimes/win/lib/net9.0/System.Diagnostics.EventLog.Messages.dll": {},
-          "runtimes/win/lib/net9.0/System.Diagnostics.EventLog.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net8.0/_._": {}
-        }
-      },
-      "System.Security.Cryptography.ProtectedData/9.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net9.0/System.Security.Cryptography.ProtectedData.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net9.0/System.Security.Cryptography.ProtectedData.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net8.0/_._": {}
-        }
-      }
     }
   },
   "libraries": {
@@ -225,23 +170,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\57059750827\\.nuget\\packages\\": {},
+    "C:\\Users\\gabri\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj",
+      "projectUniqueName": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj",
       "projectName": "NovaEraAdmin",
-      "projectPath": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\NovaEraAdmin.csproj",
-      "packagesPath": "C:\\Users\\57059750827\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\57059750827\\Desktop\\Project CS Studios\\NovaEraAdmin\\obj\\",
+      "projectPath": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\NovaEraAdmin.csproj",
+      "packagesPath": "C:\\Users\\gabri\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\57059750827\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\gabri\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -299,12 +244,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
-      }
-    },
-    "runtimes": {
-      "win-x64": {
-        "#import": []
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
