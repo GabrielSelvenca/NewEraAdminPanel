@@ -14,13 +14,14 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const [statsData, gamesData] = await Promise.all([
-          api.getStats().catch(() => ({ totalSales: 0, totalAmount: 0, totalRobux: 0 })),
-          api.getGames().catch(() => []),
+          api.getStats().catch((e) => { console.error('Stats error:', e); return { totalSales: 0, totalAmount: 0, totalRobux: 0 }; }),
+          api.getGames().catch((e) => { console.error('Games error:', e); return []; }),
         ]);
+        console.log('Games loaded:', gamesData);
         setStats(statsData);
         setGames(gamesData);
       } catch (err) {
-        console.error(err);
+        console.error('Dashboard error:', err);
       } finally {
         setLoading(false);
       }
