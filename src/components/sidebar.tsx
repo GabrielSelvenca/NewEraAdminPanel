@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet } from "lucide-react";
 import { api } from "@/lib/api";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/games", label: "Jogos", icon: Gamepad2 },
+  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet },
   { href: "/dashboard/users", label: "Usuários", icon: Users },
   { href: "/dashboard/config", label: "Configurações", icon: Settings },
 ];

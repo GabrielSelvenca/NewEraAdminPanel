@@ -104,6 +104,37 @@ interface Stats {
   totalRobux: number;
 }
 
+interface Partner {
+  id: number;
+  name: string;
+  pixKey: string;
+  percentage: number;
+  active: boolean;
+  totalReceived: number;
+  asaasWalletId?: string;
+  createdAt: string;
+}
+
+interface AsaasSubaccount {
+  id: string;
+  name: string;
+  email: string;
+  walletId: string;
+  cpfCnpj: string;
+}
+
+interface CreateSubaccountRequest {
+  name: string;
+  cpfCnpj: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  addressNumber?: string;
+  province?: string;
+  postalCode?: string;
+  birthDate?: string;
+}
+
 class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: HeadersInit = {
@@ -297,7 +328,39 @@ class ApiClient {
       body: JSON.stringify({ gameId, gamepassIdOrUrl }),
     });
   }
+
+  // Partners
+  async getPartners(): Promise<Partner[]> {
+    return this.request<Partner[]>('/api/partners');
+  }
+
+  async getPartner(id: number): Promise<Partner> {
+    return this.request<Partner>(`/api/partners/${id}`);
+  }
+
+  async updatePartner(id: number, partner: Partial<Partner>): Promise<Partner> {
+    return this.request<Partner>(`/api/partners/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(partner),
+    });
+  }
+
+  // Asaas Subaccounts (Split PIX)
+  async getAsaasSubaccounts(): Promise<AsaasSubaccount[]> {
+    return this.request<AsaasSubaccount[]>('/api/asaas/subaccounts');
+  }
+
+  async createAsaasSubaccount(data: CreateSubaccountRequest): Promise<AsaasSubaccount> {
+    return this.request<AsaasSubaccount>('/api/asaas/subaccounts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAsaasBalance(): Promise<{ balance: number }> {
+    return this.request<{ balance: number }>('/api/asaas/balance');
+  }
 }
 
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest };
