@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-/.next/
+# /.next/  # Incluído no git para deploy
 /out/
 
 # production
