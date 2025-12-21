@@ -10,9 +10,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from "@/components/ui/switch";
 import { 
   ArrowLeft, Save, Trash2, Plus, Link as LinkIcon, Loader2, 
-  Gamepad2, Package, DollarSign, ShoppingCart, RefreshCw
+  Gamepad2, Package, DollarSign, ShoppingCart, RefreshCw, TrendingUp, TrendingDown, Calendar
 } from "lucide-react";
 import Image from "next/image";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+
+// Mock data para gráficos (será substituído por dados reais da API)
+const generateMockSalesData = (days: number) => {
+  const data = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    data.push({
+      date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      vendas: Math.floor(Math.random() * 20) + 5,
+      receita: Math.floor(Math.random() * 500) + 100,
+    });
+  }
+  return data;
+};
 
 export default function GameEditPage() {
   const router = useRouter();
@@ -23,6 +40,9 @@ export default function GameEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [period, setPeriod] = useState<7 | 15 | 30>(7);
+  const [salesData, setSalesData] = useState(generateMockSalesData(7));
+  const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
 
   const [name, setName] = useState("");
   const [active, setActive] = useState(true);
@@ -39,6 +59,22 @@ export default function GameEditPage() {
   const [productRobux, setProductRobux] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [creatingProduct, setCreatingProduct] = useState(false);
+
+  // Atualiza dados do gráfico quando o período muda
+  useEffect(() => {
+    setSalesData(generateMockSalesData(period));
+  }, [period]);
+
+  // Calcula métricas
+  const totalSales = salesData.reduce((acc, d) => acc + d.vendas, 0);
+  const totalRevenue = salesData.reduce((acc, d) => acc + d.receita, 0);
+  const avgSales = totalSales / salesData.length;
+  
+  // Calcula variação (comparando com período anterior)
+  const halfPoint = Math.floor(salesData.length / 2);
+  const recentSales = salesData.slice(halfPoint).reduce((acc, d) => acc + d.vendas, 0);
+  const olderSales = salesData.slice(0, halfPoint).reduce((acc, d) => acc + d.vendas, 0);
+  const variation = olderSales > 0 ? ((recentSales - olderSales) / olderSales) * 100 : 0;
 
   const loadGame = async () => {
     try {
@@ -166,7 +202,121 @@ export default function GameEditPage() {
         </div>
       </div>
 
+      {/* Métricas e Gráficos */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm">Vendas ({period}d)</p>
+              <p className="text-2xl font-bold text-zinc-100">{totalSales}</p>
+            </div>
+            <ShoppingCart className="w-8 h-8 text-zinc-700" />
+          </div>
+          <div className={`flex items-center gap-1 mt-2 text-sm ${variation >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {variation >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+            {Math.abs(variation).toFixed(1)}% vs período anterior
+          </div>
+        </div>
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm">Receita ({period}d)</p>
+              <p className="text-2xl font-bold text-emerald-400">R$ {totalRevenue.toFixed(2)}</p>
+            </div>
+            <DollarSign className="w-8 h-8 text-emerald-700" />
+          </div>
+          <div className="text-zinc-500 text-sm mt-2">
+            Média: R$ {(totalRevenue / salesData.length).toFixed(2)}/dia
+          </div>
+        </div>
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm">Média Diária</p>
+              <p className="text-2xl font-bold text-zinc-100">{avgSales.toFixed(1)}</p>
+            </div>
+            <Calendar className="w-8 h-8 text-zinc-700" />
+          </div>
+          <div className="text-zinc-500 text-sm mt-2">vendas por dia</div>
+        </div>
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm">Produtos</p>
+              <p className="text-2xl font-bold text-zinc-100">{game.products?.length || 0}</p>
+            </div>
+            <Package className="w-8 h-8 text-zinc-700" />
+          </div>
+          <div className="text-zinc-500 text-sm mt-2">ativos no catálogo</div>
+        </div>
+      </div>
+
+      {/* Filtro de Período */}
+      <div className="flex gap-2 mb-4">
+        {([7, 15, 30] as const).map((d) => (
+          <Button
+            key={d}
+            variant={period === d ? "default" : "outline"}
+            size="sm"
+            onClick={() => setPeriod(d)}
+            className={period === d ? "bg-emerald-600" : "border-zinc-700 text-zinc-400"}
+          >
+            {d} dias
+          </Button>
+        ))}
+        {selectedProduct !== null && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedProduct(null)}
+            className="border-zinc-700 text-zinc-400 ml-auto"
+          >
+            Limpar filtro de produto
+          </Button>
+        )}
+      </div>
+
+      {/* Gráfico de Vendas */}
+      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 mb-6">
+        <h3 className="text-zinc-100 font-semibold mb-4">Vendas por Dia</h3>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={salesData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+              <XAxis dataKey="date" stroke="#71717a" fontSize={12} />
+              <YAxis stroke="#71717a" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}
+                labelStyle={{ color: '#f4f4f5' }}
+              />
+              <Area type="monotone" dataKey="vendas" stroke="#10b981" fill="#10b98133" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Gráfico de Receita */}
+      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 mb-6">
+        <h3 className="text-zinc-100 font-semibold mb-4">Receita por Dia (R$)</h3>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={salesData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+              <XAxis dataKey="date" stroke="#71717a" fontSize={12} />
+              <YAxis stroke="#71717a" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}
+                labelStyle={{ color: '#f4f4f5' }}
+                formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Receita']}
+              />
+              <Bar dataKey="receita" fill="#10b981" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Configurações do Jogo */}
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
             <div className="relative aspect-video bg-zinc-800">
@@ -185,19 +335,7 @@ export default function GameEditPage() {
               )}
             </div>
             <div className="p-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
-                  <ShoppingCart className="w-5 h-5 text-zinc-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-zinc-100">{game.totalSales || 0}</p>
-                  <p className="text-xs text-zinc-400">Vendas</p>
-                </div>
-                <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
-                  <DollarSign className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-emerald-400">R$ {(game.totalRevenue || 0).toFixed(2)}</p>
-                  <p className="text-xs text-zinc-400">Receita</p>
-                </div>
-              </div>
-
+              <h3 className="font-semibold text-zinc-100">Configurações</h3>
               <div className="space-y-3">
                 <div>
                   <Label className="text-zinc-400 text-xs">Nome</Label>
@@ -244,6 +382,7 @@ export default function GameEditPage() {
           </div>
         </div>
 
+        {/* Produtos */}
         <div className="lg:col-span-2">
           <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
             <div className="flex items-center justify-between mb-4">
