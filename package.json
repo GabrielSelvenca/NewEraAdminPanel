@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
+    "build": "next build",
+    "start": "next start -p 80",
+    "production": "npm run build && npm run start",
     "lint": "eslint"
   },
   "dependencies": {
