@@ -16,14 +16,22 @@ import {
 } from "@/components/ui/dialog";
 import {
   Users, Plus, Loader2, Wallet, Percent, CheckCircle2, XCircle,
-  Building2, Mail, Phone, MapPin, Calendar
+  Building2, Mail, Phone, MapPin, Calendar, Edit2, Trash2
 } from "lucide-react";
+import { useContext } from "react";
+import { UserContext } from "@/lib/user-context";
 
 export default function PartnersPage() {
+  const user = useContext(UserContext);
+  const isSuperAdmin = user?.role === "admin";
+  
   const [partners, setPartners] = useState<Partner[]>([]);
   const [subaccounts, setSubaccounts] = useState<AsaasSubaccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [partnerForm, setPartnerForm] = useState({ name: "", pixKey: "", percentage: 25 });
 
   // Modal de criar subconta
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -90,6 +98,34 @@ export default function PartnersPage() {
       await loadData();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleEditPartner = (partner: Partner) => {
+    setEditingPartner(partner);
+    setPartnerForm({ name: partner.name, pixKey: partner.pixKey, percentage: partner.percentage });
+    setEditDialogOpen(true);
+  };
+
+  const handleSavePartner = async () => {
+    if (!editingPartner) return;
+    try {
+      await api.updatePartner(editingPartner.id, partnerForm);
+      setEditDialogOpen(false);
+      setEditingPartner(null);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar");
+    }
+  };
+
+  const handleDeletePartner = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este parceiro?")) return;
+    try {
+      await api.deletePartner(id);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sem permissão para excluir");
     }
   };
 
@@ -192,7 +228,7 @@ export default function PartnersPage() {
                       <p className="text-sm text-zinc-500">{partner.pixKey}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="flex items-center gap-1 text-zinc-400">
                         <Percent className="w-4 h-4" />
@@ -206,6 +242,24 @@ export default function PartnersPage() {
                       checked={partner.active}
                       onCheckedChange={(checked) => handleUpdatePartner(partner.id, { active: checked })}
                     />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEditPartner(partner)}
+                      className="text-zinc-400 hover:text-zinc-100"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    {isSuperAdmin && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeletePartner(partner.id)}
+                        className="text-zinc-400 hover:text-red-400"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -213,6 +267,46 @@ export default function PartnersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog editar parceiro */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-zinc-100">Editar Parceiro</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-zinc-300">Nome</Label>
+              <Input
+                value={partnerForm.name}
+                onChange={(e) => setPartnerForm({ ...partnerForm, name: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-zinc-300">Chave PIX</Label>
+              <Input
+                value={partnerForm.pixKey}
+                onChange={(e) => setPartnerForm({ ...partnerForm, pixKey: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-zinc-300">Porcentagem (%)</Label>
+              <Input
+                type="number"
+                value={partnerForm.percentage}
+                onChange={(e) => setPartnerForm({ ...partnerForm, percentage: parseFloat(e.target.value) || 0 })}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1"
+              />
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <Button onClick={handleSavePartner} className="w-full bg-emerald-600 hover:bg-emerald-700">
+              Salvar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog criar subconta */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>

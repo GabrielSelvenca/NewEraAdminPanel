@@ -345,6 +345,17 @@ class ApiClient {
     });
   }
 
+  async createPartner(partner: { name: string; pixKey: string; percentage: number; adminUserId?: number }): Promise<Partner> {
+    return this.request<Partner>('/api/partners', {
+      method: 'POST',
+      body: JSON.stringify(partner),
+    });
+  }
+
+  async deletePartner(id: number): Promise<void> {
+    return this.request<void>(`/api/partners/${id}`, { method: 'DELETE' });
+  }
+
   // Asaas Subaccounts (Split PIX)
   async getAsaasSubaccounts(): Promise<AsaasSubaccount[]> {
     return this.request<AsaasSubaccount[]>('/api/asaas/subaccounts');
