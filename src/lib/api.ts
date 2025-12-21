@@ -1,7 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neweraapi.squareweb.app';
 
 interface LoginResponse {
-  token: string;
   user: {
     id: number;
     email: string;
@@ -71,44 +70,20 @@ interface Stats {
 }
 
 class ApiClient {
-  private token: string | null = null;
-
-  setToken(token: string | null) {
-    this.token = token;
-    if (token) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-      }
-    } else {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-      }
-    }
-  }
-
-  getToken(): string | null {
-    if (!this.token && typeof window !== 'undefined') {
-      this.token = localStorage.getItem('token');
-    }
-    return this.token;
-  }
-
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = this.getToken();
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     };
 
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     if (response.status === 401) {
-      this.setToken(null);
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !endpoint.includes('/login')) {
         window.location.href = '/login';
       }
       throw new Error('Não autorizado');
@@ -127,16 +102,27 @@ class ApiClient {
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/api/admin/login', {
+    return this.request<LoginResponse>('/api/admin/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    this.setToken(response.token);
-    return response;
   }
 
-  logout() {
-    this.setToken(null);
+  async logout(): Promise<void> {
+    await this.request<void>('/api/admin/logout', { method: 'POST' });
+  }
+
+  async getCurrentUser(): Promise<{ id: string; email: string; name: string; role: string }> {
+    return this.request('/api/admin/me');
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      await this.getCurrentUser();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   // Games

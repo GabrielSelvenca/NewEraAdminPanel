@@ -22,8 +22,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await api.login(email, password);
-      localStorage.setItem("user", JSON.stringify(response.user));
+      await api.login(email, password);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");

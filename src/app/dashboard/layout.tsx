@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { api } from "@/lib/api";
+import { UserContext, User } from "@/lib/user-context";
 
 export default function DashboardLayout({
   children,
@@ -12,14 +13,19 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const token = api.getToken();
-    if (!token) {
-      router.push("/login");
-    } else {
-      setLoading(false);
+    async function checkAuth() {
+      try {
+        const userData = await api.getCurrentUser();
+        setUser(userData);
+        setLoading(false);
+      } catch {
+        router.push("/login");
+      }
     }
+    checkAuth();
   }, [router]);
 
   if (loading) {
@@ -31,9 +37,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-auto">{children}</main>
-    </div>
+    <UserContext.Provider value={user}>
+      <div className="flex min-h-screen bg-zinc-950">
+        <Sidebar />
+        <main className="flex-1 p-8 overflow-auto">{children}</main>
+      </div>
+    </UserContext.Provider>
   );
 }

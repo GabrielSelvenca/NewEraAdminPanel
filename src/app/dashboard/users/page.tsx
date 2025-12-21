@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, AdminUser } from "@/lib/api";
+import { useUser } from "@/lib/user-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, RefreshCw, Users, Loader2, Trash2 } from "lucide-react";
 
 export default function UsersPage() {
+  const currentUser = useUser();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -22,7 +24,6 @@ export default function UsersPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
-  const [currentUserRole, setCurrentUserRole] = useState<string>("");
 
   const loadUsers = async () => {
     try {
@@ -47,11 +48,6 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      const parsed = JSON.parse(user);
-      setCurrentUserRole(parsed.role || "");
-    }
     loadUsers();
     loadAllowedRoles();
   }, []);
@@ -200,7 +196,7 @@ export default function UsersPage() {
                   <TableHead className="text-zinc-400">Nome</TableHead>
                   <TableHead className="text-zinc-400">Cargo</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
-                  {currentUserRole === "superadmin" && (
+                  {currentUser?.role === "superadmin" && (
                     <TableHead className="text-zinc-400 text-right">Ações</TableHead>
                   )}
                 </TableRow>
@@ -223,7 +219,7 @@ export default function UsersPage() {
                         {user.active ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    {currentUserRole === "superadmin" && (
+                    {currentUser?.role === "superadmin" && (
                       <TableCell className="text-right">
                         {user.role !== "superadmin" && (
                           <Button

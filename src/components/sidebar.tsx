@@ -17,9 +17,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleLogout = () => {
-    api.logout();
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Ignora erro de logout
+    }
     router.push("/login");
   };
 
