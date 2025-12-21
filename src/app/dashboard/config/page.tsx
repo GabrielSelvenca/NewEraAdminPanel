@@ -3,30 +3,55 @@
 import { useEffect, useState } from "react";
 import { api, BotConfig } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Save, Loader2, RefreshCw, Server, Hash, Users, FolderOpen, CheckCircle2 } from "lucide-react";
+
+interface DiscordServerData {
+  guildId: string;
+  guildName: string;
+  guildIcon?: string;
+  memberCount: number;
+  categories: { id: string; name: string }[];
+  textChannels: { id: string; name: string; parentId?: string }[];
+  roles: { id: string; name: string; color: string; position: number }[];
+  syncedAt: string;
+}
 
 export default function ConfigPage() {
   const [config, setConfig] = useState<BotConfig | null>(null);
+  const [serverData, setServerData] = useState<DiscordServerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    async function loadConfig() {
-      try {
-        const data = await api.getConfig();
-        setConfig(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadConfig();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [configData, discordData] = await Promise.all([
+        api.getConfig(),
+        api.getDiscordServerData().catch(() => null),
+      ]);
+      setConfig(configData);
+      setServerData(discordData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!config) return;
@@ -50,7 +75,7 @@ export default function ConfigPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
   }
@@ -62,6 +87,8 @@ export default function ConfigPage() {
       </div>
     );
   }
+
+  const syncedAt = serverData?.syncedAt ? new Date(serverData.syncedAt).toLocaleString('pt-BR') : null;
 
   return (
     <div className="space-y-6">
@@ -82,105 +109,267 @@ export default function ConfigPage() {
         </div>
       )}
 
+      {/* Status do Servidor */}
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {serverData?.guildIcon && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={serverData.guildIcon} alt="" className="w-12 h-12 rounded-full" />
+              )}
+              <div>
+                <CardTitle className="text-zinc-100 flex items-center gap-2">
+                  <Server className="w-5 h-5 text-emerald-500" />
+                  {serverData?.guildName || "Servidor não sincronizado"}
+                </CardTitle>
+                {serverData && (
+                  <CardDescription className="flex items-center gap-4 mt-1">
+                    <span className="flex items-center gap-1">
+                      <Users className="w-4 h-4" /> {serverData.memberCount} membros
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <FolderOpen className="w-4 h-4" /> {serverData.categories.length} categorias
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Hash className="w-4 h-4" /> {serverData.roles.length} cargos
+                    </span>
+                  </CardDescription>
+                )}
+              </div>
+            </div>
+            {syncedAt && (
+              <div className="flex items-center gap-2 text-sm text-zinc-500">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                Sincronizado: {syncedAt}
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        {!serverData && (
+          <CardContent>
+            <div className="text-center py-4 text-zinc-500">
+              <RefreshCw className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>O bot precisa estar online para sincronizar os dados do servidor.</p>
+              <p className="text-sm mt-1">Reinicie o bot para sincronizar categorias e cargos.</p>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Categorias Discord */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-zinc-100">Discord</CardTitle>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-blue-500" />
+              Categorias Discord
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Guild ID (Servidor)</Label>
-              <Input
-                value={config.guildId || ""}
-                onChange={(e) => updateField("guildId", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                placeholder="ID do servidor Discord"
-              />
+              <Label className="text-zinc-300">Categoria de Carrinhos</Label>
+              {serverData ? (
+                <Select
+                  value={config.categoryCarts || ""}
+                  onValueChange={(value) => updateField("categoryCarts", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-zinc-100">
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.categoryCarts || ""}
+                  onChange={(e) => updateField("categoryCarts", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID da categoria"
+                />
+              )}
             </div>
+
             <div className="space-y-2">
-              <Label className="text-zinc-300">Categoria Carrinhos</Label>
-              <Input
-                value={config.categoryCarts || ""}
-                onChange={(e) => updateField("categoryCarts", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+              <Label className="text-zinc-300">Categoria de Aprovados</Label>
+              {serverData ? (
+                <Select
+                  value={config.categoryApproved || ""}
+                  onValueChange={(value) => updateField("categoryApproved", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-zinc-100">
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.categoryApproved || ""}
+                  onChange={(e) => updateField("categoryApproved", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID da categoria"
+                />
+              )}
             </div>
+
             <div className="space-y-2">
-              <Label className="text-zinc-300">Categoria Aprovados</Label>
-              <Input
-                value={config.categoryApproved || ""}
-                onChange={(e) => updateField("categoryApproved", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Canal de Logs</Label>
-              <Input
-                value={config.channelLogsPurchases || ""}
-                onChange={(e) => updateField("channelLogsPurchases", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Cargo Admin</Label>
-              <Input
-                value={config.roleAdmin || ""}
-                onChange={(e) => updateField("roleAdmin", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Cargo Cliente</Label>
-              <Input
-                value={config.roleClient || ""}
-                onChange={(e) => updateField("roleClient", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+              <Label className="text-zinc-300">Canal de Logs de Compras</Label>
+              {serverData ? (
+                <Select
+                  value={config.channelLogsPurchases || ""}
+                  onValueChange={(value) => updateField("channelLogsPurchases", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um canal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.textChannels.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id} className="text-zinc-100">
+                        # {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.channelLogsPurchases || ""}
+                  onChange={(e) => updateField("channelLogsPurchases", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do canal"
+                />
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Cargos Discord */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-zinc-100">Loja</CardTitle>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-500" />
+              Cargos Discord
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Nome da Loja</Label>
-              <Input
-                value={config.storeName || ""}
-                onChange={(e) => updateField("storeName", e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                placeholder="Nova Era Store"
-              />
+              <Label className="text-zinc-300">Cargo de Admin</Label>
+              {serverData ? (
+                <Select
+                  value={config.roleAdmin || ""}
+                  onValueChange={(value) => updateField("roleAdmin", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um cargo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id} className="text-zinc-100">
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: role.color }} />
+                          {role.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.roleAdmin || ""}
+                  onChange={(e) => updateField("roleAdmin", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do cargo"
+                />
+              )}
             </div>
+
             <div className="space-y-2">
-              <Label className="text-zinc-300">Preço por 1000 Robux (R$)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={config.pricePerK || 0}
-                onChange={(e) => updateField("pricePerK", parseFloat(e.target.value) || 0)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+              <Label className="text-zinc-300">Cargo de Cliente (dado após compra)</Label>
+              {serverData ? (
+                <Select
+                  value={config.roleClient || ""}
+                  onValueChange={(value) => updateField("roleClient", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um cargo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id} className="text-zinc-100">
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: role.color }} />
+                          {role.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.roleClient || ""}
+                  onChange={(e) => updateField("roleClient", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do cargo"
+                />
+              )}
             </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Timeout Pagamento (min)</Label>
-              <Input
-                type="number"
-                value={config.paymentTimeoutMinutes || 30}
-                onChange={(e) => updateField("paymentTimeoutMinutes", parseInt(e.target.value) || 30)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Inatividade Carrinho (min)</Label>
-              <Input
-                type="number"
-                value={config.cartInactivityMinutes || 60}
-                onChange={(e) => updateField("cartInactivityMinutes", parseInt(e.target.value) || 60)}
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+          </CardContent>
+        </Card>
+
+        {/* Configurações da Loja */}
+        <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-zinc-100">Loja</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Nome da Loja</Label>
+                <Input
+                  value={config.storeName || ""}
+                  onChange={(e) => updateField("storeName", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="Nova Era Store"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Preço por 1000 Robux (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={config.pricePerK || 0}
+                  onChange={(e) => updateField("pricePerK", parseFloat(e.target.value) || 0)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Timeout Pagamento (min)</Label>
+                <Input
+                  type="number"
+                  value={config.paymentTimeoutMinutes || 30}
+                  onChange={(e) => updateField("paymentTimeoutMinutes", parseInt(e.target.value) || 30)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Inatividade Carrinho (min)</Label>
+                <Input
+                  type="number"
+                  value={config.cartInactivityMinutes || 60}
+                  onChange={(e) => updateField("cartInactivityMinutes", parseInt(e.target.value) || 60)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

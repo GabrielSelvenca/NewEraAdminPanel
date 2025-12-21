@@ -360,6 +360,23 @@ class ApiClient {
   async getAsaasBalance(): Promise<{ balance: number }> {
     return this.request<{ balance: number }>('/api/asaas/balance');
   }
+
+  // Discord Server Data
+  async getDiscordServerData(): Promise<DiscordServerData | null> {
+    const result = await this.request<{ synced: boolean; data?: DiscordServerData }>('/api/discord/server');
+    return result.synced ? result.data || null : null;
+  }
+}
+
+interface DiscordServerData {
+  guildId: string;
+  guildName: string;
+  guildIcon?: string;
+  memberCount: number;
+  categories: { id: string; name: string }[];
+  textChannels: { id: string; name: string; parentId?: string }[];
+  roles: { id: string; name: string; color: string; position: number }[];
+  syncedAt: string;
 }
 
 export const api = new ApiClient();
