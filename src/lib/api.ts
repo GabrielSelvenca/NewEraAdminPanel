@@ -16,8 +16,13 @@ interface Game {
   robloxGameId?: string;
   robloxPlaceId?: string;
   imageUrl?: string;
+  bannerUrl?: string;
+  description?: string;
+  creator?: string;
   active: boolean;
   products?: Product[];
+  totalSales?: number;
+  totalRevenue?: number;
 }
 
 interface Product {
@@ -137,6 +142,13 @@ class ApiClient {
   async createGame(game: Partial<Game>): Promise<Game> {
     return this.request<Game>('/api/games', {
       method: 'POST',
+      body: JSON.stringify(game),
+    });
+  }
+
+  async updateGame(id: number, game: Partial<Game>): Promise<Game> {
+    return this.request<Game>(`/api/games/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(game),
     });
   }

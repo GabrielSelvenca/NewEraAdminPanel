@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api, Game } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, RefreshCw, Trash2, Link as LinkIcon, Gamepad2, Loader2 } from "lucide-react";
-import NextLink from "next/link";
+import { Plus, RefreshCw, Link as LinkIcon, Gamepad2, Loader2, DollarSign, ShoppingCart, Pencil } from "lucide-react";
+import Image from "next/image";
 
 export default function GamesPage() {
+  const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
@@ -44,10 +43,13 @@ export default function GamesPage() {
     setSyncing(true);
     setError("");
     try {
-      await api.syncRoblox(syncUrl.trim());
+      const result = await api.syncRoblox(syncUrl.trim());
       setSyncDialogOpen(false);
       setSyncUrl("");
       await loadGames();
+      if (result.game) {
+        router.push(`/dashboard/games/${result.game.id}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao sincronizar");
     } finally {
@@ -60,10 +62,10 @@ export default function GamesPage() {
     setCreating(true);
     setError("");
     try {
-      await api.createGame({ name: gameName.trim(), active: true });
+      const game = await api.createGame({ name: gameName.trim(), active: true });
       setManualDialogOpen(false);
       setGameName("");
-      await loadGames();
+      router.push(`/dashboard/games/${game.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar jogo");
     } finally {
@@ -71,29 +73,19 @@ export default function GamesPage() {
     }
   };
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`Deletar o jogo "${name}" e todos os seus produtos?`)) return;
-    try {
-      await api.deleteGame(id);
-      await loadGames();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao deletar");
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-zinc-100">Jogos</h1>
           <p className="text-zinc-400 mt-1">Gerencie seus jogos e produtos</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Dialog open={syncDialogOpen} onOpenChange={setSyncDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700">
                 <LinkIcon className="w-4 h-4 mr-2" />
-                Sincronizar do Roblox
+                Sincronizar Roblox
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-zinc-900 border-zinc-800">
@@ -104,7 +96,7 @@ export default function GamesPage() {
                 <div className="space-y-2">
                   <Label className="text-zinc-300">Link ou ID do jogo</Label>
                   <Input
-                    placeholder="https://www.roblox.com/games/123456789 ou apenas o ID"
+                    placeholder="https://www.roblox.com/games/123456789"
                     value={syncUrl}
                     onChange={(e) => setSyncUrl(e.target.value)}
                     className="bg-zinc-800 border-zinc-700 text-zinc-100"
@@ -157,73 +149,81 @@ export default function GamesPage() {
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline" onClick={loadGames} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+          <Button variant="outline" onClick={loadGames} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 px-3">
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      <Card className="bg-zinc-900 border-zinc-800">
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+        </div>
+      ) : games.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-zinc-900 rounded-xl border border-zinc-800">
+          <Gamepad2 className="w-12 h-12 mb-4" />
+          <p>Nenhum jogo cadastrado</p>
+          <p className="text-sm">Clique em &quot;Sincronizar Roblox&quot; para adicionar</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {games.map((game) => (
+            <div
+              key={game.id}
+              className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden hover:border-zinc-700 transition-colors group"
+            >
+              <div className="relative aspect-video bg-zinc-800">
+                {game.imageUrl ? (
+                  <Image
+                    src={game.imageUrl}
+                    alt={game.name}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Gamepad2 className="w-12 h-12 text-zinc-700" />
+                  </div>
+                )}
+                {!game.active && (
+                  <div className="absolute top-2 right-2 bg-zinc-900/80 px-2 py-1 rounded text-xs text-zinc-400">
+                    Inativo
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-zinc-100 truncate mb-3">{game.name}</h3>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-zinc-800/50 rounded-lg p-2">
+                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1">
+                      <ShoppingCart className="w-3 h-3" />
+                      Vendas
+                    </div>
+                    <p className="text-zinc-100 font-semibold">{game.totalSales || 0}</p>
+                  </div>
+                  <div className="bg-zinc-800/50 rounded-lg p-2">
+                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1">
+                      <DollarSign className="w-3 h-3" />
+                      Receita
+                    </div>
+                    <p className="text-emerald-400 font-semibold">
+                      R$ {(game.totalRevenue || 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => router.push(`/dashboard/games/${game.id}`)}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100"
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Editar
+                </Button>
+              </div>
             </div>
-          ) : games.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-              <Gamepad2 className="w-12 h-12 mb-4" />
-              <p>Nenhum jogo cadastrado</p>
-              <p className="text-sm">Clique em &quot;Sincronizar do Roblox&quot; para adicionar</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="border-zinc-800 hover:bg-transparent">
-                  <TableHead className="text-zinc-400">ID</TableHead>
-                  <TableHead className="text-zinc-400">Nome</TableHead>
-                  <TableHead className="text-zinc-400">Universe ID</TableHead>
-                  <TableHead className="text-zinc-400">Produtos</TableHead>
-                  <TableHead className="text-zinc-400">Status</TableHead>
-                  <TableHead className="text-zinc-400 text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {games.map((game) => (
-                  <TableRow key={game.id} className="border-zinc-800 hover:bg-zinc-800/50">
-                    <TableCell className="text-zinc-300">{game.id}</TableCell>
-                    <TableCell>
-                      <NextLink 
-                        href={`/dashboard/games/${game.id}`}
-                        className="text-emerald-500 hover:text-emerald-400 font-medium"
-                      >
-                        {game.name}
-                      </NextLink>
-                    </TableCell>
-                    <TableCell className="text-zinc-400">{game.robloxGameId || "-"}</TableCell>
-                    <TableCell className="text-zinc-300">{game.products?.length || 0}</TableCell>
-                    <TableCell>
-                      <Badge variant={game.active ? "default" : "secondary"} 
-                        className={game.active ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-700 text-zinc-400"}>
-                        {game.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(game.id, game.name)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
