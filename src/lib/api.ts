@@ -193,6 +193,12 @@ class ApiClient {
     return this.request<void>(`/api/products/${id}`, { method: 'DELETE' });
   }
 
+  async refreshProductImage(productId: number): Promise<{ imageUrl: string }> {
+    return this.request<{ imageUrl: string }>(`/api/roblox/refresh-product-image/${productId}`, {
+      method: 'POST',
+    });
+  }
+
   // Config
   async getConfig(): Promise<BotConfig> {
     return this.request<BotConfig>('/api/config');
