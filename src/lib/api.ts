@@ -59,6 +59,36 @@ interface BotConfig {
   robloxGameId?: string;
 }
 
+interface SalesStats {
+  period: number;
+  totalSales: number;
+  totalRevenue: number;
+  totalRobux: number;
+  averageTicket: number;
+  variation: number;
+  previousPeriodSales: number;
+  previousPeriodRevenue: number;
+  salesByDay: { date: string; vendas: number; receita: number }[];
+}
+
+interface Sale {
+  id: number;
+  userId: string;
+  amount: number;
+  robux: number;
+  gamepasses: string;
+  systemOrigin: string;
+  createdAt: string;
+}
+
+interface SalesResponse {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  sales: Sale[];
+}
+
 interface AdminUser {
   id: number;
   email: string;
@@ -197,6 +227,23 @@ class ApiClient {
     return this.request<{ imageUrl: string }>(`/api/roblox/refresh-product-image/${productId}`, {
       method: 'POST',
     });
+  }
+
+  async updateProduct(id: number, product: Partial<Product>): Promise<Product> {
+    return this.request<Product>(`/api/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(product),
+    });
+  }
+
+  async getSalesStats(days: number = 7): Promise<SalesStats> {
+    return this.request<SalesStats>(`/api/payments/stats/period?days=${days}`);
+  }
+
+  async getSales(page: number = 1, limit: number = 20, days?: number): Promise<SalesResponse> {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (days) params.append('days', String(days));
+    return this.request<SalesResponse>(`/api/payments/sales?${params}`);
   }
 
   // Config
