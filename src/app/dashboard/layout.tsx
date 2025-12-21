@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { ApiStatus } from "@/components/api-status";
 import { api } from "@/lib/api";
 import { UserContext, User } from "@/lib/user-context";
 
@@ -41,6 +42,7 @@ export default function DashboardLayout({
       <div className="flex min-h-screen bg-zinc-950">
         <Sidebar />
         <main className="flex-1 p-8 overflow-auto">{children}</main>
+        <ApiStatus />
       </div>
     </UserContext.Provider>
   );

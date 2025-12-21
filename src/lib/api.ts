@@ -96,7 +96,15 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.text();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('api-offline'));
+      }
       throw new Error(error || `Erro ${response.status}`);
+    }
+    
+    // API respondeu com sucesso
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('api-online'));
     }
 
     if (response.status === 204) {
@@ -115,6 +123,18 @@ class ApiClient {
 
   async logout(): Promise<void> {
     await this.request<void>('/api/admin/logout', { method: 'POST' });
+  }
+
+  async healthCheck(): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_URL}/health`, { 
+        method: 'GET',
+        cache: 'no-store'
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   async getCurrentUser(): Promise<{ id: string; email: string; name: string; role: string }> {
