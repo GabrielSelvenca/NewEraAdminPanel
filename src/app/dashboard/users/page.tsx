@@ -44,13 +44,18 @@ export default function UsersPage() {
       if (roles.length > 0) setRole(roles[0]);
     } catch (err) {
       console.error(err);
+      // Fallback: usa role do contexto se API falhar
+      if (currentUser?.role === "superadmin" || currentUser?.role === "admin") {
+        setAllowedRoles(["admin", "gerente"]);
+        setRole("admin");
+      }
     }
   };
 
   useEffect(() => {
     loadUsers();
     loadAllowedRoles();
-  }, []);
+  }, [currentUser]);
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
