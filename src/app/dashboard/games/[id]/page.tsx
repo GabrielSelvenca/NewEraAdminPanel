@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { 
   ArrowLeft, Save, Trash2, Plus, Link as LinkIcon, Loader2, 
   Gamepad2, Package, RefreshCw, ImageIcon, Edit2, DollarSign,
-  TrendingUp, TrendingDown, ShoppingCart, BarChart3, Users
+  TrendingUp, TrendingDown, Minus, ShoppingCart, BarChart3
 } from "lucide-react";
 import Image from "next/image";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -230,8 +230,19 @@ export default function GameEditPage() {
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
           <div className="flex items-center justify-between mb-2">
             <ShoppingCart className="w-5 h-5 text-zinc-500" />
-            <span className={`text-xs px-2 py-0.5 rounded ${salesStats?.variation && salesStats.variation >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-              {salesStats?.variation && salesStats.variation >= 0 ? <TrendingUp className="w-3 h-3 inline mr-1" /> : <TrendingDown className="w-3 h-3 inline mr-1" />}
+            <span className={`text-xs px-2 py-0.5 rounded ${
+              !salesStats?.variation || salesStats.variation === 0 
+                ? 'bg-zinc-500/20 text-zinc-400' 
+                : salesStats.variation > 0 
+                  ? 'bg-emerald-500/20 text-emerald-400' 
+                  : 'bg-red-500/20 text-red-400'
+            }`}>
+              {!salesStats?.variation || salesStats.variation === 0 
+                ? <Minus className="w-3 h-3 inline mr-1" />
+                : salesStats.variation > 0 
+                  ? <TrendingUp className="w-3 h-3 inline mr-1" /> 
+                  : <TrendingDown className="w-3 h-3 inline mr-1" />
+              }
               {salesStats?.variation?.toFixed(1) || 0}%
             </span>
           </div>
