@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, RefreshCw, Users, Loader2 } from "lucide-react";
+import { Plus, RefreshCw, Users, Loader2, Trash2 } from "lucide-react";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -18,9 +18,11 @@ export default function UsersPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("admin");
+  const [role, setRole] = useState("gerente");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
+  const [currentUserRole, setCurrentUserRole] = useState<string>("");
 
   const loadUsers = async () => {
     try {
@@ -34,9 +36,44 @@ export default function UsersPage() {
     }
   };
 
+  const loadAllowedRoles = async () => {
+    try {
+      const roles = await api.getAllowedRoles();
+      setAllowedRoles(roles);
+      if (roles.length > 0) setRole(roles[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const parsed = JSON.parse(user);
+      setCurrentUserRole(parsed.role || "");
+    }
     loadUsers();
+    loadAllowedRoles();
   }, []);
+
+  const getRoleBadgeClass = (role: string) => {
+    switch (role) {
+      case "superadmin": return "bg-red-500/20 text-red-400";
+      case "admin": return "bg-purple-500/20 text-purple-400";
+      case "gerente": return "bg-blue-500/20 text-blue-400";
+      default: return "bg-zinc-700 text-zinc-400";
+    }
+  };
+
+  const handleDelete = async (id: number, email: string) => {
+    if (!confirm(`Deletar o usuário "${email}"?`)) return;
+    try {
+      await api.deleteUser(id);
+      await loadUsers();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao deletar");
+    }
+  };
 
   const handleCreate = async () => {
     if (!email.trim() || !name.trim() || !password.trim()) return;
@@ -112,10 +149,17 @@ export default function UsersPage() {
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                     className="w-full h-10 px-3 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-100"
+                    disabled={allowedRoles.length === 0}
                   >
-                    <option value="admin">Admin</option>
-                    <option value="viewer">Viewer</option>
+                    {allowedRoles.map((r) => (
+                      <option key={r} value={r}>
+                        {r.charAt(0).toUpperCase() + r.slice(1)}
+                      </option>
+                    ))}
                   </select>
+                  {allowedRoles.length === 0 && (
+                    <p className="text-yellow-400 text-xs">Você não tem permissão para criar usuários</p>
+                  )}
                 </div>
                 {error && <p className="text-red-400 text-sm">{error}</p>}
                 <Button 
@@ -156,6 +200,9 @@ export default function UsersPage() {
                   <TableHead className="text-zinc-400">Nome</TableHead>
                   <TableHead className="text-zinc-400">Cargo</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
+                  {currentUserRole === "superadmin" && (
+                    <TableHead className="text-zinc-400 text-right">Ações</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,7 +212,7 @@ export default function UsersPage() {
                     <TableCell className="text-zinc-100">{user.email}</TableCell>
                     <TableCell className="text-zinc-300">{user.name}</TableCell>
                     <TableCell>
-                      <Badge className="bg-purple-500/20 text-purple-400">
+                      <Badge className={getRoleBadgeClass(user.role)}>
                         {user.role}
                       </Badge>
                     </TableCell>
@@ -176,6 +223,20 @@ export default function UsersPage() {
                         {user.active ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
+                    {currentUserRole === "superadmin" && (
+                      <TableCell className="text-right">
+                        {user.role !== "superadmin" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(user.id, user.email)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

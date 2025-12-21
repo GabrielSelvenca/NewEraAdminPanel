@@ -199,6 +199,14 @@ class ApiClient {
     });
   }
 
+  async deleteUser(id: number): Promise<void> {
+    return this.request<void>(`/api/admin/users/${id}`, { method: 'DELETE' });
+  }
+
+  async getAllowedRoles(): Promise<string[]> {
+    return this.request<string[]>('/api/admin/allowed-roles');
+  }
+
   // Stats
   async getStats(): Promise<Stats> {
     return this.request<Stats>('/api/stats');
