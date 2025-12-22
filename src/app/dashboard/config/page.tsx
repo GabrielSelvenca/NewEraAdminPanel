@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, Loader2, RefreshCw, Server, Hash, Users, FolderOpen, CheckCircle2 } from "lucide-react";
+import { Save, Loader2, RefreshCw, Server, Hash, Users, FolderOpen, CheckCircle2, Palette, Gamepad2, Key, Store } from "lucide-react";
 
 interface DiscordServerData {
   guildId: string;
@@ -250,6 +250,62 @@ export default function ConfigPage() {
                 />
               )}
             </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Canal de Logs de Entregas</Label>
+              {serverData ? (
+                <Select
+                  value={config.channelLogsDeliveries || ""}
+                  onValueChange={(value) => updateField("channelLogsDeliveries", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um canal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.textChannels.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id} className="text-zinc-100">
+                        # {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.channelLogsDeliveries || ""}
+                  onChange={(e) => updateField("channelLogsDeliveries", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do canal"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Categoria de Tickets</Label>
+              {serverData ? (
+                <Select
+                  value={config.categoryTickets || ""}
+                  onValueChange={(value) => updateField("categoryTickets", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-zinc-100">
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.categoryTickets || ""}
+                  onChange={(e) => updateField("categoryTickets", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID da categoria"
+                />
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -329,10 +385,13 @@ export default function ConfigPage() {
         {/* Configurações da Loja */}
         <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-zinc-100">Loja</CardTitle>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <Store className="w-5 h-5 text-emerald-500" />
+              Loja
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="space-y-2">
                 <Label className="text-zinc-300">Nome da Loja</Label>
                 <Input
@@ -341,6 +400,23 @@ export default function ConfigPage() {
                   className="bg-zinc-800 border-zinc-700 text-zinc-100"
                   placeholder="Nova Era Store"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Cor da Loja</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={config.storeColor || "#257e24"}
+                    onChange={(e) => updateField("storeColor", e.target.value)}
+                    className="w-12 h-10 p-1 bg-zinc-800 border-zinc-700 cursor-pointer"
+                  />
+                  <Input
+                    value={config.storeColor || "#257e24"}
+                    onChange={(e) => updateField("storeColor", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100 flex-1"
+                    placeholder="#257e24"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-zinc-300">Preço por 1000 Robux (R$)</Label>
@@ -371,6 +447,58 @@ export default function ConfigPage() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Configurações do Roblox */}
+        <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <Gamepad2 className="w-5 h-5 text-red-500" />
+              Roblox (Entrega Automática)
+            </CardTitle>
+            <CardDescription className="text-zinc-500">
+              Configure a API do Roblox para entrega automática de robux
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-zinc-300 flex items-center gap-2">
+                  <Key className="w-4 h-4" />
+                  Roblox API Key
+                </Label>
+                <Input
+                  type="password"
+                  value={config.robloxApiKey || ""}
+                  onChange={(e) => updateField("robloxApiKey", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="Sua API Key do Roblox"
+                />
+                <p className="text-xs text-zinc-500">Obtenha em create.roblox.com/credentials</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-300 flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4" />
+                  ID do Jogo Principal
+                </Label>
+                <Input
+                  value={config.robloxGameId || ""}
+                  onChange={(e) => updateField("robloxGameId", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="Ex: 123456789"
+                />
+                <p className="text-xs text-zinc-500">Universe ID do jogo para entrega</p>
+              </div>
+            </div>
+            {config.robloxApiKey && (
+              <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <p className="text-emerald-400 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  API Key configurada
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
