@@ -81,6 +81,10 @@ interface BotConfig {
   // Cargos por valor
   tierRoles?: string;
   
+  // Disponibilidade de vendas
+  gamepassEnabled?: boolean;
+  robuxEnabled?: boolean;
+  
   // Dados Discord (JSON)
   discordServerData?: string;
   asaasApiKey?: string;
