@@ -168,11 +168,11 @@ export default function ConfigPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Categoria de Carrinhos</Label>
+              <Label className="text-zinc-300">Carrinhos Gamepass</Label>
               {serverData ? (
                 <Select
-                  value={config.categoryCarts || ""}
-                  onValueChange={(value) => updateField("categoryCarts", value)}
+                  value={config.categoryCartsGamepass || ""}
+                  onValueChange={(value) => updateField("categoryCartsGamepass", value)}
                 >
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
                     <SelectValue placeholder="Selecione uma categoria" />
@@ -187,8 +187,36 @@ export default function ConfigPage() {
                 </Select>
               ) : (
                 <Input
-                  value={config.categoryCarts || ""}
-                  onChange={(e) => updateField("categoryCarts", e.target.value)}
+                  value={config.categoryCartsGamepass || ""}
+                  onChange={(e) => updateField("categoryCartsGamepass", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID da categoria"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Carrinhos Robux</Label>
+              {serverData ? (
+                <Select
+                  value={config.categoryCartsRobux || ""}
+                  onValueChange={(value) => updateField("categoryCartsRobux", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-zinc-100">
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.categoryCartsRobux || ""}
+                  onChange={(e) => updateField("categoryCartsRobux", e.target.value)}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100"
                   placeholder="ID da categoria"
                 />
@@ -303,6 +331,91 @@ export default function ConfigPage() {
                   onChange={(e) => updateField("categoryTickets", e.target.value)}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100"
                   placeholder="ID da categoria"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Canal de Setup (Embed de Vendas)</Label>
+              {serverData ? (
+                <Select
+                  value={config.channelSetup || ""}
+                  onValueChange={(value) => updateField("channelSetup", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um canal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.textChannels.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id} className="text-zinc-100">
+                        # {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.channelSetup || ""}
+                  onChange={(e) => updateField("channelSetup", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do canal"
+                />
+              )}
+              <p className="text-xs text-zinc-500">O bot envia automaticamente o embed de vendas neste canal</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Canal de Anúncio de Compras</Label>
+              {serverData ? (
+                <Select
+                  value={config.channelAnnouncements || ""}
+                  onValueChange={(value) => updateField("channelAnnouncements", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um canal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.textChannels.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id} className="text-zinc-100">
+                        # {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.channelAnnouncements || ""}
+                  onChange={(e) => updateField("channelAnnouncements", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do canal"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Canal de Anúncio de Entregas</Label>
+              {serverData ? (
+                <Select
+                  value={config.channelDeliveryAnnouncements || ""}
+                  onValueChange={(value) => updateField("channelDeliveryAnnouncements", value)}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                    <SelectValue placeholder="Selecione um canal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {serverData.textChannels.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id} className="text-zinc-100">
+                        # {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={config.channelDeliveryAnnouncements || ""}
+                  onChange={(e) => updateField("channelDeliveryAnnouncements", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="ID do canal"
                 />
               )}
             </div>
@@ -589,7 +702,163 @@ export default function ConfigPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Cargos por Valor de Compra */}
+        <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <Users className="w-5 h-5 text-yellow-500" />
+              Cargos por Valor de Compra
+            </CardTitle>
+            <CardDescription className="text-zinc-500">
+              Configure cargos que são dados automaticamente baseado no total gasto pelo cliente
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <TierRolesEditor 
+              tierRoles={config.tierRoles || "[]"} 
+              onChange={(value) => updateField("tierRoles", value)}
+              roles={serverData?.roles || []}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Configurações de Carrinhos */}
+        <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-zinc-100 flex items-center gap-2">
+              <Store className="w-5 h-5 text-orange-500" />
+              Múltiplos Carrinhos
+            </CardTitle>
+            <CardDescription className="text-zinc-500">
+              Permite que usuários tenham mais de um carrinho aberto ao mesmo tempo
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="flex items-center gap-3 p-4 bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-750">
+                <input
+                  type="checkbox"
+                  checked={config.allowMultipleCarts ?? true}
+                  onChange={(e) => updateField("allowMultipleCarts", e.target.checked)}
+                  className="w-5 h-5 accent-emerald-500"
+                />
+                <div>
+                  <p className="text-zinc-200 font-medium">Permitir Múltiplos Carrinhos</p>
+                  <p className="text-zinc-500 text-sm">Usuários podem ter vários carrinhos abertos</p>
+                </div>
+              </label>
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Máximo de Carrinhos por Usuário</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={config.maxCartsPerUser || 3}
+                  onChange={(e) => updateField("maxCartsPerUser", parseInt(e.target.value) || 3)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+    </div>
+  );
+}
+
+// Componente para editar Tier Roles
+function TierRolesEditor({ 
+  tierRoles, 
+  onChange, 
+  roles 
+}: { 
+  tierRoles: string; 
+  onChange: (value: string) => void;
+  roles: { id: string; name: string; color: string }[];
+}) {
+  const [tiers, setTiers] = useState<{ minValue: number; roleId: string }[]>([]);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(tierRoles);
+      setTiers(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setTiers([]);
+    }
+  }, [tierRoles]);
+
+  const updateTiers = (newTiers: { minValue: number; roleId: string }[]) => {
+    setTiers(newTiers);
+    onChange(JSON.stringify(newTiers));
+  };
+
+  const addTier = () => {
+    updateTiers([...tiers, { minValue: 100, roleId: "" }]);
+  };
+
+  const removeTier = (index: number) => {
+    updateTiers(tiers.filter((_, i) => i !== index));
+  };
+
+  const updateTier = (index: number, field: "minValue" | "roleId", value: number | string) => {
+    const newTiers = [...tiers];
+    newTiers[index] = { ...newTiers[index], [field]: value };
+    updateTiers(newTiers);
+  };
+
+  return (
+    <div className="space-y-3">
+      {tiers.map((tier, index) => (
+        <div key={index} className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg">
+          <div className="flex-1 grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-zinc-400 text-xs">Valor Mínimo (R$)</Label>
+              <Input
+                type="number"
+                value={tier.minValue}
+                onChange={(e) => updateTier(index, "minValue", parseInt(e.target.value) || 0)}
+                className="bg-zinc-700 border-zinc-600 text-zinc-100 h-9"
+              />
+            </div>
+            <div>
+              <Label className="text-zinc-400 text-xs">Cargo</Label>
+              <select
+                value={tier.roleId}
+                onChange={(e) => updateTier(index, "roleId", e.target.value)}
+                className="w-full h-9 px-3 rounded-md bg-zinc-700 border border-zinc-600 text-zinc-100 text-sm"
+              >
+                <option value="">Selecione um cargo</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => removeTier(index)}
+            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          >
+            ✕
+          </Button>
+        </div>
+      ))}
+      <Button
+        variant="outline"
+        onClick={addTier}
+        className="w-full border-dashed border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+      >
+        + Adicionar Cargo por Valor
+      </Button>
+      {tiers.length > 0 && (
+        <p className="text-xs text-zinc-500">
+          Ex: Quem gastar R$100+ recebe cargo X, quem gastar R$500+ recebe cargo Y
+        </p>
+      )}
     </div>
   );
 }

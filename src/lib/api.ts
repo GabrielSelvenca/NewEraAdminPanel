@@ -67,6 +67,15 @@ interface BotConfig {
   showPriceInEmbed?: boolean;
   embedFooterText?: string;
   embedThumbnailUrl?: string;
+  channelSetup?: string;
+  channelAnnouncements?: string;
+  channelDeliveryAnnouncements?: string;
+  categoryCartsGamepass?: string;
+  categoryCartsRobux?: string;
+  setupMessageId?: string;
+  tierRoles?: string;
+  allowMultipleCarts?: boolean;
+  maxCartsPerUser?: number;
 }
 
 interface SalesStats {
