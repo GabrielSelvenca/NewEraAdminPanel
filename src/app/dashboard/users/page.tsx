@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, RefreshCw, Users, Loader2, Trash2, Pencil, Key, Shield, ShieldCheck, UserCog } from "lucide-react";
+import { Plus, RefreshCw, Users, Loader2, Trash2, Pencil, Key, UserCog } from "lucide-react";
 
 export default function UsersPage() {
   const currentUser = useUser();
@@ -41,6 +41,10 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  
+  // Search and filter
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterRole, setFilterRole] = useState<string>("all");
 
   const loadUsers = async () => {
     try {
@@ -177,6 +181,14 @@ export default function UsersPage() {
     }
   };
 
+  // Filtered users
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === "all" || user.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -263,16 +275,41 @@ export default function UsersPage() {
         </div>
       </div>
 
+      {/* Search and Filter Bar */}
+      <div className="flex gap-4 items-center">
+        <div className="flex-1">
+          <Input
+            placeholder="Buscar por nome ou email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-zinc-100"
+          />
+        </div>
+        <select
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="h-10 px-4 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-100"
+        >
+          <option value="all">Todos os cargos</option>
+          <option value="superadmin">Superadmin</option>
+          <option value="admin">Admin</option>
+          <option value="gerente">Gerente</option>
+        </select>
+        <div className="text-zinc-500 text-sm">
+          {filteredUsers.length} de {users.length} usuários
+        </div>
+      </div>
+
       <Card className="bg-zinc-900 border-zinc-800">
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
             </div>
-          ) : users.length === 0 ? (
+          ) : filteredUsers.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
               <Users className="w-12 h-12 mb-4" />
-              <p>Nenhum usuário cadastrado</p>
+              <p>{users.length === 0 ? "Nenhum usuário cadastrado" : "Nenhum resultado encontrado"}</p>
             </div>
           ) : (
             <Table>
@@ -287,7 +324,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <TableRow key={user.id} className="border-zinc-800 hover:bg-zinc-800/50">
                     <TableCell className="text-zinc-300">{user.id}</TableCell>
                     <TableCell className="text-zinc-100">{user.email}</TableCell>

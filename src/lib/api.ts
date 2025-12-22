@@ -405,6 +405,14 @@ class ApiClient {
     return this.request<{ balance: number }>('/api/asaas/balance');
   }
 
+  async getAsaasAccount(): Promise<AsaasAccountInfo | null> {
+    try {
+      return await this.request<AsaasAccountInfo>('/api/asaas/account');
+    } catch {
+      return null;
+    }
+  }
+
   // Discord Server Data
   async getDiscordServerData(): Promise<DiscordServerData | null> {
     const result = await this.request<{ synced: boolean; data?: DiscordServerData }>('/api/discord/server');
@@ -423,5 +431,16 @@ interface DiscordServerData {
   syncedAt: string;
 }
 
+interface AsaasAccountInfo {
+  name?: string;
+  tradingName?: string;
+  email?: string;
+  phone?: string;
+  cpfCnpj?: string;
+  personType?: string;
+  city?: string;
+  state?: string;
+}
+
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo };
