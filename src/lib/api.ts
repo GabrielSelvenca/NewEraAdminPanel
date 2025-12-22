@@ -83,6 +83,8 @@ interface BotConfig {
   
   // Dados Discord (JSON)
   discordServerData?: string;
+  asaasApiKey?: string;
+  asaasWalletId?: string;
 }
 
 interface SalesStats {
