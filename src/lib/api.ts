@@ -373,6 +373,14 @@ class ApiClient {
     });
   }
 
+  async processPlaceholders(text: string, gamesList?: { name: string; productCount: number }[]): Promise<string> {
+    const response = await this.request<{ processedText: string }>('/api/config/process-placeholders', {
+      method: 'POST',
+      body: JSON.stringify({ text, gamesList }),
+    });
+    return response.processedText;
+  }
+
   // Users
   async getUsers(): Promise<AdminUser[]> {
     return this.request<AdminUser[]>('/api/admin/users');

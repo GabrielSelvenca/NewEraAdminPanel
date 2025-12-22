@@ -46,7 +46,11 @@ export function DiscordEmbedPreview({
       return `R$ ${price.toFixed(2)}`;
     });
     
-    // {status}
+    // {status-gamepass} e {status-robux}
+    processed = processed.replace(/\{status-gamepass\}/g, status);
+    processed = processed.replace(/\{status-robux\}/g, status);
+    
+    // Mantém compatibilidade com {status} antigo
     processed = processed.replace(/\{status\}/g, status);
     
     return processed;
