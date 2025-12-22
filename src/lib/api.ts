@@ -305,6 +305,20 @@ class ApiClient {
     return this.request<void>(`/api/admin/users/${id}`, { method: 'DELETE' });
   }
 
+  async updateUser(id: number, data: { name?: string; email?: string; role?: string; active?: boolean }): Promise<AdminUser> {
+    return this.request<AdminUser>(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(id: number, data: { currentPassword?: string; newPassword: string }): Promise<void> {
+    return this.request<void>(`/api/admin/users/${id}/change-password`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async getAllowedRoles(): Promise<string[]> {
     return this.request<string[]>('/api/admin/allowed-roles');
   }

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, RefreshCw, Users, Loader2, Trash2 } from "lucide-react";
+import { Plus, RefreshCw, Users, Loader2, Trash2, Pencil, Key, Shield, ShieldCheck, UserCog } from "lucide-react";
 
 export default function UsersPage() {
   const currentUser = useUser();
@@ -24,6 +24,23 @@ export default function UsersPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
+  
+  // Edit user state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [saving, setSaving] = useState(false);
+  
+  // Change password state
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
+  const [passwordUserName, setPasswordUserName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const loadUsers = async () => {
     try {
@@ -73,6 +90,71 @@ export default function UsersPage() {
       await loadUsers();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erro ao deletar");
+    }
+  };
+
+  const openEditDialog = (user: AdminUser) => {
+    setEditingUser(user);
+    setEditName(user.name);
+    setEditEmail(user.email);
+    setEditRole(user.role);
+    setError("");
+    setEditDialogOpen(true);
+  };
+
+  const handleEdit = async () => {
+    if (!editingUser) return;
+    setSaving(true);
+    setError("");
+    try {
+      await api.updateUser(editingUser.id, {
+        name: editName.trim() || undefined,
+        email: editEmail.trim() || undefined,
+        role: currentUser?.role === "superadmin" ? editRole : undefined,
+      });
+      setEditDialogOpen(false);
+      await loadUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openPasswordDialog = (user: AdminUser) => {
+    setPasswordUserId(user.id);
+    setPasswordUserName(user.name);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
+    setPasswordDialogOpen(true);
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordUserId) return;
+    if (newPassword !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    setChangingPassword(true);
+    setError("");
+    try {
+      const isSelf = passwordUserId === Number(currentUser?.id);
+      await api.changePassword(passwordUserId, {
+        currentPassword: isSelf ? currentPassword : undefined,
+        newPassword,
+      });
+      setPasswordDialogOpen(false);
+      alert("Senha alterada com sucesso!");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao alterar senha");
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -201,9 +283,7 @@ export default function UsersPage() {
                   <TableHead className="text-zinc-400">Nome</TableHead>
                   <TableHead className="text-zinc-400">Cargo</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
-                  {currentUser?.role === "superadmin" && (
-                    <TableHead className="text-zinc-400 text-right">Ações</TableHead>
-                  )}
+                  <TableHead className="text-zinc-400 text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -224,20 +304,46 @@ export default function UsersPage() {
                         {user.active ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    {currentUser?.role === "superadmin" && (
-                      <TableCell className="text-right">
-                        {user.role !== "superadmin" && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        {/* Editar - próprio perfil ou superadmin */}
+                        {(user.id === Number(currentUser?.id) || currentUser?.role === "superadmin") && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(user)}
+                            className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                            title="Editar usuário"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {/* Alterar senha - próprio ou superadmin */}
+                        {(user.id === Number(currentUser?.id) || currentUser?.role === "superadmin") && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openPasswordDialog(user)}
+                            className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                            title="Alterar senha"
+                          >
+                            <Key className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {/* Deletar - só superadmin e não pode deletar superadmin */}
+                        {currentUser?.role === "superadmin" && user.role !== "superadmin" && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(user.id, user.email)}
                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            title="Deletar usuário"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
-                      </TableCell>
-                    )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -245,6 +351,116 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-zinc-100 flex items-center gap-2">
+              <UserCog className="w-5 h-5" />
+              Editar Usuário
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Nome</Label>
+              <Input
+                placeholder="Nome do usuário"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Email</Label>
+              <Input
+                type="email"
+                placeholder="email@exemplo.com"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100"
+              />
+            </div>
+            {currentUser?.role === "superadmin" && editingUser?.role !== "superadmin" && (
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Cargo</Label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  className="w-full h-10 px-3 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-100"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="gerente">Gerente</option>
+                </select>
+              </div>
+            )}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <Button 
+              onClick={handleEdit} 
+              disabled={saving}
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Pencil className="w-4 h-4 mr-2" />}
+              {saving ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-zinc-100 flex items-center gap-2">
+              <Key className="w-5 h-5 text-yellow-400" />
+              Alterar Senha - {passwordUserName}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {passwordUserId === Number(currentUser?.id) && (
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Senha Atual</Label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Nova Senha</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Confirmar Nova Senha</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-zinc-100"
+              />
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <Button 
+              onClick={handleChangePassword} 
+              disabled={changingPassword || !newPassword || !confirmPassword}
+              className="w-full bg-yellow-600 hover:bg-yellow-700"
+            >
+              {changingPassword ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
+              {changingPassword ? "Alterando..." : "Alterar Senha"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
