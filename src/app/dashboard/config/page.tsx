@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, DollarSign, Trash2, Plus } from "lucide-react";
+import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, DollarSign, Trash2, Plus, Eye } from "lucide-react";
+import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 
 interface DiscordServerData {
   guildId: string;
@@ -313,6 +314,46 @@ export default function ConfigPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Preview dos Embeds */}
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="w-5 h-5 text-purple-500" />
+            Visual dos Embeds
+          </CardTitle>
+          <CardDescription>Preview de como os embeds aparecerão no Discord</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Preview Gamepass */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Embed Gamepass</Label>
+              <DiscordEmbedPreview
+                title={config.storeName || "Nova Era Store"}
+                description={config.embedGamepassMessage || "Bem-vindo à loja de Gamepasses! Selecione um jogo abaixo para começar sua compra."}
+                color={config.storeColor || "#257e24"}
+                thumbnailUrl={config.bannerGamepass}
+                footerText="Nova Era Store • Compre com segurança"
+                timestamp={true}
+              />
+            </div>
+
+            {/* Preview Robux */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Embed Robux</Label>
+              <DiscordEmbedPreview
+                title={config.storeName || "Nova Era Store"}
+                description={config.embedRobuxMessage || "Compre Robux com segurança! Clique no botão abaixo para iniciar sua compra."}
+                color={config.storeColor || "#257e24"}
+                thumbnailUrl={config.bannerRobux}
+                footerText="Nova Era Store • Compre com segurança"
+                timestamp={true}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Cargos por Valor */}
       <Card className="bg-zinc-900 border-zinc-800">
