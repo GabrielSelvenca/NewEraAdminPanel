@@ -219,11 +219,12 @@ class ApiClient {
 
         return response.json();
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Se foi timeout ou erro de rede, tenta retry
-        if ((error.name === 'AbortError' || error.message.includes('fetch')) && attempt < this.maxRetries - 1) {
-          console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, error.message);
-          lastError = error;
+        const err = error as Error;
+        if ((err.name === 'AbortError' || err.message?.includes('fetch')) && attempt < this.maxRetries - 1) {
+          console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, err.message);
+          lastError = err;
           await this.sleep(this.retryDelay * (attempt + 1));
           continue;
         }
