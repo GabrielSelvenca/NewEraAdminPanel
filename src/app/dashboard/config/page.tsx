@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, DollarSign, Trash2, Plus, Eye } from "lucide-react";
+import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, DollarSign, Trash2, Plus, Eye, RefreshCw } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 
 interface DiscordServerData {
@@ -74,9 +74,23 @@ export default function ConfigPage() {
         tierRoles: JSON.stringify(tierRoles)
       };
       await api.updateConfig(configToSave);
-      setMessage("✅ Configurações salvas! Embeds de setup serão atualizados automaticamente.");
+      setMessage("✅ Configurações salvas! Use 'Sincronizar Bot' para aplicar mudanças imediatamente.");
     } catch (err) {
       setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao salvar"}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setSaving(true);
+    setMessage("");
+    try {
+      await api.notifyBotUpdate();
+      setMessage("✅ Bot notificado! Use o comando /sync no Discord para aplicar as mudanças.");
+      setTimeout(() => setMessage(""), 5000);
+    } catch (err) {
+      setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao sincronizar"}`);
     } finally {
       setSaving(false);
     }
@@ -121,10 +135,16 @@ export default function ConfigPage() {
           <h1 className="text-3xl font-bold text-zinc-100">Configurações do Bot</h1>
           <p className="text-zinc-400 mt-1">Configure categorias, canais, visual e cargos</p>
         </div>
-        <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-          {saving ? "Salvando..." : "Salvar Configurações"}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleSync} disabled={saving} variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-600/10">
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            Sincronizar Bot
+          </Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            {saving ? "Salvando..." : "Salvar Configurações"}
+          </Button>
+        </div>
       </div>
 
       {message && (

@@ -363,6 +363,12 @@ class ApiClient {
     });
   }
 
+  async notifyBotUpdate(): Promise<{ message: string; timestamp: string }> {
+    return this.request('/api/bot/notify-update', {
+      method: 'POST',
+    });
+  }
+
   // Users
   async getUsers(): Promise<AdminUser[]> {
     return this.request<AdminUser[]>('/api/admin/users');
