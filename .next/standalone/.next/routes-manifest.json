@@ -78,12 +78,6 @@
       "namedRegex": "^/dashboard/partners(?:/)?$"
     },
     {
-      "page": "/dashboard/settings",
-      "regex": "^/dashboard/settings(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/dashboard/settings(?:/)?$"
-    },
-    {
       "page": "/dashboard/users",
       "regex": "^/dashboard/users(?:/)?$",
       "routeKeys": {},
