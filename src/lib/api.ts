@@ -57,6 +57,16 @@ interface BotConfig {
   cartInactivityMinutes: number;
   robloxApiKey?: string;
   robloxGameId?: string;
+  welcomeMessage?: string;
+  purchaseCompleteMessage?: string;
+  paymentPendingMessage?: string;
+  cartCreatedMessage?: string;
+  notifyOnPurchase?: boolean;
+  notifyOnDelivery?: boolean;
+  autoDeleteCarts?: boolean;
+  showPriceInEmbed?: boolean;
+  embedFooterText?: string;
+  embedThumbnailUrl?: string;
 }
 
 interface SalesStats {

@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, Loader2, RefreshCw, Server, Hash, Users, FolderOpen, CheckCircle2, Palette, Gamepad2, Key, Store } from "lucide-react";
+import { Save, Loader2, RefreshCw, Server, Hash, Users, FolderOpen, CheckCircle2, Store, MessageSquare, Bot, Bell } from "lucide-react";
 
 interface DiscordServerData {
   guildId: string;
@@ -67,7 +67,7 @@ export default function ConfigPage() {
     }
   };
 
-  const updateField = (field: keyof BotConfig, value: string | number) => {
+  const updateField = (field: keyof BotConfig, value: string | number | boolean) => {
     if (!config) return;
     setConfig({ ...config, [field]: value });
   };
@@ -450,55 +450,143 @@ export default function ConfigPage() {
           </CardContent>
         </Card>
 
-        {/* Configurações do Roblox */}
+        {/* Configurações do Bot */}
         <Card className="bg-zinc-900 border-zinc-800 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-zinc-100 flex items-center gap-2">
-              <Gamepad2 className="w-5 h-5 text-red-500" />
-              Roblox (Entrega Automática)
+              <Bot className="w-5 h-5 text-blue-500" />
+              Configurações do Bot
             </CardTitle>
             <CardDescription className="text-zinc-500">
-              Configure a API do Roblox para entrega automática de robux
+              Personalize mensagens e comportamento do bot
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-zinc-300 flex items-center gap-2">
-                  <Key className="w-4 h-4" />
-                  Roblox API Key
-                </Label>
-                <Input
-                  type="password"
-                  value={config.robloxApiKey || ""}
-                  onChange={(e) => updateField("robloxApiKey", e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                  placeholder="Sua API Key do Roblox"
+          <CardContent className="space-y-6">
+            {/* Toggles */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <label className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-750">
+                <input
+                  type="checkbox"
+                  checked={config.notifyOnPurchase ?? true}
+                  onChange={(e) => updateField("notifyOnPurchase", e.target.checked)}
+                  className="w-4 h-4 accent-emerald-500"
                 />
-                <p className="text-xs text-zinc-500">Obtenha em create.roblox.com/credentials</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-zinc-300 flex items-center gap-2">
-                  <Gamepad2 className="w-4 h-4" />
-                  ID do Jogo Principal
-                </Label>
-                <Input
-                  value={config.robloxGameId || ""}
-                  onChange={(e) => updateField("robloxGameId", e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                  placeholder="Ex: 123456789"
+                <div>
+                  <p className="text-zinc-200 text-sm font-medium">Notificar Compras</p>
+                  <p className="text-zinc-500 text-xs">Logs de compra</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-750">
+                <input
+                  type="checkbox"
+                  checked={config.notifyOnDelivery ?? true}
+                  onChange={(e) => updateField("notifyOnDelivery", e.target.checked)}
+                  className="w-4 h-4 accent-emerald-500"
                 />
-                <p className="text-xs text-zinc-500">Universe ID do jogo para entrega</p>
+                <div>
+                  <p className="text-zinc-200 text-sm font-medium">Notificar Entregas</p>
+                  <p className="text-zinc-500 text-xs">Logs de entrega</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-750">
+                <input
+                  type="checkbox"
+                  checked={config.autoDeleteCarts ?? true}
+                  onChange={(e) => updateField("autoDeleteCarts", e.target.checked)}
+                  className="w-4 h-4 accent-emerald-500"
+                />
+                <div>
+                  <p className="text-zinc-200 text-sm font-medium">Auto-deletar Carrinhos</p>
+                  <p className="text-zinc-500 text-xs">Após inatividade</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-750">
+                <input
+                  type="checkbox"
+                  checked={config.showPriceInEmbed ?? true}
+                  onChange={(e) => updateField("showPriceInEmbed", e.target.checked)}
+                  className="w-4 h-4 accent-emerald-500"
+                />
+                <div>
+                  <p className="text-zinc-200 text-sm font-medium">Mostrar Preços</p>
+                  <p className="text-zinc-500 text-xs">Nos embeds</p>
+                </div>
+              </label>
+            </div>
+
+            {/* Mensagens */}
+            <div>
+              <h4 className="text-zinc-300 font-medium mb-3 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Mensagens Personalizadas
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">Boas-vindas</Label>
+                  <Input
+                    value={config.welcomeMessage || ""}
+                    onChange={(e) => updateField("welcomeMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="Bem-vindo à {storeName}! 🎮"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">Carrinho Criado</Label>
+                  <Input
+                    value={config.cartCreatedMessage || ""}
+                    onChange={(e) => updateField("cartCreatedMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="Seu carrinho foi criado! 🛒"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">Aguardando Pagamento</Label>
+                  <Input
+                    value={config.paymentPendingMessage || ""}
+                    onChange={(e) => updateField("paymentPendingMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="Aguardando pagamento... ⏳"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">Compra Concluída</Label>
+                  <Input
+                    value={config.purchaseCompleteMessage || ""}
+                    onChange={(e) => updateField("purchaseCompleteMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="Compra realizada com sucesso! ✅"
+                  />
+                </div>
               </div>
             </div>
-            {config.robloxApiKey && (
-              <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                <p className="text-emerald-400 text-sm flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  API Key configurada
-                </p>
+
+            {/* Embed Settings */}
+            <div>
+              <h4 className="text-zinc-300 font-medium mb-3 flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Personalização dos Embeds
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">Texto do Footer</Label>
+                  <Input
+                    value={config.embedFooterText || ""}
+                    onChange={(e) => updateField("embedFooterText", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="Nova Era Store • Robux com segurança"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-400 text-sm">URL da Thumbnail</Label>
+                  <Input
+                    value={config.embedThumbnailUrl || ""}
+                    onChange={(e) => updateField("embedThumbnailUrl", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                    placeholder="https://exemplo.com/logo.png"
+                  />
+                </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>
