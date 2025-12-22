@@ -1,0 +1,284 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { api, Coupon } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, Loader2, Ticket, Calendar, Hash, Percent, DollarSign } from "lucide-react";
+
+export default function CouponsPage() {
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  const [formData, setFormData] = useState({
+    code: "",
+    discountType: "percentage",
+    discountValue: 0,
+    expiresAt: "",
+    maxUses: "",
+  });
+
+  useEffect(() => {
+    loadCoupons();
+  }, []);
+
+  const loadCoupons = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getCoupons();
+      setCoupons(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!formData.code || formData.discountValue <= 0) {
+      alert("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    try {
+      setCreating(true);
+      await api.createCoupon({
+        code: formData.code.toUpperCase(),
+        discountType: formData.discountType,
+        discountValue: formData.discountValue,
+        expiresAt: formData.expiresAt || null,
+        maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
+      });
+
+      setFormData({
+        code: "",
+        discountType: "percentage",
+        discountValue: 0,
+        expiresAt: "",
+        maxUses: "",
+      });
+      setShowForm(false);
+      await loadCoupons();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao criar cupom");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Tem certeza que deseja deletar este cupom?")) return;
+
+    try {
+      await api.deleteCoupon(id);
+      await loadCoupons();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao deletar cupom");
+    }
+  };
+
+  const toggleActive = async (id: number, active: boolean) => {
+    try {
+      await api.updateCoupon(id, { active: !active });
+      await loadCoupons();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao atualizar cupom");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-100">Cupons</h1>
+          <p className="text-zinc-400 mt-1">Gerencie cupons de desconto com limite de tempo e usos</p>
+        </div>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-emerald-600 hover:bg-emerald-700">
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Cupom
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardHeader>
+            <CardTitle>Criar Novo Cupom</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Código do Cupom</Label>
+                <Input
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  className="bg-zinc-800 border-zinc-700"
+                  placeholder="DESCONTO10"
+                  maxLength={50}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tipo de Desconto</Label>
+                <Select value={formData.discountType} onValueChange={(value) => setFormData({ ...formData, discountType: value })}>
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="percentage">Percentual (%)</SelectItem>
+                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Valor do Desconto</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.discountValue}
+                  onChange={(e) => setFormData({ ...formData, discountValue: parseFloat(e.target.value) || 0 })}
+                  className="bg-zinc-800 border-zinc-700"
+                  placeholder={formData.discountType === "percentage" ? "10" : "5.00"}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Data de Expiração (Opcional)</Label>
+                <Input
+                  type="datetime-local"
+                  value={formData.expiresAt}
+                  onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Limite de Usos (Opcional)</Label>
+                <Input
+                  type="number"
+                  value={formData.maxUses}
+                  onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700"
+                  placeholder="Deixe vazio para ilimitado"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handleCreate} disabled={creating} className="bg-emerald-600 hover:bg-emerald-700">
+                {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Criar Cupom
+              </Button>
+              <Button onClick={() => setShowForm(false)} variant="outline">
+                Cancelar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {coupons.length === 0 ? (
+          <Card className="bg-zinc-900 border-zinc-800 col-span-full">
+            <CardContent className="py-12 text-center text-zinc-500">
+              <Ticket className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              Nenhum cupom cadastrado
+            </CardContent>
+          </Card>
+        ) : (
+          coupons.map((coupon) => (
+            <Card
+              key={coupon.id}
+              className={`bg-zinc-900 border-zinc-800 ${!coupon.active ? "opacity-50" : ""}`}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-5 h-5 text-emerald-500" />
+                    <CardTitle className="text-lg">{coupon.code}</CardTitle>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant={coupon.active ? "outline" : "default"}
+                      onClick={() => toggleActive(coupon.id, coupon.active)}
+                      className="h-7 px-2"
+                    >
+                      {coupon.active ? "Desativar" : "Ativar"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(coupon.id)}
+                      className="h-7 px-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  {coupon.discountType === "percentage" ? (
+                    <Percent className="w-4 h-4 text-blue-400" />
+                  ) : (
+                    <DollarSign className="w-4 h-4 text-green-400" />
+                  )}
+                  <span className="text-zinc-300">
+                    {coupon.discountType === "percentage"
+                      ? `${coupon.discountValue}% de desconto`
+                      : `R$ ${coupon.discountValue.toFixed(2)} de desconto`}
+                  </span>
+                </div>
+
+                {coupon.expiresAt && (
+                  <div className="flex items-center gap-2 text-sm text-zinc-400">
+                    <Calendar className="w-4 h-4" />
+                    Expira: {new Date(coupon.expiresAt).toLocaleString("pt-BR")}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                  <Hash className="w-4 h-4" />
+                  Usos: {coupon.currentUses}
+                  {coupon.maxUses ? ` / ${coupon.maxUses}` : " (ilimitado)"}
+                </div>
+
+                <div className="pt-2 border-t border-zinc-800">
+                  {coupon.isExpired && (
+                    <span className="inline-block px-2 py-1 text-xs rounded bg-red-500/10 text-red-400 border border-red-500/20">
+                      Expirado
+                    </span>
+                  )}
+                  {coupon.isMaxUsesReached && (
+                    <span className="inline-block px-2 py-1 text-xs rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 ml-2">
+                      Limite Atingido
+                    </span>
+                  )}
+                  {coupon.isValid && coupon.active && (
+                    <span className="inline-block px-2 py-1 text-xs rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Ativo
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

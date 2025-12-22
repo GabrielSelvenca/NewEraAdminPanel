@@ -471,6 +471,40 @@ class ApiClient {
     const result = await this.request<{ synced: boolean; data?: DiscordServerData }>('/api/discord/server');
     return result.synced ? result.data || null : null;
   }
+
+  // Coupons
+  async getCoupons(): Promise<Coupon[]> {
+    return this.request<Coupon[]>('/api/coupons');
+  }
+
+  async getCoupon(id: number): Promise<Coupon> {
+    return this.request<Coupon>(`/api/coupons/${id}`);
+  }
+
+  async createCoupon(data: { code: string; discountType: string; discountValue: number; expiresAt?: string | null; maxUses?: number | null }): Promise<Coupon> {
+    return this.request<Coupon>('/api/coupons', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCoupon(id: number, data: { active?: boolean; expiresAt?: string; maxUses?: number }): Promise<Coupon> {
+    return this.request<Coupon>(`/api/coupons/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCoupon(id: number): Promise<void> {
+    return this.request<void>(`/api/coupons/${id}`, { method: 'DELETE' });
+  }
+
+  async validateCoupon(code: string): Promise<{ isValid: boolean; errorMessage?: string; coupon?: Coupon }> {
+    return this.request('/api/coupons/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  }
 }
 
 interface DiscordServerData {
@@ -495,5 +529,21 @@ interface AsaasAccountInfo {
   state?: string;
 }
 
+interface Coupon {
+  id: number;
+  code: string;
+  discountType: string;
+  discountValue: number;
+  expiresAt?: string;
+  maxUses?: number;
+  currentUses: number;
+  active: boolean;
+  isValid: boolean;
+  isExpired: boolean;
+  isMaxUsesReached: boolean;
+  createdAt: string;
+  createdBy?: number;
+}
+
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon };
