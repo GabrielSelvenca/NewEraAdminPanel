@@ -505,6 +505,34 @@ class ApiClient {
       body: JSON.stringify({ code }),
     });
   }
+
+  // Deliveries
+  async getDeliveries(status?: string): Promise<Delivery[]> {
+    const url = status ? `/api/deliveries?status=${status}` : '/api/deliveries';
+    return this.request<Delivery[]>(url);
+  }
+
+  async getDelivery(id: number): Promise<Delivery> {
+    return this.request<Delivery>(`/api/deliveries/${id}`);
+  }
+
+  async getDeliveryStats(): Promise<DeliveryStats> {
+    return this.request<DeliveryStats>('/api/deliveries/stats');
+  }
+
+  async updateDeliveryStatus(id: number, data: { status: string; proofUrl?: string; notes?: string; deliveryMethod?: string }): Promise<Delivery> {
+    return this.request<Delivery>(`/api/deliveries/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async uploadDeliveryProof(id: number, proofUrl: string): Promise<{ message: string; delivery: Delivery }> {
+    return this.request(`/api/deliveries/${id}/proof`, {
+      method: 'PUT',
+      body: JSON.stringify({ proofUrl }),
+    });
+  }
 }
 
 interface DiscordServerData {
@@ -545,5 +573,41 @@ interface Coupon {
   createdBy?: number;
 }
 
+interface Delivery {
+  id: number;
+  saleId: number;
+  userId: string;
+  robloxUsername: string;
+  robloxUserId?: number;
+  type: string;
+  robuxAmount?: number;
+  gamepassIds?: string;
+  value: number;
+  status: string;
+  proofUrl?: string;
+  deliveryMethod?: string;
+  deliveredBy?: number;
+  deliveredAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  notes?: string;
+  sale?: {
+    id: number;
+    amount: number;
+    status: string;
+    paymentId?: string;
+  };
+}
+
+interface DeliveryStats {
+  total: number;
+  pending: number;
+  inProgress: number;
+  completed: number;
+  failed: number;
+  totalValue: number;
+  avgDeliveryTimeMinutes: number;
+}
+
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon, Delivery, DeliveryStats };

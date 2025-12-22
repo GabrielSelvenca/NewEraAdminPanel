@@ -60,6 +60,12 @@
       "namedRegex": "^/dashboard/coupons(?:/)?$"
     },
     {
+      "page": "/dashboard/deliveries",
+      "regex": "^/dashboard/deliveries(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/deliveries(?:/)?$"
+    },
+    {
       "page": "/dashboard/games",
       "regex": "^/dashboard/games(?:/)?$",
       "routeKeys": {},
