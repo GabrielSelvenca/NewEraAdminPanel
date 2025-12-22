@@ -155,43 +155,88 @@ interface CreateSubaccountRequest {
 }
 
 class ApiClient {
+  private maxRetries = 3;
+  private retryDelay = 1000; // 1 segundo
+
+  private async sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-      credentials: 'include',
-    });
+    let lastError: Error | null = null;
 
-    if (response.status === 401) {
-      if (typeof window !== 'undefined' && !endpoint.includes('/login')) {
-        window.location.href = '/login';
+    // Retry com backoff exponencial
+    for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30 segundos
+
+        const response = await fetch(`${API_URL}${endpoint}`, {
+          ...options,
+          headers,
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (response.status === 401) {
+          if (typeof window !== 'undefined' && !endpoint.includes('/login')) {
+            window.location.href = '/login';
+          }
+          throw new Error('Não autorizado');
+        }
+
+        if (!response.ok) {
+          const error = await response.text();
+          
+          // Se for erro 500 ou 502/503, tenta retry
+          if (response.status >= 500 && attempt < this.maxRetries - 1) {
+            lastError = new Error(error || `Erro ${response.status}`);
+            await this.sleep(this.retryDelay * (attempt + 1));
+            continue;
+          }
+          
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('api-offline'));
+          }
+          throw new Error(error || `Erro ${response.status}`);
+        }
+        
+        // API respondeu com sucesso
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('api-online'));
+        }
+
+        if (response.status === 204) {
+          return {} as T;
+        }
+
+        return response.json();
+
+      } catch (error: any) {
+        // Se foi timeout ou erro de rede, tenta retry
+        if ((error.name === 'AbortError' || error.message.includes('fetch')) && attempt < this.maxRetries - 1) {
+          console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, error.message);
+          lastError = error;
+          await this.sleep(this.retryDelay * (attempt + 1));
+          continue;
+        }
+        
+        throw error;
       }
-      throw new Error('Não autorizado');
     }
 
-    if (!response.ok) {
-      const error = await response.text();
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('api-offline'));
-      }
-      throw new Error(error || `Erro ${response.status}`);
-    }
-    
-    // API respondeu com sucesso
+    // Se chegou aqui, todas as tentativas falharam
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('api-online'));
+      window.dispatchEvent(new Event('api-offline'));
     }
-
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json();
+    throw lastError || new Error('Falha ao conectar com a API após múltiplas tentativas');
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
