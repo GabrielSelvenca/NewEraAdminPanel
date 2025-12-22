@@ -74,7 +74,11 @@ export default function ConfigPage() {
         tierRoles: JSON.stringify(tierRoles)
       };
       await api.updateConfig(configToSave);
-      setMessage("✅ Configurações salvas! Use 'Sincronizar Bot' para aplicar mudanças imediatamente.");
+      
+      // Notifica o bot automaticamente após salvar
+      await api.notifyBotUpdate();
+      
+      setMessage("✅ Configurações salvas! Bot será atualizado automaticamente em até 10 segundos.");
     } catch (err) {
       setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao salvar"}`);
     } finally {
