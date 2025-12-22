@@ -43,39 +43,46 @@ interface Product {
 interface BotConfig {
   id: number;
   guildId?: string;
-  channelLogsPurchases?: string;
-  channelLogsDeliveries?: string;
-  categoryCarts?: string;
+  
+  // Categorias
+  categoryCartsGamepass?: string;
+  categoryCartsRobux?: string;
   categoryApproved?: string;
-  categoryTickets?: string;
-  roleClient?: string;
-  roleAdmin?: string;
+  
+  // Canais
+  channelPurchasesLog?: string;
+  channelDeliveriesLog?: string;
+  channelSetupGamepass?: string;
+  channelSetupRobux?: string;
+  
+  // Store Settings
   storeName?: string;
   storeColor?: string;
   pricePerK: number;
   paymentTimeoutMinutes: number;
   cartInactivityMinutes: number;
+  
+  // Roblox API
   robloxApiKey?: string;
   robloxGameId?: string;
-  welcomeMessage?: string;
-  purchaseCompleteMessage?: string;
-  paymentPendingMessage?: string;
-  cartCreatedMessage?: string;
-  notifyOnPurchase?: boolean;
-  notifyOnDelivery?: boolean;
-  autoDeleteCarts?: boolean;
-  showPriceInEmbed?: boolean;
-  embedFooterText?: string;
-  embedThumbnailUrl?: string;
-  channelSetup?: string;
-  channelAnnouncements?: string;
-  channelDeliveryAnnouncements?: string;
-  categoryCartsGamepass?: string;
-  categoryCartsRobux?: string;
-  setupMessageId?: string;
+  
+  // Mensagens dos Embeds
+  embedGamepassMessage?: string;
+  embedRobuxMessage?: string;
+  
+  // Banners
+  bannerGamepass?: string;
+  bannerRobux?: string;
+  
+  // IDs mensagens setup
+  setupGamepassMessageId?: string;
+  setupRobuxMessageId?: string;
+  
+  // Cargos por valor
   tierRoles?: string;
-  allowMultipleCarts?: boolean;
-  maxCartsPerUser?: number;
+  
+  // Dados Discord (JSON)
+  discordServerData?: string;
 }
 
 interface SalesStats {
