@@ -32,6 +32,7 @@ export default function ConfigPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [tierRoles, setTierRoles] = useState<TierRole[]>([]);
+  const [games, setGames] = useState<{ name: string; active: boolean }[]>([]);
 
   useEffect(() => {
     loadData();
@@ -40,12 +41,14 @@ export default function ConfigPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [configData, discordData] = await Promise.all([
+      const [configData, discordData, gamesData] = await Promise.all([
         api.getConfig(),
         api.getDiscordServerData().catch(() => null),
+        api.getGames().catch(() => []),
       ]);
       setConfig(configData);
       setServerData(discordData);
+      setGames(gamesData.filter((g: { active: boolean }) => g.active));
       
       if (configData.tierRoles) {
         try {
@@ -331,11 +334,15 @@ export default function ConfigPage() {
               <Label className="text-sm font-semibold">Embed Gamepass</Label>
               <DiscordEmbedPreview
                 title={config.storeName || "Nova Era Store"}
-                description={config.embedGamepassMessage || "Bem-vindo à loja de Gamepasses! Selecione um jogo abaixo para começar sua compra."}
+                description={config.embedGamepassMessage || "Bem-vindo à **{store-name}**! Selecione um jogo abaixo:\n\n{games-list}\n\n{status}"}
                 color={config.storeColor || "#257e24"}
                 thumbnailUrl={config.bannerGamepass}
-                footerText="Nova Era Store • Compre com segurança"
+                footerText={`${config.storeName || "Nova Era Store"} • Compre com segurança`}
                 timestamp={true}
+                storeName={config.storeName || "Nova Era Store"}
+                gamesList={games.map(g => g.name)}
+                pricePerK={config.pricePerK || 27.99}
+                status="🟢 Disponível"
               />
             </div>
 
@@ -344,11 +351,15 @@ export default function ConfigPage() {
               <Label className="text-sm font-semibold">Embed Robux</Label>
               <DiscordEmbedPreview
                 title={config.storeName || "Nova Era Store"}
-                description={config.embedRobuxMessage || "Compre Robux com segurança! Clique no botão abaixo para iniciar sua compra."}
+                description={config.embedRobuxMessage || "Compre Robux com *segurança*!\n\nExemplo: **1000 Robux** custa __{robux-price 1000}__\n\n{status}"}
                 color={config.storeColor || "#257e24"}
                 thumbnailUrl={config.bannerRobux}
-                footerText="Nova Era Store • Compre com segurança"
+                footerText={`${config.storeName || "Nova Era Store"} • Compre com segurança`}
                 timestamp={true}
+                storeName={config.storeName || "Nova Era Store"}
+                gamesList={games.map(g => g.name)}
+                pricePerK={config.pricePerK || 27.99}
+                status="🟢 Disponível"
               />
             </div>
           </div>
