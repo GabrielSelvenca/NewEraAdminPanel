@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
 
@@ -13,8 +13,9 @@ const menuItems = [
   { href: "/dashboard/partners", label: "Parceiros", icon: Wallet, requireFeature: 'gamesEnabled' as const },
   { href: "/dashboard/sellers", label: "Vendedores", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
   { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
+  { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, requireFeature: null },
   { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null },
-  { href: "/dashboard/config", label: "Configurações", icon: Settings, requireFeature: 'gamesEnabled' as const },
+  { href: "/dashboard/config", label: "Configurações", icon: Settings, requireFeature: null },
 ];
 
 export function Sidebar() {
