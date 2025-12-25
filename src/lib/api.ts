@@ -283,8 +283,8 @@ class ApiClient {
     role: string;
     phone?: string;
     cpfCnpj?: string;
-    hasAsaasApiKey?: boolean;
-    asaasSandbox?: boolean;
+    hasMercadoPagoAccessToken?: boolean;
+    mercadoPagoSandbox?: boolean;
   }> {
     return this.request('/api/admin/me');
   }
@@ -413,8 +413,8 @@ class ApiClient {
     active?: boolean;
     phone?: string;
     cpfCnpj?: string;
-    asaasApiKey?: string;
-    asaasSandbox?: boolean;
+    mercadoPagoAccessToken?: string;
+    mercadoPagoSandbox?: boolean;
   }): Promise<AdminUser> {
     return this.request<AdminUser>(`/api/admin/users/${id}`, {
       method: 'PATCH',

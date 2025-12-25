@@ -15,10 +15,8 @@ interface SellerPaymentSettings {
   email: string;
   phone?: string;
   cpfCnpj?: string;
-  hasAsaasApiKey: boolean;
-  asaasSandbox: boolean;
-  asaasWalletId?: string;
-  asaasAccountId?: string;
+  hasMercadoPagoAccessToken: boolean;
+  mercadoPagoSandbox: boolean;
 }
 
 export default function PaymentSettingsPage() {
@@ -29,8 +27,8 @@ export default function PaymentSettingsPage() {
   
   const [formData, setFormData] = useState({
     cpfCnpj: '',
-    asaasApiKey: '',
-    asaasSandbox: false
+    mercadoPagoAccessToken: '',
+    mercadoPagoSandbox: false
   });
 
   useEffect(() => {
@@ -50,14 +48,14 @@ export default function PaymentSettingsPage() {
         email: currentUser.email,
         phone: currentUser.phone,
         cpfCnpj: currentUser.cpfCnpj,
-        hasAsaasApiKey: currentUser.hasAsaasApiKey || false,
-        asaasSandbox: currentUser.asaasSandbox || false
+        hasMercadoPagoAccessToken: currentUser.hasMercadoPagoAccessToken || false,
+        mercadoPagoSandbox: currentUser.mercadoPagoSandbox || false
       });
       
       setFormData({
         cpfCnpj: currentUser.cpfCnpj || '',
-        asaasApiKey: '',
-        asaasSandbox: currentUser.asaasSandbox || false
+        mercadoPagoAccessToken: '',
+        mercadoPagoSandbox: currentUser.mercadoPagoSandbox || false
       });
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
@@ -81,18 +79,18 @@ export default function PaymentSettingsPage() {
       
       const updateData: Record<string, string | boolean> = {
         cpfCnpj: formData.cpfCnpj.replace(/\D/g, ''),
-        asaasSandbox: formData.asaasSandbox
+        mercadoPagoSandbox: formData.mercadoPagoSandbox
       };
 
-      if (formData.asaasApiKey) {
-        updateData.asaasApiKey = formData.asaasApiKey;
+      if (formData.mercadoPagoAccessToken) {
+        updateData.mercadoPagoAccessToken = formData.mercadoPagoAccessToken;
       }
 
       await api.updateUser(seller.id, updateData);
       
       alert('Configurações salvas com sucesso!');
       await loadCurrentSeller();
-      setFormData({ ...formData, asaasApiKey: '' });
+      setFormData({ ...formData, mercadoPagoAccessToken: '' });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar configurações';
       alert(errorMessage);
@@ -174,13 +172,13 @@ export default function PaymentSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Status da Conta Asaas</CardTitle>
+            <CardTitle>Status da Conta Mercado Pago</CardTitle>
             <CardDescription>Configuração da integração de pagamentos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">API Key Configurada</Label>
-              {seller.hasAsaasApiKey ? (
+              <Label className="text-sm">Access Token Configurado</Label>
+              {seller.hasMercadoPagoAccessToken ? (
                 <Badge variant="default" className="gap-1">
                   <CheckCircle className="w-3 h-3" />
                   Configurada
@@ -195,8 +193,8 @@ export default function PaymentSettingsPage() {
             
             <div className="flex items-center justify-between">
               <Label className="text-sm">Ambiente</Label>
-              <Badge variant={seller.asaasSandbox ? "outline" : "default"}>
-                {seller.asaasSandbox ? 'Sandbox (Teste)' : 'Produção'}
+              <Badge variant={seller.mercadoPagoSandbox ? "outline" : "default"}>
+                {seller.mercadoPagoSandbox ? 'Sandbox (Teste)' : 'Produção'}
               </Badge>
             </div>
 
@@ -217,7 +215,7 @@ export default function PaymentSettingsPage() {
             Configurar Dados de Cobrança
           </CardTitle>
           <CardDescription>
-            Configure seu CPF/CNPJ e API Key do Asaas para receber pagamentos
+            Configure seu CPF/CNPJ e Access Token do Mercado Pago para receber pagamentos
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -241,14 +239,14 @@ export default function PaymentSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="asaasApiKey">API Key do Asaas</Label>
+                <Label htmlFor="mercadoPagoAccessToken">Access Token do Mercado Pago</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="asaasApiKey"
+                    id="mercadoPagoAccessToken"
                     type={showApiKey ? 'text' : 'password'}
-                    value={formData.asaasApiKey}
-                    onChange={(e) => setFormData({ ...formData, asaasApiKey: e.target.value })}
-                    placeholder={seller.hasAsaasApiKey ? '••••••••••••••••' : 'Cole sua API Key aqui'}
+                    value={formData.mercadoPagoAccessToken}
+                    onChange={(e) => setFormData({ ...formData, mercadoPagoAccessToken: e.target.value })}
+                    placeholder={seller.hasMercadoPagoAccessToken ? '••••••••••••••••' : 'Cole seu Access Token aqui'}
                     className="flex-1"
                   />
                   <Button
@@ -261,9 +259,9 @@ export default function PaymentSettingsPage() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {seller.hasAsaasApiKey 
-                    ? 'Deixe em branco para manter a chave atual' 
-                    : 'Obtenha em asaas.com → Integrações → API Key'}
+                  {seller.hasMercadoPagoAccessToken 
+                    ? 'Deixe em branco para manter o token atual' 
+                    : 'Obtenha em mercadopago.com.br → Seu negócio → Credenciais'}
                 </p>
               </div>
             </div>
@@ -272,8 +270,8 @@ export default function PaymentSettingsPage() {
               <input
                 type="checkbox"
                 id="sandbox"
-                checked={formData.asaasSandbox}
-                onChange={(e) => setFormData({ ...formData, asaasSandbox: e.target.checked })}
+                checked={formData.mercadoPagoSandbox}
+                onChange={(e) => setFormData({ ...formData, mercadoPagoSandbox: e.target.checked })}
                 className="rounded border-gray-300"
               />
               <Label htmlFor="sandbox" className="cursor-pointer">
