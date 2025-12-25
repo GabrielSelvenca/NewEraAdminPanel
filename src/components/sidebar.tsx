@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, ChevronDown, DollarSign } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
-import { useState } from "react";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null },
@@ -26,7 +25,6 @@ const configSubItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [configOpen, setConfigOpen] = useState(pathname.startsWith('/dashboard/config'));
 
   const handleLogout = async () => {
     try {
@@ -71,49 +69,35 @@ export function Sidebar() {
             );
           })}
         
-        {/* Configurações com Subcategorias */}
+        {/* Configurações com Subcategorias Sempre Visíveis */}
         <div>
-          <button
-            onClick={() => setConfigOpen(!configOpen)}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full",
-              pathname.startsWith('/dashboard/config')
-                ? "bg-emerald-500/10 text-emerald-500"
-                : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-            )}
-          >
-            <Settings className="w-5 h-5" />
-            <span className="font-medium flex-1 text-left">Configurações</span>
-            <ChevronDown className={cn(
-              "w-4 h-4 transition-transform",
-              configOpen ? "rotate-180" : ""
-            )} />
-          </button>
+          <div className="flex items-center gap-3 px-4 py-3 text-zinc-500 text-sm font-semibold">
+            <Settings className="w-4 h-4" />
+            <span>Configurações</span>
+          </div>
           
-          {configOpen && (
-            <div className="ml-4 mt-1 space-y-1">
-              {configSubItems
-                .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
-                .map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm",
-                        isActive
-                          ? "bg-emerald-500/10 text-emerald-500"
-                          : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                      )}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span className="font-medium">{item.label}</span>
-                    </Link>
-                  );
-                })}
-            </div>
-          )}
+          <div className="ml-4 space-y-1">
+            {configSubItems
+              .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
+              .map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm",
+                      isActive
+                        ? "bg-emerald-500/10 text-emerald-500"
+                        : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                    )}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+          </div>
         </div>
       </nav>
 
