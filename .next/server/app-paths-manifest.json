@@ -3,15 +3,15 @@
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/dashboard/deliveries/page": "app/dashboard/deliveries/page.js",
+  "/dashboard/config/games/page": "app/dashboard/config/games/page.js",
   "/dashboard/config/page": "app/dashboard/config/page.js",
   "/dashboard/coupons/page": "app/dashboard/coupons/page.js",
+  "/dashboard/deliveries/page": "app/dashboard/deliveries/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/orders/page": "app/dashboard/orders/page.js",
   "/dashboard/partners/page": "app/dashboard/partners/page.js",
-  "/dashboard/games/[id]/page": "app/dashboard/games/[id]/page.js",
   "/dashboard/games/page": "app/dashboard/games/page.js",
+  "/dashboard/users/page": "app/dashboard/users/page.js",
   "/dashboard/sellers/page": "app/dashboard/sellers/page.js",
-  "/dashboard/config/games/page": "app/dashboard/config/games/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/users/page": "app/dashboard/users/page.js"
+  "/dashboard/games/[id]/page": "app/dashboard/games/[id]/page.js"
 }

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign } from "lucide-react";
+import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign, Upload } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -27,6 +27,7 @@ export default function ConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -82,6 +83,24 @@ export default function ConfigPage() {
   const updateField = (field: keyof BotConfig, value: string | number | boolean) => {
     if (!config) return;
     setConfig({ ...config, [field]: value });
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: keyof BotConfig) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setMessage("");
+    
+    try {
+      const result = await api.uploadImage(file);
+      updateField(field, result.url);
+      setMessage(`✅ Imagem enviada com sucesso!`);
+    } catch (err) {
+      setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao enviar imagem"}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -350,14 +369,36 @@ export default function ConfigPage() {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" />
-                    Banner Robux (URL)
+                    Banner Robux
                   </Label>
-                  <Input
-                    value={config.bannerRobux || ""}
-                    onChange={(e) => updateField("bannerRobux", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700"
-                    placeholder="https://..."
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={config.bannerRobux || ""}
+                      onChange={(e) => updateField("bannerRobux", e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 flex-1"
+                      placeholder="URL da imagem ou faça upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('banner-robux-upload')?.click()}
+                      className="border-zinc-700"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <input
+                      id="banner-robux-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "bannerRobux")}
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -404,6 +404,24 @@ class ApiClient {
     });
   }
 
+  async uploadImage(file: File): Promise<{ url: string; fileName: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_URL}/api/upload/image`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao fazer upload da imagem');
+    }
+
+    return response.json();
+  }
+
   async changePassword(id: number, data: { currentPassword?: string; newPassword: string }): Promise<void> {
     return this.request<void>(`/api/admin/users/${id}/change-password`, {
       method: 'POST',
