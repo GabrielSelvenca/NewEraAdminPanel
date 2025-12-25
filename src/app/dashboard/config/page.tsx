@@ -137,35 +137,6 @@ export default function ConfigPage() {
     );
   }
 
-  if (!gamesEnabled) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-zinc-100">Configurações</h1>
-          <p className="text-zinc-400 mt-1">Configurações do sistema</p>
-        </div>
-
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-zinc-100">Marketplace Ativo</CardTitle>
-            <CardDescription>
-              Sistema de marketplace de gamepasses Roblox está ativo
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="py-12 text-center">
-            <Store className="w-16 h-16 mx-auto mb-4 text-emerald-600" />
-            <p className="text-zinc-400 text-lg">
-              Sistema de marketplace configurado e funcionando
-            </p>
-            <p className="text-zinc-500 text-sm mt-2">
-              Configure vendedores, pedidos e cupons através do menu lateral
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   if (!config) {
     return <div className="text-center text-zinc-500 py-12">Erro ao carregar configurações</div>;
   }
