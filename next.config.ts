@@ -5,13 +5,14 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     unoptimized: true
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts']
-  }
+  },
+  // Garantir que arquivos estáticos sejam copiados corretamente
+  outputFileTracingRoot: undefined,
 };
 
 export default nextConfig;
