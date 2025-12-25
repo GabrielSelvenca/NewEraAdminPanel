@@ -4,22 +4,32 @@ import { useEffect, useState } from "react";
 import { api, Game, Stats } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Gamepad2, Gem } from "lucide-react";
+import { isFeatureEnabled } from "@/lib/feature-toggle";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const gamesEnabled = isFeatureEnabled('gamesEnabled');
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [statsData, gamesData] = await Promise.all([
-          api.getStats().catch((e) => { console.error('Stats error:', e); return { totalSales: 0, totalAmount: 0, totalRobux: 0 }; }),
-          api.getGames().catch((e) => { console.error('Games error:', e); return []; }),
-        ]);
-        console.log('Games loaded:', gamesData);
-        setStats(statsData);
-        setGames(gamesData);
+        // Só carrega stats de jogos se a feature estiver habilitada
+        if (gamesEnabled) {
+          const [statsData, gamesData] = await Promise.all([
+            api.getStats().catch((e) => { 
+              console.error('Stats error:', e); 
+              return { totalSales: 0, totalAmount: 0, totalRobux: 0 }; 
+            }),
+            api.getGames().catch((e) => { 
+              console.error('Games error:', e); 
+              return []; 
+            })
+          ]);
+          setStats(statsData);
+          setGames(gamesData);
+        }
       } catch (err) {
         console.error('Dashboard error:', err);
       } finally {
@@ -27,7 +37,7 @@ export default function DashboardPage() {
       }
     }
     loadData();
-  }, []);
+  }, [gamesEnabled]);
 
   if (loading) {
     return (
