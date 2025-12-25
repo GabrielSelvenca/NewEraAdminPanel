@@ -136,6 +136,7 @@ export function DiscordEmbedPreview({
           </div>
           {thumbnailUrl && (
             <div className="flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={thumbnailUrl} 
                 alt="Thumbnail" 
@@ -149,6 +150,7 @@ export function DiscordEmbedPreview({
         </div>
         {imageUrl && (
           <div className="mt-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={imageUrl} 
               alt="Banner" 
