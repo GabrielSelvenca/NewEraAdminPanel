@@ -46,27 +46,26 @@ export default function ConfigPage() {
     try {
       setLoading(true);
       
-      // Só carrega config e games se jogos estiverem habilitados
+      const [configData, discordData] = await Promise.all([
+        api.getConfig(),
+        api.getDiscordServerData().catch(() => null),
+      ]);
+      
+      setConfig(configData);
+      setServerData(discordData);
+      
+      // Só carrega games se jogos estiverem habilitados
       if (gamesEnabled) {
-        const [configData, discordData, gamesData] = await Promise.all([
-          api.getConfig(),
-          api.getDiscordServerData().catch(() => null),
-          api.getGames().catch(() => []),
-        ]);
-        setConfig(configData);
-        setServerData(discordData);
+        const gamesData = await api.getGames().catch(() => []);
         setGames(gamesData.filter((g: { active: boolean }) => g.active));
-        
-        if (configData.tierRoles) {
-          try {
-            setTierRoles(JSON.parse(configData.tierRoles));
-          } catch {
-            setTierRoles([]);
-          }
+      }
+      
+      if (configData.tierRoles) {
+        try {
+          setTierRoles(JSON.parse(configData.tierRoles));
+        } catch {
+          setTierRoles([]);
         }
-      } else {
-        const discordData = await api.getDiscordServerData().catch(() => null);
-        setServerData(discordData);
       }
     } catch (err) {
       console.error(err);
