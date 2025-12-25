@@ -276,7 +276,16 @@ class ApiClient {
     }
   }
 
-  async getCurrentUser(): Promise<{ id: string; email: string; name: string; role: string }> {
+  async getCurrentUser(): Promise<{ 
+    id: string; 
+    email: string; 
+    name: string; 
+    role: string;
+    phone?: string;
+    cpfCnpj?: string;
+    hasAsaasApiKey?: boolean;
+    asaasSandbox?: boolean;
+  }> {
     return this.request('/api/admin/me');
   }
 
@@ -397,7 +406,16 @@ class ApiClient {
     return this.request<void>(`/api/admin/users/${id}`, { method: 'DELETE' });
   }
 
-  async updateUser(id: number, data: { name?: string; email?: string; role?: string; active?: boolean }): Promise<AdminUser> {
+  async updateUser(id: number, data: { 
+    name?: string; 
+    email?: string; 
+    role?: string; 
+    active?: boolean;
+    phone?: string;
+    cpfCnpj?: string;
+    asaasApiKey?: string;
+    asaasSandbox?: boolean;
+  }): Promise<AdminUser> {
     return this.request<AdminUser>(`/api/admin/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),

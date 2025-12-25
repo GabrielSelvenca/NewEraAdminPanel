@@ -48,16 +48,16 @@ export default function PaymentSettingsPage() {
         id: parseInt(currentUser.id),
         name: currentUser.name,
         email: currentUser.email,
-        phone: undefined,
-        cpfCnpj: undefined,
-        hasAsaasApiKey: false,
-        asaasSandbox: false
+        phone: currentUser.phone,
+        cpfCnpj: currentUser.cpfCnpj,
+        hasAsaasApiKey: currentUser.hasAsaasApiKey || false,
+        asaasSandbox: currentUser.asaasSandbox || false
       });
       
       setFormData({
-        cpfCnpj: '',
+        cpfCnpj: currentUser.cpfCnpj || '',
         asaasApiKey: '',
-        asaasSandbox: false
+        asaasSandbox: currentUser.asaasSandbox || false
       });
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
@@ -242,19 +242,19 @@ export default function PaymentSettingsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="asaasApiKey">API Key do Asaas</Label>
-                <div className="relative">
+                <div className="flex gap-2">
                   <Input
                     id="asaasApiKey"
                     type={showApiKey ? 'text' : 'password'}
                     value={formData.asaasApiKey}
                     onChange={(e) => setFormData({ ...formData, asaasApiKey: e.target.value })}
                     placeholder={seller.hasAsaasApiKey ? '••••••••••••••••' : 'Cole sua API Key aqui'}
+                    className="flex-1"
                   />
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
+                    variant="outline"
+                    size="icon"
                     onClick={() => setShowApiKey(!showApiKey)}
                   >
                     {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
