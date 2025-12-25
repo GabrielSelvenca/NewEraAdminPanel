@@ -4,11 +4,11 @@
   "/login/page": "/login",
   "/page": "/",
   "/dashboard/config/page": "/dashboard/config",
-  "/dashboard/deliveries/page": "/dashboard/deliveries",
   "/dashboard/coupons/page": "/dashboard/coupons",
   "/dashboard/games/[id]/page": "/dashboard/games/[id]",
-  "/dashboard/page": "/dashboard",
-  "/dashboard/users/page": "/dashboard/users",
+  "/dashboard/games/page": "/dashboard/games",
   "/dashboard/partners/page": "/dashboard/partners",
-  "/dashboard/games/page": "/dashboard/games"
+  "/dashboard/users/page": "/dashboard/users",
+  "/dashboard/deliveries/page": "/dashboard/deliveries",
+  "/dashboard/page": "/dashboard"
 }

@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build && xcopy /E /I /Y .next\\static .next\\standalone\\.next\\static && xcopy /E /I /Y public .next\\standalone\\public",
     "start": "node .next/standalone/server.js",
-    "production": "npm run build && npm run start",
+    "production": "node .next/standalone/server.js",
     "lint": "eslint"
   },
   "dependencies": {
