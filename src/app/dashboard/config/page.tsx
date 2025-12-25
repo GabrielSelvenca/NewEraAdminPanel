@@ -53,6 +53,8 @@ export default function ConfigPage() {
     setSaving(true);
     setMessage("");
     try {
+      console.log('💾 Salvando configurações:', config);
+      console.log('💰 PricePerK sendo enviado:', config.pricePerK, typeof config.pricePerK);
       await api.updateConfig(config);
       await api.notifyBotUpdate();
       setMessage("✅ Configurações salvas! Bot será atualizado automaticamente em até 10 segundos.");
