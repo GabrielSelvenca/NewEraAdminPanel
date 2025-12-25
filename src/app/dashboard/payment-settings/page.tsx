@@ -40,23 +40,25 @@ export default function PaymentSettingsPage() {
   const loadCurrentSeller = async () => {
     try {
       setLoading(true);
-      // Pega o vendedor atual (usuário logado)
+      // Pega o usuário atual (que já é seller se for admin/superadmin)
       const currentUser = await api.getCurrentUser();
       
-      // Busca dados completos do vendedor
-      const sellers = await api.getSellers();
-      const currentSeller = sellers.find(
-        (s) => s.email === currentUser.email
-      );
+      // Usa os dados do próprio usuário
+      setSeller({
+        id: parseInt(currentUser.id),
+        name: currentUser.name,
+        email: currentUser.email,
+        phone: undefined,
+        cpfCnpj: undefined,
+        hasAsaasApiKey: false,
+        asaasSandbox: false
+      });
       
-      if (currentSeller) {
-        setSeller(currentSeller);
-        setFormData({
-          cpfCnpj: currentSeller.cpfCnpj || '',
-          asaasApiKey: '',
-          asaasSandbox: currentSeller.asaasSandbox
-        });
-      }
+      setFormData({
+        cpfCnpj: '',
+        asaasApiKey: '',
+        asaasSandbox: false
+      });
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
     } finally {
@@ -86,7 +88,7 @@ export default function PaymentSettingsPage() {
         updateData.asaasApiKey = formData.asaasApiKey;
       }
 
-      await api.updateSeller(seller.id, updateData);
+      await api.updateUser(seller.id, updateData);
       
       alert('Configurações salvas com sucesso!');
       await loadCurrentSeller();
