@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, UserCog } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
 
@@ -20,6 +20,7 @@ const menuItems = [
 const configSubItems = [
   { href: "/dashboard/config", label: "Robux", icon: DollarSign, requireFeature: null },
   { href: "/dashboard/config/games", label: "Jogos", icon: Gamepad2, requireFeature: null },
+  { href: "/dashboard/customers", label: "Customers Asaas", icon: UserCog, requireFeature: null },
 ];
 
 export function Sidebar() {

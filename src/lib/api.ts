@@ -544,6 +544,18 @@ class ApiClient {
     });
   }
 
+  // Asaas Customers
+  async getAsaasCustomers(): Promise<{ data: AsaasCustomer[] }> {
+    return this.request<{ data: AsaasCustomer[] }>('/api/asaas/customers');
+  }
+
+  async createAsaasCustomer(data: { name: string; cpfCnpj: string; email?: string }): Promise<AsaasCustomer> {
+    return this.request<AsaasCustomer>('/api/asaas/customers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // Deliveries
   async getDeliveries(status?: string): Promise<Delivery[]> {
     const url = status ? `/api/deliveries?status=${status}` : '/api/deliveries';
@@ -647,5 +659,13 @@ interface DeliveryStats {
   avgDeliveryTimeMinutes: number;
 }
 
+interface AsaasCustomer {
+  id: string;
+  name: string;
+  cpfCnpj: string;
+  email?: string;
+  dateCreated: string;
+}
+
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon, Delivery, DeliveryStats };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon, Delivery, DeliveryStats, AsaasCustomer };
