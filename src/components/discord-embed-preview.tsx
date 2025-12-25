@@ -6,6 +6,7 @@ interface DiscordEmbedPreviewProps {
   color?: string;
   footerText?: string;
   thumbnailUrl?: string;
+  imageUrl?: string;
   timestamp?: boolean;
   storeName?: string;
   gamesList?: string[];
@@ -19,6 +20,7 @@ export function DiscordEmbedPreview({
   color = "#257e24",
   footerText = "Footer do embed",
   thumbnailUrl,
+  imageUrl,
   timestamp = true,
   storeName = "Nova Era Store",
   gamesList = [],
@@ -136,7 +138,7 @@ export function DiscordEmbedPreview({
             <div className="flex-shrink-0">
               <img 
                 src={thumbnailUrl} 
-                alt="Banner" 
+                alt="Thumbnail" 
                 className="w-24 h-24 rounded object-cover"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -145,6 +147,18 @@ export function DiscordEmbedPreview({
             </div>
           )}
         </div>
+        {imageUrl && (
+          <div className="mt-3">
+            <img 
+              src={imageUrl} 
+              alt="Banner" 
+              className="w-full rounded object-cover max-h-80"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

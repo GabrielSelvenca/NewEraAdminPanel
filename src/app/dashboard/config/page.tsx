@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign, Upload } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
+import { ImageCropEditor } from "@/components/image-crop-editor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface DiscordServerData {
@@ -28,6 +29,9 @@ export default function ConfigPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string>("");
+  const [cropField, setCropField] = useState<"bannerRobux" | "bannerGamepass">("bannerRobux");
 
   useEffect(() => {
     loadData();
@@ -85,17 +89,30 @@ export default function ConfigPage() {
     setConfig({ ...config, [field]: value });
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: keyof BotConfig) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: "bannerRobux" | "bannerGamepass") => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+      setCropField(field);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+    
+    event.target.value = "";
+  };
+
+  const handleSaveCroppedImage = async (croppedBlob: Blob) => {
     setUploading(true);
     setMessage("");
     
     try {
+      const file = new File([croppedBlob], "banner.jpg", { type: "image/jpeg" });
       const result = await api.uploadImage(file);
-      updateField(field, result.url);
-      setMessage(`✅ Imagem enviada com sucesso!`);
+      updateField(cropField, result.url);
+      setMessage(`✅ Banner enviado com sucesso!`);
     } catch (err) {
       setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao enviar imagem"}`);
     } finally {
@@ -422,7 +439,7 @@ export default function ConfigPage() {
                     title={config.storeName || "Nova Era Store"}
                     description={config.embedRobuxMessage}
                     color={config.storeColor || "#257e24"}
-                    thumbnailUrl={config.bannerRobux}
+                    imageUrl={config.bannerRobux}
                   />
                 </div>
               )}
@@ -430,6 +447,14 @@ export default function ConfigPage() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <ImageCropEditor
+        image={imageToCrop}
+        open={cropperOpen}
+        onClose={() => setCropperOpen(false)}
+        onSave={handleSaveCroppedImage}
+        aspect={16 / 9}
+      />
     </div>
   );
 }
