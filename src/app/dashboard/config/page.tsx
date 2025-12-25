@@ -376,12 +376,20 @@ export default function ConfigPage() {
                     <Palette className="w-4 h-4" />
                     Cor da Loja (Hex)
                   </Label>
-                  <Input
-                    value={config.storeColor || ""}
-                    onChange={(e) => updateField("storeColor", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700"
-                    placeholder="#257e24"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={config.storeColor || "#257e24"}
+                      onChange={(e) => updateField("storeColor", e.target.value)}
+                      className="w-16 h-10 p-1 bg-zinc-800 border-zinc-700 cursor-pointer"
+                    />
+                    <Input
+                      value={config.storeColor || ""}
+                      onChange={(e) => updateField("storeColor", e.target.value)}
+                      className="flex-1 bg-zinc-800 border-zinc-700"
+                      placeholder="#257e24"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
