@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart } from "lucide-react";
 import { api } from "@/lib/api";
+import { FeatureFlags } from "@/lib/feature-toggle";
 
 const menuItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/games", label: "Jogos", icon: Gamepad2 },
-  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet },
-  { href: "/dashboard/users", label: "Usuários", icon: Users },
-  { href: "/dashboard/config", label: "Configurações", icon: Settings },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null },
+  { href: "/dashboard/games", label: "Jogos", icon: Gamepad2, requireFeature: 'gamesEnabled' as const },
+  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet, requireFeature: 'gamesEnabled' as const },
+  { href: "/dashboard/sellers", label: "Vendedores", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
+  { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
+  { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null },
+  { href: "/dashboard/config", label: "Configurações", icon: Settings, requireFeature: 'gamesEnabled' as const },
 ];
 
 export function Sidebar() {
@@ -39,25 +42,27 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href || 
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                isActive
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
+        {menuItems
+          .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
+          .map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                  isActive
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
       </nav>
 
       <div className="p-4 border-t border-zinc-800">
