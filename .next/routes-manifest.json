@@ -72,10 +72,22 @@
       "namedRegex": "^/dashboard/games(?:/)?$"
     },
     {
+      "page": "/dashboard/orders",
+      "regex": "^/dashboard/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/orders(?:/)?$"
+    },
+    {
       "page": "/dashboard/partners",
       "regex": "^/dashboard/partners(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard/partners(?:/)?$"
+    },
+    {
+      "page": "/dashboard/sellers",
+      "regex": "^/dashboard/sellers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/sellers(?:/)?$"
     },
     {
       "page": "/dashboard/users",

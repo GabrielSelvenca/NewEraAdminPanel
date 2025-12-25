@@ -12,6 +12,7 @@ import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSq
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
+import { isFeatureEnabled } from "@/lib/feature-toggle";
 
 interface DiscordServerData {
   guildId: string;
@@ -35,6 +36,7 @@ export default function ConfigPage() {
   const [message, setMessage] = useState("");
   const [tierRoles, setTierRoles] = useState<TierRole[]>([]);
   const [games, setGames] = useState<{ name: string; active: boolean }[]>([]);
+  const gamesEnabled = isFeatureEnabled('gamesEnabled');
 
   useEffect(() => {
     loadData();
@@ -43,21 +45,28 @@ export default function ConfigPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [configData, discordData, gamesData] = await Promise.all([
-        api.getConfig(),
-        api.getDiscordServerData().catch(() => null),
-        api.getGames().catch(() => []),
-      ]);
-      setConfig(configData);
-      setServerData(discordData);
-      setGames(gamesData.filter((g: { active: boolean }) => g.active));
       
-      if (configData.tierRoles) {
-        try {
-          setTierRoles(JSON.parse(configData.tierRoles));
-        } catch {
-          setTierRoles([]);
+      // Só carrega config e games se jogos estiverem habilitados
+      if (gamesEnabled) {
+        const [configData, discordData, gamesData] = await Promise.all([
+          api.getConfig(),
+          api.getDiscordServerData().catch(() => null),
+          api.getGames().catch(() => []),
+        ]);
+        setConfig(configData);
+        setServerData(discordData);
+        setGames(gamesData.filter((g: { active: boolean }) => g.active));
+        
+        if (configData.tierRoles) {
+          try {
+            setTierRoles(JSON.parse(configData.tierRoles));
+          } catch {
+            setTierRoles([]);
+          }
         }
+      } else {
+        const discordData = await api.getDiscordServerData().catch(() => null);
+        setServerData(discordData);
       }
     } catch (err) {
       console.error(err);
