@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign, Gamepad2, ArrowRight } from "lucide-react";
+import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import Link from "next/link";
 
 interface DiscordServerData {
   guildId: string;
@@ -104,13 +103,6 @@ export default function ConfigPage() {
           <p className="text-zinc-400 mt-1">Configure o sistema de vendas de Robux</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/dashboard/config/games">
-            <Button variant="outline" className="border-purple-600 text-purple-400 hover:bg-purple-600/10">
-              <Gamepad2 className="w-4 h-4 mr-2" />
-              Config. Jogos
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
           <Button onClick={handleSync} disabled={saving} variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-600/10">
             {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
             Sincronizar Bot

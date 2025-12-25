@@ -1,17 +1,17 @@
 {
   "/_not-found/page": "/_not-found",
   "/favicon.ico/route": "/favicon.ico",
-  "/login/page": "/login",
   "/page": "/",
-  "/dashboard/config/games/page": "/dashboard/config/games",
+  "/login/page": "/login",
   "/dashboard/config/page": "/dashboard/config",
-  "/dashboard/coupons/page": "/dashboard/coupons",
-  "/dashboard/deliveries/page": "/dashboard/deliveries",
-  "/dashboard/users/page": "/dashboard/users",
   "/dashboard/games/[id]/page": "/dashboard/games/[id]",
+  "/dashboard/config/games/page": "/dashboard/config/games",
+  "/dashboard/games/page": "/dashboard/games",
+  "/dashboard/orders/page": "/dashboard/orders",
+  "/dashboard/coupons/page": "/dashboard/coupons",
   "/dashboard/page": "/dashboard",
   "/dashboard/partners/page": "/dashboard/partners",
-  "/dashboard/games/page": "/dashboard/games",
-  "/dashboard/sellers/page": "/dashboard/sellers",
-  "/dashboard/orders/page": "/dashboard/orders"
+  "/dashboard/users/page": "/dashboard/users",
+  "/dashboard/deliveries/page": "/dashboard/deliveries",
+  "/dashboard/sellers/page": "/dashboard/sellers"
 }

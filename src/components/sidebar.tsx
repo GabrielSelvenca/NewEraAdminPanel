@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, ChevronDown, DollarSign } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
+import { useState } from "react";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null },
@@ -15,12 +16,17 @@ const menuItems = [
   { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
   { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, requireFeature: null },
   { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null },
-  { href: "/dashboard/config", label: "Configurações", icon: Settings, requireFeature: null },
+];
+
+const configSubItems = [
+  { href: "/dashboard/config", label: "Robux", icon: DollarSign, requireFeature: null },
+  { href: "/dashboard/config/games", label: "Jogos", icon: Gamepad2, requireFeature: null },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [configOpen, setConfigOpen] = useState(pathname.startsWith('/dashboard/config'));
 
   const handleLogout = async () => {
     try {
@@ -64,6 +70,51 @@ export function Sidebar() {
               </Link>
             );
           })}
+        
+        {/* Configurações com Subcategorias */}
+        <div>
+          <button
+            onClick={() => setConfigOpen(!configOpen)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full",
+              pathname.startsWith('/dashboard/config')
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+            )}
+          >
+            <Settings className="w-5 h-5" />
+            <span className="font-medium flex-1 text-left">Configurações</span>
+            <ChevronDown className={cn(
+              "w-4 h-4 transition-transform",
+              configOpen ? "rotate-180" : ""
+            )} />
+          </button>
+          
+          {configOpen && (
+            <div className="ml-4 mt-1 space-y-1">
+              {configSubItems
+                .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
+                .map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm",
+                        isActive
+                          ? "bg-emerald-500/10 text-emerald-500"
+                          : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                      )}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  );
+                })}
+            </div>
+          )}
+        </div>
       </nav>
 
       <div className="p-4 border-t border-zinc-800">
