@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, CreditCard } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, CreditCard, ChevronDown } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
+import { useState } from "react";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null },
@@ -26,6 +27,7 @@ const configSubItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [configOpen, setConfigOpen] = useState(true);
 
   const handleLogout = async () => {
     try {
@@ -70,14 +72,30 @@ export function Sidebar() {
             );
           })}
         
-        {/* Configurações com Subcategorias Sempre Visíveis */}
+        {/* Configurações com Menu Colapsável */}
         <div>
-          <div className="flex items-center gap-3 px-4 py-3 text-zinc-500 text-sm font-semibold">
-            <Settings className="w-4 h-4" />
-            <span>Configurações</span>
-          </div>
+          <button
+            onClick={() => setConfigOpen(!configOpen)}
+            className="flex items-center justify-between w-full px-4 py-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Settings className="w-5 h-5" />
+              <span className="font-medium">Configurações</span>
+            </div>
+            <ChevronDown 
+              className={cn(
+                "w-4 h-4 transition-transform duration-200",
+                configOpen ? "rotate-180" : ""
+              )}
+            />
+          </button>
           
-          <div className="ml-4 space-y-1">
+          <div 
+            className={cn(
+              "ml-4 space-y-1 overflow-hidden transition-all duration-200",
+              configOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
+            )}
+          >
             {configSubItems
               .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
               .map((item) => {
