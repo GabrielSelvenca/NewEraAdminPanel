@@ -583,6 +583,22 @@ class ApiClient {
       body: JSON.stringify({ proofUrl }),
     });
   }
+
+  // Sellers
+  async getSellers(): Promise<Seller[]> {
+    return this.request<Seller[]>('/api/sellers');
+  }
+
+  async getSeller(id: number): Promise<Seller> {
+    return this.request<Seller>(`/api/sellers/${id}`);
+  }
+
+  async updateSeller(id: number, data: Partial<UpdateSellerRequest>): Promise<Seller> {
+    return this.request<Seller>(`/api/sellers/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 interface DiscordServerData {
@@ -667,5 +683,47 @@ interface AsaasCustomer {
   dateCreated: string;
 }
 
+interface Seller {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  cpfCnpj?: string;
+  status: string;
+  hasAsaasApiKey: boolean;
+  asaasSandbox: boolean;
+  asaasWalletId?: string;
+  asaasAccountId?: string;
+  maxActiveOrders: number;
+  cooldownSeconds: number;
+  assignedVolume24h: number;
+  assignedCount24h: number;
+  activeOrders: number;
+  lastAssignedAt?: string;
+  cooldownUntil?: string;
+  totalOrdersCompleted: number;
+  totalVolumeCompleted: number;
+  robuxBalance: number;
+  robuxVerifiedAt?: string;
+  robloxUserId?: number;
+  robloxUsername?: string;
+  lowStockAlertSent: boolean;
+  createdAt: string;
+}
+
+interface UpdateSellerRequest {
+  name?: string;
+  email?: string;
+  phone?: string;
+  cpfCnpj?: string;
+  status?: string;
+  asaasApiKey?: string;
+  asaasSandbox?: boolean;
+  asaasWalletId?: string;
+  asaasAccountId?: string;
+  maxActiveOrders?: number;
+  cooldownSeconds?: number;
+}
+
 export const api = new ApiClient();
-export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon, Delivery, DeliveryStats, AsaasCustomer };
+export type { LoginResponse, Game, Product, BotConfig, AdminUser, Stats, Partner, AsaasSubaccount, CreateSubaccountRequest, AsaasAccountInfo, Coupon, Delivery, DeliveryStats, AsaasCustomer, Seller, UpdateSellerRequest };
