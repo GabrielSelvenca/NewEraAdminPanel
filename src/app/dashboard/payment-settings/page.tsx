@@ -28,8 +28,7 @@ export default function PaymentSettingsPage() {
   
   const [formData, setFormData] = useState({
     cpfCnpj: '',
-    mercadoPagoAccessToken: '',
-    mercadoPagoSandbox: false
+    mercadoPagoAccessToken: ''
   });
 
   useEffect(() => {
@@ -55,8 +54,7 @@ export default function PaymentSettingsPage() {
       
       setFormData({
         cpfCnpj: currentUser.cpfCnpj || '',
-        mercadoPagoAccessToken: '',
-        mercadoPagoSandbox: currentUser.mercadoPagoSandbox || false
+        mercadoPagoAccessToken: ''
       });
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
@@ -80,7 +78,7 @@ export default function PaymentSettingsPage() {
       
       const updateData: Record<string, string | boolean> = {
         cpfCnpj: formData.cpfCnpj.replace(/\D/g, ''),
-        mercadoPagoSandbox: formData.mercadoPagoSandbox
+        mercadoPagoSandbox: false
       };
 
       if (formData.mercadoPagoAccessToken) {
@@ -91,7 +89,7 @@ export default function PaymentSettingsPage() {
       
       toast.success('Configurações salvas com sucesso!');
       await loadCurrentSeller();
-      setFormData({ ...formData, mercadoPagoAccessToken: '' });
+      setFormData({ cpfCnpj: formData.cpfCnpj, mercadoPagoAccessToken: '' });
     } catch (error) {
       toast.error('Erro ao salvar', error instanceof Error ? error.message : undefined);
     } finally {
@@ -193,8 +191,8 @@ export default function PaymentSettingsPage() {
             
             <div className="flex items-center justify-between">
               <Label className="text-sm">Ambiente</Label>
-              <Badge variant={seller.mercadoPagoSandbox ? "outline" : "default"}>
-                {seller.mercadoPagoSandbox ? 'Sandbox (Teste)' : 'Produção'}
+              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                🚀 Produção
               </Badge>
             </div>
 
@@ -266,17 +264,18 @@ export default function PaymentSettingsPage() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="sandbox"
-                checked={formData.mercadoPagoSandbox}
-                onChange={(e) => setFormData({ ...formData, mercadoPagoSandbox: e.target.checked })}
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="sandbox" className="cursor-pointer">
-                Usar ambiente de teste (Sandbox)
-              </Label>
+            <div className="pt-2 pb-1">
+              <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                    Ambiente de Produção Ativo
+                  </p>
+                  <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                    Todas as transações serão reais e processarão dinheiro real.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <Button type="submit" disabled={saving} className="w-full md:w-auto">
@@ -292,10 +291,10 @@ export default function PaymentSettingsPage() {
           <CardTitle className="text-blue-900 dark:text-blue-100">ℹ️ Como funciona</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-          <p>• <strong>CPF/CNPJ:</strong> Usado para identificar você nas cobranças e transferências</p>
-          <p>• <strong>API Key:</strong> Permite que o sistema crie cobranças em sua conta Asaas</p>
-          <p>• <strong>Sandbox:</strong> Use para testes sem movimentar dinheiro real</p>
-          <p>• <strong>Segurança:</strong> Sua API Key é criptografada e nunca é exibida após salvar</p>
+          <p>• <strong>CPF/CNPJ:</strong> Usado para identificar você nas cobranças e transferências do Mercado Pago</p>
+          <p>• <strong>Access Token:</strong> Permite que o sistema crie cobranças em sua conta Mercado Pago</p>
+          <p>• <strong>Produção:</strong> Todas as transações processam dinheiro real</p>
+          <p>• <strong>Segurança:</strong> Seu Access Token é criptografado e nunca é exibido após salvar</p>
         </CardContent>
       </Card>
     </div>
