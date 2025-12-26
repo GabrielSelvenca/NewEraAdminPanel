@@ -191,9 +191,7 @@ export default function PaymentSettingsPage() {
             
             <div className="flex items-center justify-between">
               <Label className="text-sm">Ambiente</Label>
-              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
-                🚀 Produção
-              </Badge>
+              <Badge variant="default">Produção</Badge>
             </div>
 
             {seller.cpfCnpj && (
@@ -264,19 +262,6 @@ export default function PaymentSettingsPage() {
               </div>
             </div>
 
-            <div className="pt-2 pb-1">
-              <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                    Ambiente de Produção Ativo
-                  </p>
-                  <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                    Todas as transações serão reais e processarão dinheiro real.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             <Button type="submit" disabled={saving} className="w-full md:w-auto">
               <Save className="w-4 h-4 mr-2" />
@@ -286,15 +271,76 @@ export default function PaymentSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-blue-900 dark:text-blue-100">ℹ️ Como funciona</CardTitle>
+          <CardTitle>📘 Como Obter seu Access Token do Mercado Pago</CardTitle>
+          <CardDescription>Siga o passo a passo abaixo para configurar sua integração</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-          <p>• <strong>CPF/CNPJ:</strong> Usado para identificar você nas cobranças e transferências do Mercado Pago</p>
-          <p>• <strong>Access Token:</strong> Permite que o sistema crie cobranças em sua conta Mercado Pago</p>
-          <p>• <strong>Produção:</strong> Todas as transações processam dinheiro real</p>
-          <p>• <strong>Segurança:</strong> Seu Access Token é criptografado e nunca é exibido após salvar</p>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                1
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">Acesse o Mercado Pago</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Entre na sua conta em <a href="https://www.mercadopago.com.br" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">mercadopago.com.br</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                2
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">Vá para Credenciais</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Clique no seu perfil (canto superior direito) → <strong>Seu negócio</strong> → <strong>Configurações</strong> → <strong>Credenciais</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                3
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibbold mb-1">Copie o Access Token de Produção</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Na seção &quot;Credenciais de produção&quot;, clique em <strong>&quot;Access Token de produção&quot;</strong> e copie o código que começa com <code className="bg-muted px-1 py-0.5 rounded text-xs">APP_USR-...</code>
+                </p>
+                <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                    ⚠️ <strong>Importante:</strong> Use apenas o Access Token de <strong>PRODUÇÃO</strong>, não o de teste.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                4
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">Cole no Formulário Acima</h4>
+                <p className="text-sm text-muted-foreground">
+                  Cole o Access Token copiado no campo &quot;Access Token do Mercado Pago&quot; acima, preencha seu CPF/CNPJ e clique em <strong>Salvar Configurações</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t space-y-2">
+            <h4 className="font-semibold text-sm">ℹ️ Informações Importantes</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• Seu Access Token permite que o sistema crie cobranças em sua conta</li>
+              <li>• O token é criptografado e armazenado com segurança</li>
+              <li>• Você receberá os pagamentos diretamente na sua conta Mercado Pago</li>
+              <li>• Nunca compartilhe seu Access Token com terceiros</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </div>
