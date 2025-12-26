@@ -11,7 +11,7 @@ import { Gamepad2, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await api.login(email, password);
+      await api.login(username, password);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
@@ -46,13 +46,13 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-300">Email</Label>
+              <Label htmlFor="username" className="text-zinc-300">Usuário</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
                 required
               />

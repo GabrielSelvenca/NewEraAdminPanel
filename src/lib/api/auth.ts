@@ -2,10 +2,10 @@ import { client } from './client';
 import type { LoginResponse } from './types';
 
 export const auth = {
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async login(username: string, password: string): Promise<LoginResponse> {
     return client.request<LoginResponse>('/api/admin/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
   },
 
@@ -15,7 +15,7 @@ export const auth = {
 
   async getCurrentUser(): Promise<{ 
     id: string; 
-    email: string; 
+    username: string; 
     name: string; 
     role: string;
     phone?: string;

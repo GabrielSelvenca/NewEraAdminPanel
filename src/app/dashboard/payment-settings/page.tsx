@@ -13,7 +13,7 @@ import { toast } from '@/lib/error-handling';
 interface SellerPaymentSettings {
   id: number;
   name: string;
-  email: string;
+  username: string;
   phone?: string;
   cpfCnpj?: string;
   hasMercadoPagoAccessToken: boolean;
@@ -45,7 +45,7 @@ export default function PaymentSettingsPage() {
       setSeller({
         id: parseInt(currentUser.id),
         name: currentUser.name,
-        email: currentUser.email,
+        username: currentUser.username,
         phone: currentUser.phone,
         cpfCnpj: currentUser.cpfCnpj,
         hasMercadoPagoAccessToken: currentUser.hasMercadoPagoAccessToken || false,
@@ -156,8 +156,8 @@ export default function PaymentSettingsPage() {
               <p className="font-medium">{seller.name}</p>
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Email</Label>
-              <p className="font-medium">{seller.email}</p>
+              <Label className="text-xs text-muted-foreground">Usuário</Label>
+              <p className="font-medium">{seller.username}</p>
             </div>
             {seller.phone && (
               <div>
