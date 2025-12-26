@@ -91,8 +91,12 @@ export default function GameEditPage() {
     }
   };
 
-  useEffect(() => { if (gameId) loadGame(); }, [gameId]);
-  useEffect(() => { loadSalesStats(); }, [period]);
+  useEffect(() => { if (gameId) loadGame(); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameId]);
+  useEffect(() => { loadSalesStats(); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
 
   const handleSave = async () => {
     setSaving(true);

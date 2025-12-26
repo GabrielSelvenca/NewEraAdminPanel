@@ -27,6 +27,7 @@ export function ApiStatus() {
     checkApiStatus();
     const interval = setInterval(checkApiStatus, 30000); // Verifica a cada 30 segundos
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Intercepta erros de requisição
@@ -41,6 +42,7 @@ export function ApiStatus() {
       window.removeEventListener('api-offline', handleOffline);
       window.removeEventListener('api-online', handleOnline);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isOnline || dismissed) return null;

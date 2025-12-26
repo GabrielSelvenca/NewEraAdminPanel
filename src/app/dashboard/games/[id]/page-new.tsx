@@ -60,6 +60,7 @@ export default function GameEditPage() {
 
   useEffect(() => {
     if (gameId) loadGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId]);
 
   const handleSave = async () => {

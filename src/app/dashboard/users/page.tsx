@@ -77,7 +77,8 @@ export default function UsersPage() {
   useEffect(() => {
     loadUsers();
     loadAllowedRoles();
-  }, [currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
