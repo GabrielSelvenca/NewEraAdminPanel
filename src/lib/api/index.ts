@@ -12,7 +12,7 @@ export { users } from './users';
 export { coupons } from './coupons';
 export { deliveries } from './deliveries';
 export { sellers } from './sellers';
-export { asaas } from './asaas';
+export { mercadopago } from './mercadopago';
 export { roblox } from './roblox';
 export { upload } from './upload';
 
@@ -28,14 +28,11 @@ export type {
   AdminUser,
   Stats,
   Partner,
-  AsaasSubaccount,
-  CreateSubaccountRequest,
   DiscordServerData,
-  AsaasAccountInfo,
   Coupon,
   Delivery,
   DeliveryStats,
-  AsaasCustomer,
+  MercadoPagoPayment,
   Seller,
   UpdateSellerRequest,
 } from './types';
@@ -52,7 +49,7 @@ import { users } from './users';
 import { coupons } from './coupons';
 import { deliveries } from './deliveries';
 import { sellers } from './sellers';
-import { asaas } from './asaas';
+import { mercadopago } from './mercadopago';
 import { roblox } from './roblox';
 import { upload } from './upload';
 
@@ -110,13 +107,10 @@ export const api = {
   updatePartner: partners.update.bind(partners),
   deletePartner: partners.delete.bind(partners),
   
-  // Asaas
-  getAsaasSubaccounts: asaas.getSubaccounts.bind(asaas),
-  createAsaasSubaccount: asaas.createSubaccount.bind(asaas),
-  getAsaasBalance: asaas.getBalance.bind(asaas),
-  getAsaasAccount: asaas.getAccount.bind(asaas),
-  getAsaasCustomers: asaas.getCustomers.bind(asaas),
-  createAsaasCustomer: asaas.createCustomer.bind(asaas),
+  // Mercado Pago
+  createPixPayment: mercadopago.createPixPayment.bind(mercadopago),
+  getMercadoPagoPayment: mercadopago.getPayment.bind(mercadopago),
+  getMercadoPagoPaymentStatus: mercadopago.getPaymentStatus.bind(mercadopago),
   
   // Coupons
   getCoupons: coupons.getAll.bind(coupons),

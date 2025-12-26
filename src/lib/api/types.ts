@@ -65,8 +65,8 @@ export interface BotConfig {
   gamepassEnabled?: boolean;
   robuxEnabled?: boolean;
   discordServerData?: string;
-  asaasApiKey?: string;
-  asaasWalletId?: string;
+  mercadoPagoAccessToken?: string;
+  mercadoPagoPublicKey?: string;
 }
 
 export interface SalesStats {
@@ -121,28 +121,18 @@ export interface Partner {
   percentage: number;
   active: boolean;
   totalReceived: number;
-  asaasWalletId?: string;
   createdAt: string;
 }
 
-export interface AsaasSubaccount {
-  id: string;
-  name: string;
-  email: string;
-  walletId: string;
-  cpfCnpj: string;
-}
-
-export interface CreateSubaccountRequest {
-  name: string;
-  cpfCnpj: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  addressNumber?: string;
-  province?: string;
-  postalCode?: string;
-  birthDate?: string;
+export interface MercadoPagoPayment {
+  paymentId: string;
+  status: string;
+  statusDetail?: string;
+  qrCode: string;
+  qrCodeBase64: string;
+  amount: number;
+  createdAt: string;
+  expiresAt?: string;
 }
 
 export interface DiscordServerData {
@@ -156,16 +146,6 @@ export interface DiscordServerData {
   syncedAt: string;
 }
 
-export interface AsaasAccountInfo {
-  name?: string;
-  tradingName?: string;
-  email?: string;
-  phone?: string;
-  cpfCnpj?: string;
-  personType?: string;
-  city?: string;
-  state?: string;
-}
 
 export interface Coupon {
   id: number;
@@ -219,14 +199,6 @@ export interface DeliveryStats {
   avgDeliveryTimeMinutes: number;
 }
 
-export interface AsaasCustomer {
-  id: string;
-  name: string;
-  cpfCnpj: string;
-  email?: string;
-  dateCreated: string;
-}
-
 export interface Seller {
   id: number;
   name: string;
@@ -234,10 +206,6 @@ export interface Seller {
   phone?: string;
   cpfCnpj?: string;
   status: string;
-  hasAsaasApiKey: boolean;
-  asaasSandbox: boolean;
-  asaasWalletId?: string;
-  asaasAccountId?: string;
   maxActiveOrders: number;
   cooldownSeconds: number;
   assignedVolume24h: number;
@@ -261,10 +229,6 @@ export interface UpdateSellerRequest {
   phone?: string;
   cpfCnpj?: string;
   status?: string;
-  asaasApiKey?: string;
-  asaasSandbox?: boolean;
-  asaasWalletId?: string;
-  asaasAccountId?: string;
   maxActiveOrders?: number;
   cooldownSeconds?: number;
 }
