@@ -1,7 +1,7 @@
 export interface LoginResponse {
   user: {
     id: number;
-    email: string;
+    username: string;
     name: string;
     role: string;
   };
@@ -101,7 +101,7 @@ export interface SalesResponse {
 
 export interface AdminUser {
   id: number;
-  email: string;
+  username: string;
   name: string;
   role: string;
   active: boolean;

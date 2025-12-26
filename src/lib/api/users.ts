@@ -6,7 +6,7 @@ export const users = {
     return client.request<AdminUser[]>('/api/admin/users');
   },
 
-  async create(user: { email: string; name: string; password: string; role: string }): Promise<AdminUser> {
+  async create(user: { username: string; name: string; password: string; role: string }): Promise<AdminUser> {
     return client.request<AdminUser>('/api/admin/register', {
       method: 'POST',
       body: JSON.stringify(user),
@@ -15,7 +15,7 @@ export const users = {
 
   async update(id: number, data: { 
     name?: string; 
-    email?: string; 
+    username?: string; 
     role?: string; 
     active?: boolean;
     phone?: string;

@@ -18,7 +18,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("gerente");
@@ -30,7 +30,7 @@ export default function UsersPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
+  const [editUsername, setEditUsername] = useState("");
   const [editRole, setEditRole] = useState("");
   const [saving, setSaving] = useState(false);
   
@@ -89,8 +89,8 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (id: number, email: string) => {
-    if (!confirm(`Deletar o usuário "${email}"?`)) return;
+  const handleDelete = async (id: number, username: string) => {
+    if (!confirm(`Deletar o usuário "${username}"?`)) return;
     try {
       await api.deleteUser(id);
       toast.success("Usuário deletado com sucesso");
@@ -103,7 +103,7 @@ export default function UsersPage() {
   const openEditDialog = (user: AdminUser) => {
     setEditingUser(user);
     setEditName(user.name);
-    setEditEmail(user.email);
+    setEditUsername(user.username);
     setEditRole(user.role);
     setError("");
     setEditDialogOpen(true);
@@ -116,7 +116,7 @@ export default function UsersPage() {
     try {
       await api.updateUser(editingUser.id, {
         name: editName.trim() || undefined,
-        email: editEmail.trim() || undefined,
+        username: editUsername.trim() || undefined,
         role: currentUser?.role === "superadmin" ? editRole : undefined,
       });
       setEditDialogOpen(false);
@@ -166,13 +166,13 @@ export default function UsersPage() {
   };
 
   const handleCreate = async () => {
-    if (!email.trim() || !name.trim() || !password.trim()) return;
+    if (!username.trim() || !name.trim() || !password.trim()) return;
     setCreating(true);
     setError("");
     try {
-      await api.createUser({ email: email.trim(), name: name.trim(), password, role });
+      await api.createUser({ username: username.trim(), name: name.trim(), password, role });
       setDialogOpen(false);
-      setEmail("");
+      setUsername("");
       setName("");
       setPassword("");
       setRole("admin");
@@ -187,7 +187,7 @@ export default function UsersPage() {
   // Filtered users
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
+                          user.username.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
@@ -213,12 +213,12 @@ export default function UsersPage() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-zinc-300">Email</Label>
+                  <Label className="text-zinc-300">Usuário</Label>
                   <Input
-                    type="email"
-                    placeholder="email@exemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="nome.usuario"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="bg-zinc-800 border-zinc-700 text-zinc-100"
                   />
                 </div>
@@ -262,7 +262,7 @@ export default function UsersPage() {
                 {error && <p className="text-red-400 text-sm">{error}</p>}
                 <Button 
                   onClick={handleCreate} 
-                  disabled={creating || !email.trim() || !name.trim() || !password.trim()}
+                  disabled={creating || !username.trim() || !name.trim() || !password.trim()}
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                 >
                   {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
@@ -282,7 +282,7 @@ export default function UsersPage() {
       <div className="flex gap-4 items-center">
         <div className="flex-1">
           <Input
-            placeholder="Buscar por nome ou email..."
+            placeholder="Buscar por nome ou usuário..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-zinc-800 border-zinc-700 text-zinc-100"
@@ -319,7 +319,7 @@ export default function UsersPage() {
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
                   <TableHead className="text-zinc-400">ID</TableHead>
-                  <TableHead className="text-zinc-400">Email</TableHead>
+                  <TableHead className="text-zinc-400">Usuário</TableHead>
                   <TableHead className="text-zinc-400">Nome</TableHead>
                   <TableHead className="text-zinc-400">Cargo</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
@@ -330,7 +330,7 @@ export default function UsersPage() {
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id} className="border-zinc-800 hover:bg-zinc-800/50">
                     <TableCell className="text-zinc-300">{user.id}</TableCell>
-                    <TableCell className="text-zinc-100">{user.email}</TableCell>
+                    <TableCell className="text-zinc-100">{user.username}</TableCell>
                     <TableCell className="text-zinc-300">{user.name}</TableCell>
                     <TableCell>
                       <Badge className={getRoleBadgeClass(user.role)}>
@@ -375,7 +375,7 @@ export default function UsersPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(user.id, user.email)}
+                            onClick={() => handleDelete(user.id, user.username)}
                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             title="Deletar usuário"
                           >
@@ -412,12 +412,12 @@ export default function UsersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Email</Label>
+              <Label className="text-zinc-300">Usuário</Label>
               <Input
-                type="email"
-                placeholder="email@exemplo.com"
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
+                type="text"
+                placeholder="nome.usuario"
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100"
               />
             </div>

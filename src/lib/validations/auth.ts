@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, 'Email é obrigatório')
-    .email('Email inválido')
-    .toLowerCase()
+    .min(1, 'Usuário é obrigatório')
     .trim(),
   password: z
     .string()
@@ -19,11 +17,10 @@ export const registerSchema = z.object({
     .min(2, 'Nome deve ter no mínimo 2 caracteres')
     .max(100, 'Nome muito longo')
     .trim(),
-  email: z
+  username: z
     .string()
-    .min(1, 'Email é obrigatório')
-    .email('Email inválido')
-    .toLowerCase()
+    .min(1, 'Usuário é obrigatório')
+    .max(100, 'Usuário muito longo')
     .trim(),
   password: z
     .string()
