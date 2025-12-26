@@ -309,8 +309,17 @@ export default function PaymentSettingsPage() {
               <div className="flex-1">
                 <h4 className="font-semibold mb-1">Ative suas Credenciais de Produção</h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Na seção &quot;Credenciais de produção&quot;, clique no botão <strong>&quot;Ativar credenciais&quot;</strong> para habilitar o Access Token de produção.
+                  Na seção &quot;Credenciais de produção&quot;, clique em <strong>&quot;Ativar credenciais&quot;</strong>. Será solicitado:
                 </p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-4 mb-2">
+                  <li>• <strong>Setor:</strong> Escolha a categoria que melhor descreve seu negócio</li>
+                  <li>• <strong>Site:</strong> Insira a URL do seu site ou aplicação (ex: seu domínio, Discord, etc)</li>
+                </ul>
+                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                    💡 <strong>Dica:</strong> Você pode usar a URL do seu servidor Discord, site da comunidade, ou qualquer endereço web relacionado ao seu negócio.
+                  </p>
+                </div>
               </div>
             </div>
 
