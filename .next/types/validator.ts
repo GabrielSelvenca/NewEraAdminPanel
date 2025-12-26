@@ -126,10 +126,28 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../src/app/dashboard/transactions/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/dashboard/transactions">> = Specific
+  const handler = {} as typeof import("../../src/app/dashboard/transactions/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/dashboard/users/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/dashboard/users">> = Specific
   const handler = {} as typeof import("../../src/app/dashboard/users/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/dashboard/webhooks/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/dashboard/webhooks">> = Specific
+  const handler = {} as typeof import("../../src/app/dashboard/webhooks/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

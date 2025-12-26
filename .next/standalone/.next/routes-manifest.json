@@ -96,10 +96,22 @@
       "namedRegex": "^/dashboard/payment\\-settings(?:/)?$"
     },
     {
+      "page": "/dashboard/transactions",
+      "regex": "^/dashboard/transactions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/transactions(?:/)?$"
+    },
+    {
       "page": "/dashboard/users",
       "regex": "^/dashboard/users(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard/users(?:/)?$"
+    },
+    {
+      "page": "/dashboard/webhooks",
+      "regex": "^/dashboard/webhooks(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/webhooks(?:/)?$"
     },
     {
       "page": "/favicon.ico",
