@@ -21,7 +21,7 @@ export default function UsersPage() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("gerente");
+  const [role, setRole] = useState("auxiliar");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const [allowedRoles, setAllowedRoles] = useState<string[]>([]);
@@ -67,9 +67,9 @@ export default function UsersPage() {
     } catch (err) {
       console.error(err);
       // Fallback: usa role do contexto se API falhar
-      if (currentUser?.role === "superadmin" || currentUser?.role === "admin") {
-        setAllowedRoles(["admin", "gerente"]);
-        setRole("admin");
+      if (currentUser?.role === "admin") {
+        setAllowedRoles(["gerente", "auxiliar"]);
+        setRole("gerente");
       }
     }
   };
@@ -82,10 +82,19 @@ export default function UsersPage() {
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
-      case "superadmin": return "bg-red-500/20 text-red-400";
-      case "admin": return "bg-purple-500/20 text-purple-400";
-      case "gerente": return "bg-blue-500/20 text-blue-400";
+      case "admin": return "bg-red-500/20 text-red-400";
+      case "gerente": return "bg-purple-500/20 text-purple-400";
+      case "auxiliar": return "bg-blue-500/20 text-blue-400";
       default: return "bg-zinc-700 text-zinc-400";
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case "admin": return "Admin";
+      case "gerente": return "Gerente";
+      case "auxiliar": return "Auxiliar";
+      default: return role;
     }
   };
 
@@ -117,7 +126,7 @@ export default function UsersPage() {
       await api.updateUser(editingUser.id, {
         name: editName.trim() || undefined,
         username: editUsername.trim() || undefined,
-        role: currentUser?.role === "superadmin" ? editRole : undefined,
+        role: currentUser?.role === "admin" ? editRole : undefined,
       });
       setEditDialogOpen(false);
       await loadUsers();
@@ -294,9 +303,9 @@ export default function UsersPage() {
           className="h-10 px-4 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-100"
         >
           <option value="all">Todos os cargos</option>
-          <option value="superadmin">Superadmin</option>
           <option value="admin">Admin</option>
           <option value="gerente">Gerente</option>
+          <option value="auxiliar">Auxiliar</option>
         </select>
         <div className="text-zinc-500 text-sm">
           {filteredUsers.length} de {users.length} usuários
@@ -334,7 +343,7 @@ export default function UsersPage() {
                     <TableCell className="text-zinc-300">{user.name}</TableCell>
                     <TableCell>
                       <Badge className={getRoleBadgeClass(user.role)}>
-                        {user.role}
+                        {getRoleDisplayName(user.role)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -346,8 +355,8 @@ export default function UsersPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        {/* Editar - próprio perfil ou superadmin */}
-                        {(user.id === Number(currentUser?.id) || currentUser?.role === "superadmin") && (
+                        {/* Editar - próprio perfil ou admin */}
+                        {(user.id === Number(currentUser?.id) || currentUser?.role === "admin") && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -358,8 +367,8 @@ export default function UsersPage() {
                             <Pencil className="w-4 h-4" />
                           </Button>
                         )}
-                        {/* Alterar senha - próprio ou superadmin */}
-                        {(user.id === Number(currentUser?.id) || currentUser?.role === "superadmin") && (
+                        {/* Alterar senha - próprio ou admin */}
+                        {(user.id === Number(currentUser?.id) || currentUser?.role === "admin") && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -370,8 +379,8 @@ export default function UsersPage() {
                             <Key className="w-4 h-4" />
                           </Button>
                         )}
-                        {/* Deletar - só superadmin e não pode deletar superadmin */}
-                        {currentUser?.role === "superadmin" && user.role !== "superadmin" && (
+                        {/* Deletar - só admin e não pode deletar admin */}
+                        {currentUser?.role === "admin" && user.role !== "admin" && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -421,7 +430,7 @@ export default function UsersPage() {
                 className="bg-zinc-800 border-zinc-700 text-zinc-100"
               />
             </div>
-            {currentUser?.role === "superadmin" && editingUser?.role !== "superadmin" && (
+            {currentUser?.role === "admin" && editingUser?.role !== "admin" && (
               <div className="space-y-2">
                 <Label className="text-zinc-300">Cargo</Label>
                 <select
@@ -429,8 +438,8 @@ export default function UsersPage() {
                   onChange={(e) => setEditRole(e.target.value)}
                   className="w-full h-10 px-3 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-100"
                 >
-                  <option value="admin">Admin</option>
                   <option value="gerente">Gerente</option>
+                  <option value="auxiliar">Auxiliar</option>
                 </select>
               </div>
             )}

@@ -38,7 +38,7 @@ export default function PaymentSettingsPage() {
   const loadCurrentSeller = async () => {
     try {
       setLoading(true);
-      // Pega o usuário atual (que já é seller se for admin/superadmin)
+      // Pega o usuário atual (que já é seller se for admin/gerente)
       const currentUser = await api.getCurrentUser();
       
       // Usa os dados do próprio usuário

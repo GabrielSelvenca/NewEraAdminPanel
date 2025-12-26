@@ -3,31 +3,36 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, CreditCard, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, CreditCard, ChevronDown, UserCog } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { UserContext } from "@/lib/user-context";
 
+// Roles: admin (full access), gerente (no users page), auxiliar (dashboard only)
 const menuItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null },
-  { href: "/dashboard/games", label: "Jogos", icon: Gamepad2, requireFeature: 'gamesEnabled' as const },
-  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet, requireFeature: 'gamesEnabled' as const },
-  { href: "/dashboard/sellers", label: "Vendedores", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
-  { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const },
-  { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, requireFeature: null },
-  { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
+  { href: "/dashboard/games", label: "Jogos", icon: Gamepad2, requireFeature: 'gamesEnabled' as const, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet, requireFeature: 'gamesEnabled' as const, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/sellers", label: "Vendedores", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null, allowedRoles: ['admin'] },
+  { href: "/dashboard/settings", label: "Minha Conta", icon: UserCog, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
 ];
 
 const configSubItems = [
-  { href: "/dashboard/config", label: "Robux", icon: DollarSign, requireFeature: null },
-  { href: "/dashboard/config/games", label: "Jogos", icon: Gamepad2, requireFeature: null },
-  { href: "/dashboard/payment-settings", label: "Pagamento", icon: CreditCard, requireFeature: null },
+  { href: "/dashboard/config", label: "Robux", icon: DollarSign, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/config/games", label: "Jogos", icon: Gamepad2, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
+  { href: "/dashboard/payment-settings", label: "Pagamento", icon: CreditCard, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [configOpen, setConfigOpen] = useState(true);
+  const user = useContext(UserContext);
+  const userRole = user?.role || 'auxiliar';
 
   const handleLogout = async () => {
     try {
@@ -51,7 +56,7 @@ export function Sidebar() {
 
       <nav className="flex-1 p-4 space-y-1">
         {menuItems
-          .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
+          .filter((item) => (!item.requireFeature || FeatureFlags[item.requireFeature]) && item.allowedRoles.includes(userRole))
           .map((item) => {
             const isActive = pathname === item.href || 
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -97,7 +102,7 @@ export function Sidebar() {
             )}
           >
             {configSubItems
-              .filter((item) => !item.requireFeature || FeatureFlags[item.requireFeature])
+              .filter((item) => (!item.requireFeature || FeatureFlags[item.requireFeature]) && item.allowedRoles.includes(userRole))
               .map((item) => {
                 const isActive = pathname === item.href;
                 return (

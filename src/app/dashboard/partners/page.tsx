@@ -21,7 +21,7 @@ import { UserContext } from "@/lib/user-context";
 
 export default function PartnersPage() {
   const user = useContext(UserContext);
-  const isSuperAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin";
   
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +156,7 @@ export default function PartnersPage() {
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    {isSuperAdmin && (
+                    {isAdmin && (
                       <Button
                         size="sm"
                         variant="ghost"
