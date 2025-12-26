@@ -312,13 +312,22 @@ export default function PaymentSettingsPage() {
                   Na seção &quot;Credenciais de produção&quot;, clique em <strong>&quot;Ativar credenciais&quot;</strong>. Será solicitado:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 ml-4 mb-2">
-                  <li>• <strong>Setor:</strong> Escolha a categoria que melhor descreve seu negócio</li>
-                  <li>• <strong>Site:</strong> Insira a URL do seu site ou aplicação (ex: seu domínio, Discord, etc)</li>
+                  <li>• <strong>Setor:</strong> Escolha qualquer categoria (ex: Serviços de TI)</li>
+                  <li>• <strong>Site:</strong> Insira qualquer URL válida - <strong>NÃO precisa ser seu</strong></li>
                 </ul>
-                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-xs text-blue-800 dark:text-blue-200">
-                    💡 <strong>Dica:</strong> Você pode usar a URL do seu servidor Discord, site da comunidade, ou qualquer endereço web relacionado ao seu negócio.
+                <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <p className="text-xs text-green-800 dark:text-green-200 font-semibold mb-2">
+                    ✅ NÃO PRECISA TER UM SITE PRÓPRIO!
                   </p>
+                  <p className="text-xs text-green-800 dark:text-green-200">
+                    Você pode usar qualquer URL válida. Exemplos:
+                  </p>
+                  <ul className="text-xs text-green-800 dark:text-green-200 mt-1 ml-4 space-y-0.5">
+                    <li>• Link do servidor Discord</li>
+                    <li>• Sua página no Twitter/X</li>
+                    <li>• Seu perfil no Instagram</li>
+                    <li>• Qualquer site relacionado ao seu negócio</li>
+                  </ul>
                 </div>
               </div>
             </div>
