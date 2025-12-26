@@ -96,12 +96,6 @@
       "namedRegex": "^/dashboard/payment\\-settings(?:/)?$"
     },
     {
-      "page": "/dashboard/sellers",
-      "regex": "^/dashboard/sellers(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/dashboard/sellers(?:/)?$"
-    },
-    {
       "page": "/dashboard/users",
       "regex": "^/dashboard/users(?:/)?$",
       "routeKeys": {},
