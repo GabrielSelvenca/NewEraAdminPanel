@@ -320,13 +320,11 @@ export default function PaymentSettingsPage() {
                     ✅ NÃO PRECISA TER UM SITE PRÓPRIO!
                   </p>
                   <p className="text-xs text-green-800 dark:text-green-200">
-                    Você pode usar qualquer URL válida. Exemplos:
+                    Você pode usar qualquer URL válida. Recomendo usar:
                   </p>
                   <ul className="text-xs text-green-800 dark:text-green-200 mt-1 ml-4 space-y-0.5">
-                    <li>• Link do servidor Discord</li>
+                    <li>• Link do servidor do Discord</li>
                     <li>• Sua página no Twitter/X</li>
-                    <li>• Seu perfil no Instagram</li>
-                    <li>• Qualquer site relacionado ao seu negócio</li>
                   </ul>
                 </div>
               </div>
