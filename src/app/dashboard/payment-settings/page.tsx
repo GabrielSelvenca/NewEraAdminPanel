@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Save, CheckCircle, XCircle, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { toast } from '@/lib/error-handling';
 
 interface SellerPaymentSettings {
   id: number;
@@ -70,7 +71,7 @@ export default function PaymentSettingsPage() {
     if (!seller) return;
 
     if (!formData.cpfCnpj) {
-      alert('CPF/CNPJ é obrigatório');
+      toast.error('Validação', 'CPF/CNPJ é obrigatório');
       return;
     }
 
@@ -88,12 +89,11 @@ export default function PaymentSettingsPage() {
 
       await api.updateUser(seller.id, updateData);
       
-      alert('Configurações salvas com sucesso!');
+      toast.success('Configurações salvas com sucesso!');
       await loadCurrentSeller();
       setFormData({ ...formData, mercadoPagoAccessToken: '' });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar configurações';
-      alert(errorMessage);
+      toast.error('Erro ao salvar', error instanceof Error ? error.message : undefined);
     } finally {
       setSaving(false);
     }

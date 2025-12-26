@@ -1,40 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, Delivery } from "@/lib/api";
+import { toast } from "@/lib/error-handling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Loader2, CheckCircle, Clock, XCircle, TrendingUp, Upload } from "lucide-react";
+import { Package, Loader2, CheckCircle, Clock, XCircle, TrendingUp } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-
-interface Delivery {
-  id: number;
-  saleId: number;
-  userId: string;
-  robloxUsername: string;
-  robloxUserId?: number;
-  type: string;
-  robuxAmount?: number;
-  gamepassIds?: string;
-  value: number;
-  status: string;
-  proofUrl?: string;
-  deliveryMethod?: string;
-  deliveredBy?: number;
-  deliveredAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  notes?: string;
-  sale?: {
-    id: number;
-    amount: number;
-    status: string;
-    paymentId?: string;
-  };
-}
 
 interface Stats {
   total: number;
@@ -92,7 +67,7 @@ export default function DeliveriesPage() {
       await loadData();
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : "Erro ao atualizar status");
+      toast.error("Erro ao atualizar status", err instanceof Error ? err.message : undefined);
     } finally {
       setUpdating(false);
     }

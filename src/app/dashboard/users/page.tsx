@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, RefreshCw, Users, Loader2, Trash2, Pencil, Key, UserCog } from "lucide-react";
+import { toast } from "@/lib/error-handling";
 
 export default function UsersPage() {
   const currentUser = useUser();
@@ -91,9 +92,10 @@ export default function UsersPage() {
     if (!confirm(`Deletar o usuário "${email}"?`)) return;
     try {
       await api.deleteUser(id);
+      toast.success("Usuário deletado com sucesso");
       await loadUsers();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao deletar");
+      toast.error("Erro ao deletar usuário", err instanceof Error ? err.message : undefined);
     }
   };
 
@@ -154,7 +156,7 @@ export default function UsersPage() {
         newPassword,
       });
       setPasswordDialogOpen(false);
-      alert("Senha alterada com sucesso!");
+      toast.success("Senha alterada com sucesso!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao alterar senha");
     } finally {

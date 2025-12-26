@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Loader2, Ticket, Calendar, Hash, Percent, DollarSign } from "lucide-react";
+import { LoadingState } from "@/components/shared";
+import { toast } from "@/lib/error-handling";
+import { couponSchema } from "@/lib/validations";
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -40,21 +43,29 @@ export default function CouponsPage() {
   };
 
   const handleCreate = async () => {
-    if (!formData.code || formData.discountValue <= 0) {
-      alert("Preencha todos os campos obrigatórios");
+    const data = {
+      code: formData.code,
+      discountType: formData.discountType as "percentage" | "fixed",
+      discountValue: formData.discountValue,
+      expiresAt: formData.expiresAt || "",
+      maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
+      active: true,
+    };
+
+    const validated = couponSchema.safeParse(data);
+    if (!validated.success) {
+      toast.error("Validação", validated.error.issues[0]?.message || "Dados inválidos");
       return;
     }
 
     try {
       setCreating(true);
       await api.createCoupon({
-        code: formData.code.toUpperCase(),
-        discountType: formData.discountType,
-        discountValue: formData.discountValue,
-        expiresAt: formData.expiresAt || null,
-        maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
+        ...validated.data,
+        expiresAt: validated.data.expiresAt || null,
       });
 
+      toast.success("Cupom criado com sucesso");
       setFormData({
         code: "",
         discountType: "percentage",
@@ -65,7 +76,7 @@ export default function CouponsPage() {
       setShowForm(false);
       await loadCoupons();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao criar cupom");
+      toast.error("Erro ao criar cupom", err instanceof Error ? err.message : undefined);
     } finally {
       setCreating(false);
     }
@@ -76,27 +87,25 @@ export default function CouponsPage() {
 
     try {
       await api.deleteCoupon(id);
+      toast.success("Cupom deletado com sucesso");
       await loadCoupons();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao deletar cupom");
+      toast.error("Erro ao deletar cupom", err instanceof Error ? err.message : undefined);
     }
   };
 
   const toggleActive = async (id: number, active: boolean) => {
     try {
       await api.updateCoupon(id, { active: !active });
+      toast.success(`Cupom ${!active ? 'ativado' : 'desativado'} com sucesso`);
       await loadCoupons();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao atualizar cupom");
+      toast.error("Erro ao atualizar cupom", err instanceof Error ? err.message : undefined);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-      </div>
-    );
+    return <LoadingState message="Carregando cupons..." />;
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { toast } from "@/lib/error-handling";
 import { api, Game, Product } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,9 +98,10 @@ export default function GameEditPage() {
     setSaving(true);
     try {
       await api.updateGame(gameId, { name, active, imageUrl: imageUrl || undefined });
+      toast.success("Jogo atualizado com sucesso");
       await loadGame();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao salvar");
+      toast.error("Erro ao salvar", err instanceof Error ? err.message : undefined);
     } finally {
       setSaving(false);
     }
@@ -110,9 +112,10 @@ export default function GameEditPage() {
     setDeleting(true);
     try {
       await api.deleteGame(gameId);
+      toast.success("Jogo deletado com sucesso");
       router.push("/dashboard/games");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao deletar");
+      toast.error("Erro ao deletar", err instanceof Error ? err.message : undefined);
       setDeleting(false);
     }
   };
@@ -188,14 +191,22 @@ export default function GameEditPage() {
 
   const handleDeleteProduct = async (productId: number, pName: string) => {
     if (!confirm(`Deletar "${pName}"?`)) return;
-    try { await api.deleteProduct(productId); await loadGame(); }
-    catch (err) { alert(err instanceof Error ? err.message : "Erro"); }
+    try { 
+      await api.deleteProduct(productId); 
+      toast.success("Produto deletado com sucesso");
+      await loadGame(); 
+    }
+    catch (err) { toast.error("Erro ao deletar", err instanceof Error ? err.message : undefined); }
   };
 
   const handleRefreshImage = async (productId: number) => {
     setRefreshingImage(productId);
-    try { await api.refreshProductImage(productId); await loadGame(); }
-    catch (err) { alert(err instanceof Error ? err.message : "Erro"); }
+    try { 
+      await api.refreshProductImage(productId); 
+      toast.success("Imagem atualizada com sucesso");
+      await loadGame(); 
+    }
+    catch (err) { toast.error("Erro ao atualizar imagem", err instanceof Error ? err.message : undefined); }
     finally { setRefreshingImage(null); }
   };
 
