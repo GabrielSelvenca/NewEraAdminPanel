@@ -307,9 +307,21 @@ export default function PaymentSettingsPage() {
                 3
               </div>
               <div className="flex-1">
-                <h4 className="font-semibbold mb-1">Copie o Access Token de Produção</h4>
+                <h4 className="font-semibold mb-1">Ative suas Credenciais de Produção</h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Na seção &quot;Credenciais de produção&quot;, clique em <strong>&quot;Access Token de produção&quot;</strong> e copie o código que começa com <code className="bg-muted px-1 py-0.5 rounded text-xs">APP_USR-...</code>
+                  Na seção &quot;Credenciais de produção&quot;, clique no botão <strong>&quot;Ativar credenciais&quot;</strong> para habilitar o Access Token de produção.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                4
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">Copie o Access Token de Produção</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Após ativar, copie o <strong>Access Token de produção</strong> que começa com <code className="bg-muted px-1 py-0.5 rounded text-xs">APP_USR-...</code>
                 </p>
                 <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                   <p className="text-xs text-yellow-800 dark:text-yellow-200">
@@ -321,7 +333,7 @@ export default function PaymentSettingsPage() {
 
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                4
+                5
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold mb-1">Cole no Formulário Acima</h4>
