@@ -31,7 +31,7 @@ export default function ConfigPage() {
   const [uploading, setUploading] = useState(false);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string>("");
-  const [cropField, setCropField] = useState<"bannerRobux" | "bannerGamepass">("bannerRobux");
+  const [cropField, setCropField] = useState<"bannerRobux" | "bannerGamepass" | "purchaseApprovedBanner" | "purchaseLogBanner">("bannerRobux");
 
   useEffect(() => {
     loadData();
@@ -102,7 +102,7 @@ export default function ConfigPage() {
       .replace(/\{max_order\}/g, String(config.maxOrderAmount || 100000));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: "bannerRobux" | "bannerGamepass") => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: "bannerRobux" | "bannerGamepass" | "purchaseApprovedBanner" | "purchaseLogBanner") => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -548,12 +548,35 @@ export default function ConfigPage() {
                     <ImageIcon className="w-4 h-4" />
                     Banner (URL de imagem 16:9)
                   </Label>
-                  <Input
-                    value={config.purchaseApprovedBanner || ""}
-                    onChange={(e) => updateField("purchaseApprovedBanner", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700"
-                    placeholder="https://exemplo.com/banner.png"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={config.purchaseApprovedBanner || ""}
+                      onChange={(e) => updateField("purchaseApprovedBanner", e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 flex-1"
+                      placeholder="https://exemplo.com/banner.png"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('banner-approved-upload')?.click()}
+                      className="border-zinc-700"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <input
+                      id="banner-approved-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "purchaseApprovedBanner")}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -576,12 +599,35 @@ export default function ConfigPage() {
                     <ImageIcon className="w-4 h-4" />
                     Banner (URL de imagem 16:9)
                   </Label>
-                  <Input
-                    value={config.purchaseLogBanner || ""}
-                    onChange={(e) => updateField("purchaseLogBanner", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700"
-                    placeholder="https://exemplo.com/banner-log.png"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={config.purchaseLogBanner || ""}
+                      onChange={(e) => updateField("purchaseLogBanner", e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 flex-1"
+                      placeholder="https://exemplo.com/banner-log.png"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('banner-log-upload')?.click()}
+                      className="border-zinc-700"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <input
+                      id="banner-log-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "purchaseLogBanner")}
+                    />
+                  </div>
                 </div>
               </div>
 
