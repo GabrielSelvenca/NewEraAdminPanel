@@ -135,26 +135,47 @@ export default function ConfigPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-zinc-100">Configurações - Robux</h1>
-          <p className="text-zinc-400 mt-1">Configure o sistema de vendas de Robux</p>
+      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 border border-zinc-700 rounded-xl p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-zinc-100">Configurações - Robux</h1>
+            <p className="text-zinc-400 mt-1">Configure o sistema de vendas de Robux</p>
+          </div>
+          <div className="flex gap-3">
+            {!serverData && (
+              <Button 
+                onClick={handleSync} 
+                disabled={saving} 
+                variant="outline" 
+                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500"
+              >
+                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                Sincronizar Discord
+              </Button>
+            )}
+            <Button 
+              onClick={handleSave} 
+              disabled={saving} 
+              className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              {saving ? "Salvando..." : "Salvar Configurações"}
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleSync} disabled={saving} variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-600/10">
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-            Sincronizar Bot
-          </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            {saving ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
+        {!serverData && (
+          <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <p className="text-sm text-blue-400">
+              <span className="font-semibold">💡 Dica:</span> Clique em &quot;Sincronizar Discord&quot; para que o bot envie as categorias e canais do servidor, permitindo seleção via dropdown.
+            </p>
+          </div>
+        )}
       </div>
 
       {message && (
-        <div className={`p-4 rounded-lg ${message.includes("✅") ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
-          {message}
+        <div className={`p-4 rounded-lg flex items-start gap-3 ${message.includes("✅") ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
+          <span className="text-xl">{message.includes("✅") ? "✅" : "❌"}</span>
+          <span className="flex-1">{message.replace(/[✅❌]/g, '').trim()}</span>
         </div>
       )}
 
