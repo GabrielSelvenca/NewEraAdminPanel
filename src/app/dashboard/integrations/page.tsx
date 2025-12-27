@@ -258,7 +258,13 @@ export default function IntegrationsPage() {
                       <code className="text-2xl font-mono font-bold text-emerald-400 flex-1 text-center tracking-widest">
                         {discordCode}
                       </code>
-                      <Button variant="ghost" size="icon" onClick={copyCode}>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={copyCode}
+                        className="border-zinc-600 hover:bg-emerald-500/20 hover:border-emerald-500 hover:text-emerald-400 transition-all cursor-pointer"
+                        title="Copiar código"
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
