@@ -502,17 +502,15 @@ export default function ConfigPage() {
                 />
               </div>
 
-              {config.embedRobuxMessage && (
-                <div className="pt-4 border-t border-zinc-800">
-                  <Label className="mb-3 block">Preview do Embed</Label>
-                  <DiscordEmbedPreview
-                    title={config.storeName || "Nova Era Store"}
-                    description={config.embedRobuxMessage}
-                    color={config.storeColor || "#257e24"}
-                    imageUrl={config.bannerRobux}
-                  />
-                </div>
-              )}
+              <div className="pt-4 border-t border-zinc-800">
+                <Label className="mb-3 block">Preview do Embed</Label>
+                <DiscordEmbedPreview
+                  title={`💎 ${config.storeName || "Nova Era Store"}`}
+                  description={config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **R$ ${(config.pricePerK || 27.99).toFixed(2)}** por 1000 Robux\n\nClique no botão abaixo para iniciar sua compra.`}
+                  color={config.storeColor || "#257e24"}
+                  imageUrl={config.bannerRobux}
+                />
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>
