@@ -93,6 +93,15 @@ export default function ConfigPage() {
     setConfig({ ...config, [field]: value });
   };
 
+  const processPlaceholders = (text: string): string => {
+    if (!config) return text;
+    return text
+      .replace(/\{store_name\}/g, config.storeName || "Nova Era Store")
+      .replace(/\{price_per_k\}/g, `R$ ${(config.pricePerK || 27.99).toFixed(2)}`)
+      .replace(/\{min_order\}/g, String(config.minOrderAmount || 1000))
+      .replace(/\{max_order\}/g, String(config.maxOrderAmount || 100000));
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: "bannerRobux" | "bannerGamepass") => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -502,8 +511,10 @@ export default function ConfigPage() {
                 />
                 <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg p-3 space-y-1">
                   <p className="font-semibold text-zinc-400 mb-2">Placeholders disponíveis:</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{store_name}"}</code> → Nome da loja (ex: NewEra Store)</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{price_per_k}"}</code> → Preço por 1000 Robux (ex: 41.50)</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{store_name}"}</code> → Nome da loja (ex: {config.storeName || "Nova Era Store"})</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{price_per_k}"}</code> → Preço por 1000 Robux (ex: R$ {(config.pricePerK || 27.99).toFixed(2)})</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{min_order}"}</code> → Pedido mínimo em Robux (ex: {config.minOrderAmount || 1000})</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{max_order}"}</code> → Pedido máximo em Robux (ex: {config.maxOrderAmount || 100000})</p>
                   <p className="text-zinc-600 mt-2">Use **texto** para negrito no Discord</p>
                 </div>
               </div>
@@ -512,7 +523,7 @@ export default function ConfigPage() {
                 <Label className="mb-3 block">Preview do Embed</Label>
                 <DiscordEmbedPreview
                   title={`💎 ${config.storeName || "Nova Era Store"}`}
-                  description={config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **R$ ${(config.pricePerK || 27.99).toFixed(2)}** por 1000 Robux\n\nClique no botão abaixo para iniciar sua compra.`}
+                  description={processPlaceholders(config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **{price_per_k}** por 1000 Robux\n\nClique no botão abaixo para iniciar sua compra.`)}
                   color={config.storeColor || "#257e24"}
                   imageUrl={config.bannerRobux}
                 />
