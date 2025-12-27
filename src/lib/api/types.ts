@@ -41,16 +41,20 @@ export interface Product {
 export interface BotConfig {
   id: number;
   guildId?: string;
-  categoryCartsGamepass?: string;
-  categoryCartsRobux?: string;
+  categoryCarts?: string;
   categoryApproved?: string;
-  channelPurchasesLog?: string;
-  channelDeliveriesLog?: string;
+  categoryTickets?: string;
+  channelLogsPurchases?: string;
+  channelLogsDeliveries?: string;
   channelSetupGamepass?: string;
   channelSetupRobux?: string;
+  roleClient?: string;
+  roleAdmin?: string;
   storeName?: string;
   storeColor?: string;
   pricePerK: number;
+  minOrderAmount?: number;
+  maxOrderAmount?: number;
   paymentTimeoutMinutes: number;
   cartInactivityMinutes: number;
   robloxApiKey?: string;
@@ -59,14 +63,8 @@ export interface BotConfig {
   embedRobuxMessage?: string;
   bannerGamepass?: string;
   bannerRobux?: string;
-  setupGamepassMessageId?: string;
-  setupRobuxMessageId?: string;
-  tierRoles?: string;
-  gamepassEnabled?: boolean;
-  robuxEnabled?: boolean;
-  discordServerData?: string;
-  mercadoPagoAccessToken?: string;
-  mercadoPagoPublicKey?: string;
+  refreshRequested?: boolean;
+  updatedAt?: string;
 }
 
 export interface SalesStats {

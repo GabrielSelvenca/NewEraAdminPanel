@@ -237,8 +237,8 @@ export default function ConfigPage() {
                     <Label>Carrinhos Robux</Label>
                     {serverData ? (
                       <Select
-                        value={config.categoryCartsRobux || ""}
-                        onValueChange={(value) => updateField("categoryCartsRobux", value)}
+                        value={config.categoryCarts || ""}
+                        onValueChange={(value) => updateField("categoryCarts", value)}
                       >
                         <SelectTrigger className="bg-zinc-800 border-zinc-700">
                           <SelectValue placeholder="Selecione categoria" />
@@ -253,8 +253,8 @@ export default function ConfigPage() {
                       </Select>
                     ) : (
                       <Input
-                        value={config.categoryCartsRobux || ""}
-                        onChange={(e) => updateField("categoryCartsRobux", e.target.value)}
+                        value={config.categoryCarts || ""}
+                        onChange={(e) => updateField("categoryCarts", e.target.value)}
                         className="bg-zinc-800 border-zinc-700"
                         placeholder="ID da categoria"
                       />
@@ -301,8 +301,8 @@ export default function ConfigPage() {
                     <Label>Compras Concluídas (Log)</Label>
                     {serverData ? (
                       <Select
-                        value={config.channelPurchasesLog || ""}
-                        onValueChange={(value) => updateField("channelPurchasesLog", value)}
+                        value={config.channelLogsPurchases || ""}
+                        onValueChange={(value) => updateField("channelLogsPurchases", value)}
                       >
                         <SelectTrigger className="bg-zinc-800 border-zinc-700">
                           <SelectValue placeholder="Selecione canal" />
@@ -317,8 +317,8 @@ export default function ConfigPage() {
                       </Select>
                     ) : (
                       <Input
-                        value={config.channelPurchasesLog || ""}
-                        onChange={(e) => updateField("channelPurchasesLog", e.target.value)}
+                        value={config.channelLogsPurchases || ""}
+                        onChange={(e) => updateField("channelLogsPurchases", e.target.value)}
                         className="bg-zinc-800 border-zinc-700"
                         placeholder="ID do canal"
                       />
@@ -328,8 +328,8 @@ export default function ConfigPage() {
                     <Label>Entregas Concluídas</Label>
                     {serverData ? (
                       <Select
-                        value={config.channelDeliveriesLog || ""}
-                        onValueChange={(value) => updateField("channelDeliveriesLog", value)}
+                        value={config.channelLogsDeliveries || ""}
+                        onValueChange={(value) => updateField("channelLogsDeliveries", value)}
                       >
                         <SelectTrigger className="bg-zinc-800 border-zinc-700">
                           <SelectValue placeholder="Selecione canal" />
@@ -344,8 +344,8 @@ export default function ConfigPage() {
                       </Select>
                     ) : (
                       <Input
-                        value={config.channelDeliveriesLog || ""}
-                        onChange={(e) => updateField("channelDeliveriesLog", e.target.value)}
+                        value={config.channelLogsDeliveries || ""}
+                        onChange={(e) => updateField("channelLogsDeliveries", e.target.value)}
                         className="bg-zinc-800 border-zinc-700"
                         placeholder="ID do canal"
                       />
