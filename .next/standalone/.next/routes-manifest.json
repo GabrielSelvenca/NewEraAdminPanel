@@ -78,6 +78,12 @@
       "namedRegex": "^/dashboard/games(?:/)?$"
     },
     {
+      "page": "/dashboard/integrations",
+      "regex": "^/dashboard/integrations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/integrations(?:/)?$"
+    },
+    {
       "page": "/dashboard/orders",
       "regex": "^/dashboard/orders(?:/)?$",
       "routeKeys": {},
