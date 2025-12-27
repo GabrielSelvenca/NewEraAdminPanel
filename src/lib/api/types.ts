@@ -63,6 +63,7 @@ export interface BotConfig {
   embedRobuxMessage?: string;
   bannerGamepass?: string;
   bannerRobux?: string;
+  purchaseApprovedMessage?: string;
   refreshRequested?: boolean;
   updatedAt?: string;
 }

@@ -528,6 +528,27 @@ export default function ConfigPage() {
                   imageUrl={config.bannerRobux}
                 />
               </div>
+
+              <div className="space-y-2 pt-4 border-t border-zinc-800">
+                <Label className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Mensagem de Compra Aprovada
+                </Label>
+                <Textarea
+                  value={config.purchaseApprovedMessage || "Olá, {user-mention}!\n\nSua compra de **{robux} Robux** foi aprovada!\nValor pago: **R$ {value}**\n\nAguarde até que um entregador te chame neste ticket!"}
+                  onChange={(e) => updateField("purchaseApprovedMessage", e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 min-h-[120px] font-mono text-sm"
+                  placeholder="Mensagem enviada quando o pagamento é aprovado..."
+                />
+                <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg p-3 space-y-1">
+                  <p className="font-semibold text-zinc-400 mb-2">Placeholders disponíveis:</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{user}"}</code> → ID do usuário</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{user-mention}"}</code> → Menção do usuário (@usuario)</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{robux}"}</code> → Quantidade de Robux comprada</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{value}"}</code> → Valor pago (ex: 41.50)</p>
+                  <p className="text-zinc-600 mt-2">Use **texto** para negrito no Discord</p>
+                </div>
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>
