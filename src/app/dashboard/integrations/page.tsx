@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
-import { Loader2, Link2, Unlink, ExternalLink, CheckCircle2, XCircle, AlertCircle, Copy, RefreshCw } from 'lucide-react';
+import { Loader2, Link2, Unlink, CheckCircle2, XCircle, AlertCircle, Copy, RefreshCw, Eye, EyeOff, Save, CreditCard } from 'lucide-react';
 
 interface LinkStatus {
   discord: {
@@ -33,6 +34,12 @@ interface DiscordCodeResponse {
   instructions: string;
 }
 
+interface CurrentUser {
+  id: string;
+  cpfCnpj?: string;
+  hasMercadoPagoAccessToken?: boolean;
+}
+
 export default function IntegrationsPage() {
   const [status, setStatus] = useState<LinkStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,11 +58,17 @@ export default function IntegrationsPage() {
   const [savingCookie, setSavingCookie] = useState(false);
   const [refreshingBalance, setRefreshingBalance] = useState(false);
   const [unlinkingRoblox, setUnlinkingRoblox] = useState(false);
-  const [updatingBalance, setUpdatingBalance] = useState(false);
-  const [newBalance, setNewBalance] = useState('');
+
+  // Mercado Pago
+  const [mpAccessToken, setMpAccessToken] = useState('');
+  const [mpCpfCnpj, setMpCpfCnpj] = useState('');
+  const [showToken, setShowToken] = useState(false);
+  const [savingMp, setSavingMp] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
     loadStatus();
+    loadCurrentUser();
   }, []);
 
   const loadStatus = async () => {
@@ -67,6 +80,16 @@ export default function IntegrationsPage() {
       setError('Não foi possível carregar o status das integrações');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCurrentUser = async () => {
+    try {
+      const user = await api.getCurrentUser();
+      setCurrentUser(user);
+      setMpCpfCnpj(user.cpfCnpj || '');
+    } catch (err) {
+      console.error('Erro ao carregar usuário:', err);
     }
   };
 
@@ -134,28 +157,6 @@ export default function IntegrationsPage() {
     }
   };
 
-  const updateBalance = async () => {
-    const balance = parseInt(newBalance);
-    if (isNaN(balance) || balance < 0) {
-      setError('Digite um saldo válido');
-      return;
-    }
-
-    try {
-      setUpdatingBalance(true);
-      setError(null);
-      await api.put('/api/link/roblox/balance', { balance });
-      setSuccess('Saldo atualizado!');
-      setNewBalance('');
-      await loadStatus();
-    } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(error.message || 'Erro ao atualizar saldo');
-    } finally {
-      setUpdatingBalance(false);
-    }
-  };
-
   const unlinkRoblox = async () => {
     try {
       setUnlinkingRoblox(true);
@@ -207,6 +208,58 @@ export default function IntegrationsPage() {
     }
   };
 
+  // ==================== MERCADO PAGO ====================
+
+  const formatCpfCnpj = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+      return numbers
+        .replace(/(\d{2})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1/$2')
+        .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    }
+  };
+
+  const saveMercadoPago = async () => {
+    if (!mpCpfCnpj.trim()) {
+      setError('CPF/CNPJ é obrigatório');
+      return;
+    }
+
+    if (!currentUser) return;
+
+    try {
+      setSavingMp(true);
+      setError(null);
+
+      const updateData: Record<string, string | boolean> = {
+        cpfCnpj: mpCpfCnpj.replace(/\D/g, ''),
+        mercadoPagoSandbox: false
+      };
+
+      if (mpAccessToken.trim()) {
+        updateData.mercadoPagoAccessToken = mpAccessToken.trim();
+      }
+
+      await api.updateUser(parseInt(currentUser.id), updateData);
+      setSuccess('Mercado Pago configurado com sucesso!');
+      setMpAccessToken('');
+      await loadStatus();
+      await loadCurrentUser();
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Erro ao salvar configurações');
+    } finally {
+      setSavingMp(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -240,7 +293,8 @@ export default function IntegrationsPage() {
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Discord e Roblox - Dois cards lado a lado */}
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Discord */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
@@ -311,17 +365,15 @@ export default function IntegrationsPage() {
                     <p className="text-xs text-zinc-500 text-center">
                       Use <code className="bg-zinc-800 px-1 rounded">/vincular {discordCode}</code> no bot
                     </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        className="flex-1 border-zinc-700"
-                        onClick={generateDiscordCode}
-                        disabled={generatingCode}
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Novo código
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full border-zinc-700"
+                      onClick={generateDiscordCode}
+                      disabled={generatingCode}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Novo código
+                    </Button>
                   </div>
                 ) : (
                   <Button
@@ -386,7 +438,7 @@ export default function IntegrationsPage() {
                           onClick={refreshBalance}
                           disabled={refreshingBalance}
                           className="h-6 px-2 text-xs hover:bg-emerald-500/20"
-                          title="Atualizar saldo automaticamente"
+                          title="Atualizar saldo"
                         >
                           {refreshingBalance ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
@@ -406,7 +458,7 @@ export default function IntegrationsPage() {
                 
                 {!status.roblox.hasCookie && (
                   <div className="space-y-2">
-                    <p className="text-xs text-zinc-400">Cole seu cookie .ROBLOSECURITY para atualizar saldo automaticamente:</p>
+                    <p className="text-xs text-zinc-400">Cole seu cookie .ROBLOSECURITY:</p>
                     <div className="flex gap-2">
                       <Input
                         type="password"
@@ -424,26 +476,6 @@ export default function IntegrationsPage() {
                         {savingCookie ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar'}
                       </Button>
                     </div>
-                  </div>
-                )}
-
-                {!status.roblox.hasCookie && (
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Saldo manual"
-                      value={newBalance}
-                      onChange={(e) => setNewBalance(e.target.value)}
-                      className="bg-zinc-800 border-zinc-700"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={updateBalance}
-                      disabled={updatingBalance}
-                      className="border-zinc-700"
-                    >
-                      {updatingBalance ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Atualizar'}
-                    </Button>
                   </div>
                 )}
 
@@ -486,83 +518,113 @@ export default function IntegrationsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Mercado Pago */}
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-white">
-                <svg className="h-6 w-6 text-[#00B1EA]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm-1 5v2H9v2h2v6h2v-6h2v-2h-2V7h-2z"/>
-                </svg>
-                Mercado Pago
-              </CardTitle>
-              {status?.mercadoPago.configured ? (
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Configurado
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="bg-zinc-800 text-zinc-400">
-                  <XCircle className="h-3 w-3 mr-1" />
-                  Não configurado
-                </Badge>
-              )}
-            </div>
-            <CardDescription className="text-zinc-500">
-              Configure sua conta Mercado Pago para receber pagamentos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {status?.mercadoPago.configured ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-zinc-800 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-white">Token configurado</p>
-                    {status.mercadoPago.sandbox && (
-                      <Badge variant="outline" className="mt-1 border-yellow-500/30 text-yellow-400">Modo Sandbox</Badge>
-                    )}
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800" asChild>
-                  <a href="/dashboard/payment-settings">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Configurações de Pagamento
-                  </a>
-                </Button>
-              </div>
-            ) : (
-              <Button className="w-full bg-[#00B1EA] hover:bg-[#009ACC]" asChild>
-                <a href="/dashboard/payment-settings">
-                  <Link2 className="h-4 w-4 mr-2" />
-                  Configurar Mercado Pago
-                </a>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Informações */}
+      {/* Mercado Pago - Card grande */}
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-white">Como vincular suas contas?</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-white">
+              <CreditCard className="h-6 w-6 text-[#00B1EA]" />
+              Mercado Pago
+            </CardTitle>
+            {status?.mercadoPago.configured ? (
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Configurado
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-zinc-800 text-zinc-400">
+                <XCircle className="h-3 w-3 mr-1" />
+                Não configurado
+              </Badge>
+            )}
+          </div>
+          <CardDescription className="text-zinc-500">
+            Configure sua conta Mercado Pago para receber pagamentos PIX
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ul className="space-y-3 text-zinc-400">
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Discord:</strong> Clique em &quot;Gerar Código&quot;, copie o código e use o comando <code className="bg-zinc-800 px-1 rounded">/vincular</code> no bot do Discord.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Roblox:</strong> Digite seu username do Roblox e clique em vincular. O sistema verificará automaticamente se a conta existe.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Mercado Pago:</strong> Configure seu Access Token nas configurações de pagamento para receber pagamentos.</span>
-            </li>
-          </ul>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="cpfCnpj" className="text-zinc-300">CPF/CNPJ *</Label>
+              <Input
+                id="cpfCnpj"
+                value={mpCpfCnpj}
+                onChange={(e) => setMpCpfCnpj(formatCpfCnpj(e.target.value))}
+                placeholder="000.000.000-00"
+                className="bg-zinc-800 border-zinc-700"
+              />
+              <p className="text-xs text-zinc-500">Usado para identificação nas cobranças</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="accessToken" className="text-zinc-300">Access Token {status?.mercadoPago.configured ? '(deixe vazio para manter)' : '*'}</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="accessToken"
+                  type={showToken ? 'text' : 'password'}
+                  value={mpAccessToken}
+                  onChange={(e) => setMpAccessToken(e.target.value)}
+                  placeholder={status?.mercadoPago.configured ? '••••••••••••••••' : 'APP_USR-...'}
+                  className="bg-zinc-800 border-zinc-700 flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowToken(!showToken)}
+                  className="border-zinc-700"
+                >
+                  {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-zinc-500">
+                Obtenha em mercadopago.com.br → Seu negócio → Credenciais
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={saveMercadoPago}
+            disabled={savingMp}
+            className="bg-[#00B1EA] hover:bg-[#009ACC]"
+          >
+            {savingMp ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Salvar Configurações
+          </Button>
+
+          {/* Tutorial */}
+          <div className="border-t border-zinc-800 pt-6">
+            <h4 className="font-semibold text-white mb-4">📘 Como obter seu Access Token</h4>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              <div className="p-3 bg-zinc-800/50 rounded-lg">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-[#00B1EA] text-white rounded-full text-sm font-bold mb-2">1</span>
+                <p className="text-sm text-zinc-300">Acesse <a href="https://www.mercadopago.com.br" target="_blank" rel="noopener noreferrer" className="text-[#00B1EA] hover:underline">mercadopago.com.br</a></p>
+              </div>
+              <div className="p-3 bg-zinc-800/50 rounded-lg">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-[#00B1EA] text-white rounded-full text-sm font-bold mb-2">2</span>
+                <p className="text-sm text-zinc-300">Vá em Seu negócio → Configurações → Credenciais</p>
+              </div>
+              <div className="p-3 bg-zinc-800/50 rounded-lg">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-[#00B1EA] text-white rounded-full text-sm font-bold mb-2">3</span>
+                <p className="text-sm text-zinc-300">Ative as credenciais de <strong>produção</strong></p>
+              </div>
+              <div className="p-3 bg-zinc-800/50 rounded-lg">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-[#00B1EA] text-white rounded-full text-sm font-bold mb-2">4</span>
+                <p className="text-sm text-zinc-300">Copie o Access Token (APP_USR-...)</p>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <p className="text-sm text-green-400">
+                ✅ <strong>Não precisa ter site!</strong> Use qualquer URL válida (link do Discord, Twitter, etc.)
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -575,65 +637,38 @@ export default function IntegrationsPage() {
             </svg>
             Como pegar o Cookie do Roblox (Saldo Automático)
           </CardTitle>
-          <CardDescription className="text-zinc-400">
-            Siga os passos abaixo para configurar a atualização automática do seu saldo de Robux
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-              <div>
-                <p className="text-white font-medium">Abra o Roblox no navegador</p>
-                <p className="text-sm text-zinc-400">Acesse <a href="https://www.roblox.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">www.roblox.com</a> e faça login na sua conta</p>
-              </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">1</span>
+              <p className="text-sm text-zinc-300">Acesse <a href="https://www.roblox.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">roblox.com</a> e faça login</p>
             </div>
-            
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-              <div>
-                <p className="text-white font-medium">Abra as Ferramentas de Desenvolvedor</p>
-                <p className="text-sm text-zinc-400">Pressione <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">F12</code> ou <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Ctrl + Shift + I</code> (Windows) / <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Cmd + Option + I</code> (Mac)</p>
-              </div>
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">2</span>
+              <p className="text-sm text-zinc-300">Pressione <code className="bg-zinc-700 px-1 rounded">F12</code> para abrir DevTools</p>
             </div>
-            
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-              <div>
-                <p className="text-white font-medium">Vá para a aba Application (Aplicativo)</p>
-                <p className="text-sm text-zinc-400">No menu superior das ferramentas, clique em <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Application</code> (pode estar em &quot;»&quot; se a tela for pequena)</p>
-              </div>
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">3</span>
+              <p className="text-sm text-zinc-300">Vá em Application → Cookies → roblox.com</p>
             </div>
-            
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
-              <div>
-                <p className="text-white font-medium">Encontre os Cookies</p>
-                <p className="text-sm text-zinc-400">No menu lateral esquerdo, expanda <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Cookies</code> e clique em <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">https://www.roblox.com</code></p>
-              </div>
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">4</span>
+              <p className="text-sm text-zinc-300">Encontre <code className="bg-zinc-700 px-1 rounded text-red-400">.ROBLOSECURITY</code></p>
             </div>
-            
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</span>
-              <div>
-                <p className="text-white font-medium">Copie o cookie .ROBLOSECURITY</p>
-                <p className="text-sm text-zinc-400">Procure por <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-red-400">.ROBLOSECURITY</code> na lista, clique duas vezes no valor e copie (Ctrl+C)</p>
-              </div>
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">5</span>
+              <p className="text-sm text-zinc-300">Clique duas vezes no valor e copie</p>
             </div>
-            
-            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
-              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">6</span>
-              <div>
-                <p className="text-white font-medium">Cole aqui no painel</p>
-                <p className="text-sm text-zinc-400">Cole o cookie no campo acima e clique em &quot;Salvar&quot;. Seu saldo será atualizado automaticamente!</p>
-              </div>
+            <div className="p-3 bg-zinc-800/50 rounded-lg">
+              <span className="inline-flex items-center justify-center w-6 h-6 bg-emerald-500 text-white rounded-full text-sm font-bold mb-2">6</span>
+              <p className="text-sm text-zinc-300">Cole no campo acima e salve</p>
             </div>
           </div>
-
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
             <p className="text-red-400 text-sm flex items-start gap-2">
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span><strong>Atenção:</strong> Nunca compartilhe seu cookie com ninguém! Ele dá acesso total à sua conta Roblox. Só use em sistemas que você confia.</span>
+              <span><strong>Atenção:</strong> Nunca compartilhe seu cookie! Ele dá acesso total à sua conta Roblox.</span>
             </p>
           </div>
         </CardContent>

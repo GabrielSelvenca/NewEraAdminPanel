@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, UserCog, LogOut, Zap, Settings, Ticket, CreditCard, Link2 } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, LogOut, Zap, Settings, Ticket, Link2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useContext } from "react";
 import { UserContext } from "@/lib/user-context";
@@ -13,7 +13,6 @@ const menuItems = [
   { href: "/dashboard/users", label: "Usuários", icon: Users, allowedRoles: ['admin'] },
   { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, allowedRoles: ['admin', 'gerente'] },
   { href: "/dashboard/config", label: "Config. Bot", icon: Settings, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/payment-settings", label: "Mercado Pago", icon: CreditCard, allowedRoles: ['admin'] },
   { href: "/dashboard/integrations", label: "Integrações", icon: Link2, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
   { href: "/dashboard/settings", label: "Minha Conta", icon: UserCog, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
 ];
