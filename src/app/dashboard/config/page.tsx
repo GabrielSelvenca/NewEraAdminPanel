@@ -62,6 +62,7 @@ export default function ConfigPage() {
       await api.updateConfig(config);
       await api.notifyBotUpdate();
       setMessage("✅ Configurações salvas! Bot será atualizado automaticamente em até 10 segundos.");
+      await loadData();
     } catch (err) {
       setMessage(`❌ ${err instanceof Error ? err.message : "Erro ao salvar"}`);
     } finally {
