@@ -184,8 +184,9 @@ export default function ConfigPage() {
                   <Input
                     type="number"
                     step="0.01"
-                    value={config.pricePerK || 0}
-                    onChange={(e) => updateField("pricePerK", parseFloat(e.target.value) || 0)}
+                    min="20"
+                    value={config.pricePerK ? config.pricePerK.toFixed(2) : "20.00"}
+                    onChange={(e) => updateField("pricePerK", Math.max(20, parseFloat(e.target.value) || 20))}
                     className="bg-zinc-800 border-zinc-700"
                   />
                 </div>
