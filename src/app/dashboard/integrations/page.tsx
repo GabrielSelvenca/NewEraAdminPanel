@@ -19,6 +19,7 @@ interface LinkStatus {
     id: number | null;
     username: string | null;
     balance: number;
+    hasCookie: boolean;
   };
   mercadoPago: {
     configured: boolean;
@@ -45,7 +46,10 @@ export default function IntegrationsPage() {
   
   // Roblox
   const [robloxUsername, setRobloxUsername] = useState('');
+  const [robloxCookie, setRobloxCookie] = useState('');
   const [linkingRoblox, setLinkingRoblox] = useState(false);
+  const [savingCookie, setSavingCookie] = useState(false);
+  const [refreshingBalance, setRefreshingBalance] = useState(false);
   const [unlinkingRoblox, setUnlinkingRoblox] = useState(false);
   const [updatingBalance, setUpdatingBalance] = useState(false);
   const [newBalance, setNewBalance] = useState('');
@@ -164,6 +168,42 @@ export default function IntegrationsPage() {
       setError(error.message || 'Erro ao desvincular Roblox');
     } finally {
       setUnlinkingRoblox(false);
+    }
+  };
+
+  const saveRobloxCookie = async () => {
+    if (!robloxCookie.trim()) {
+      setError('Cole o cookie .ROBLOSECURITY');
+      return;
+    }
+
+    try {
+      setSavingCookie(true);
+      setError(null);
+      await api.post('/api/link/roblox/cookie', { cookie: robloxCookie.trim() });
+      setSuccess('Cookie salvo e saldo atualizado automaticamente!');
+      setRobloxCookie('');
+      await loadStatus();
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Erro ao salvar cookie');
+    } finally {
+      setSavingCookie(false);
+    }
+  };
+
+  const refreshBalance = async () => {
+    try {
+      setRefreshingBalance(true);
+      setError(null);
+      await api.post('/api/link/roblox/refresh-balance', {});
+      setSuccess('Saldo atualizado!');
+      await loadStatus();
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Erro ao atualizar saldo');
+    } finally {
+      setRefreshingBalance(false);
     }
   };
 
@@ -335,28 +375,78 @@ export default function IntegrationsPage() {
                   <div className="flex-1">
                     <p className="font-medium text-white">{status.roblox.username}</p>
                     <p className="text-sm text-zinc-500">ID: {status.roblox.id}</p>
-                    <p className="text-sm font-medium text-emerald-400">
-                      Saldo: {status.roblox.balance.toLocaleString()} Robux
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-emerald-400">
+                        Saldo: {status.roblox.balance.toLocaleString()} Robux
+                      </p>
+                      {status.roblox.hasCookie && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={refreshBalance}
+                          disabled={refreshingBalance}
+                          className="h-6 px-2 text-xs hover:bg-emerald-500/20"
+                          title="Atualizar saldo automaticamente"
+                        >
+                          {refreshingBalance ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                    {status.roblox.hasCookie ? (
+                      <p className="text-xs text-emerald-500">✓ Saldo automático ativo</p>
+                    ) : (
+                      <p className="text-xs text-yellow-500">⚠ Configure o cookie para saldo automático</p>
+                    )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Novo saldo"
-                    value={newBalance}
-                    onChange={(e) => setNewBalance(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={updateBalance}
-                    disabled={updatingBalance}
-                    className="border-zinc-700"
-                  >
-                    {updatingBalance ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Atualizar'}
-                  </Button>
-                </div>
+                
+                {!status.roblox.hasCookie && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-zinc-400">Cole seu cookie .ROBLOSECURITY para atualizar saldo automaticamente:</p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        placeholder="Cookie .ROBLOSECURITY"
+                        value={robloxCookie}
+                        onChange={(e) => setRobloxCookie(e.target.value)}
+                        className="bg-zinc-800 border-zinc-700 text-xs"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={saveRobloxCookie}
+                        disabled={savingCookie}
+                        className="border-zinc-700"
+                      >
+                        {savingCookie ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salvar'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {!status.roblox.hasCookie && (
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Saldo manual"
+                      value={newBalance}
+                      onChange={(e) => setNewBalance(e.target.value)}
+                      className="bg-zinc-800 border-zinc-700"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={updateBalance}
+                      disabled={updatingBalance}
+                      className="border-zinc-700"
+                    >
+                      {updatingBalance ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Atualizar'}
+                    </Button>
+                  </div>
+                )}
+
                 <Button
                   variant="destructive"
                   className="w-full"
