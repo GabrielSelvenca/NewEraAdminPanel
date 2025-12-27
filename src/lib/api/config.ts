@@ -16,6 +16,7 @@ export const config = {
   async notifyBotUpdate(): Promise<{ message: string; timestamp: string }> {
     return client.request('/api/bot/notify-update', {
       method: 'POST',
+      body: JSON.stringify({ data: { timestamp: new Date().toISOString() } }),
     });
   },
 
