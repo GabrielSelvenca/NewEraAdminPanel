@@ -57,7 +57,12 @@ export default function ConfigPage() {
     setSaving(true);
     setMessage("");
     try {
-      await api.updateConfig(config);
+      // Auto-set guildId from serverData if available
+      const configToSave = {
+        ...config,
+        guildId: serverData?.guildId || config.guildId,
+      };
+      await api.updateConfig(configToSave);
       await api.notifyBotUpdate();
       setMessage("✅ Configurações salvas! Bot será atualizado automaticamente em até 10 segundos.");
       await loadData();
@@ -207,6 +212,26 @@ export default function ConfigPage() {
                     min="20"
                     value={config.pricePerK ? config.pricePerK.toFixed(2) : "20.00"}
                     onChange={(e) => updateField("pricePerK", Math.max(20, parseFloat(e.target.value) || 20))}
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Timeout de Pagamento (minutos)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={config.paymentTimeoutMinutes || 30}
+                    onChange={(e) => updateField("paymentTimeoutMinutes", parseInt(e.target.value) || 30)}
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Timeout de Inatividade do Carrinho (minutos)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={config.cartInactivityMinutes || 10}
+                    onChange={(e) => updateField("cartInactivityMinutes", parseInt(e.target.value) || 10)}
                     className="bg-zinc-800 border-zinc-700"
                   />
                 </div>
