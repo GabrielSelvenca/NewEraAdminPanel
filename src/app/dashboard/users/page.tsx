@@ -62,14 +62,23 @@ export default function UsersPage() {
   const loadAllowedRoles = async () => {
     try {
       const roles = await api.getAllowedRoles();
-      setAllowedRoles(roles);
-      if (roles.length > 0) setRole(roles[0]);
+      // Se a API retornar vazio mas o usuário é admin, usa fallback
+      if (roles.length === 0 && currentUser?.role === "admin") {
+        setAllowedRoles(["admin", "gerente", "auxiliar"]);
+        setRole("gerente");
+      } else {
+        setAllowedRoles(roles);
+        if (roles.length > 0) setRole(roles[0]);
+      }
     } catch (err) {
       console.error(err);
       // Fallback: usa role do contexto se API falhar
       if (currentUser?.role === "admin") {
-        setAllowedRoles(["gerente", "auxiliar"]);
+        setAllowedRoles(["admin", "gerente", "auxiliar"]);
         setRole("gerente");
+      } else if (currentUser?.role === "gerente") {
+        setAllowedRoles(["auxiliar"]);
+        setRole("auxiliar");
       }
     }
   };
