@@ -64,6 +64,9 @@ export interface BotConfig {
   bannerGamepass?: string;
   bannerRobux?: string;
   purchaseApprovedMessage?: string;
+  purchaseApprovedBanner?: string;
+  purchaseLogMessage?: string;
+  purchaseLogBanner?: string;
   refreshRequested?: boolean;
   updatedAt?: string;
 }

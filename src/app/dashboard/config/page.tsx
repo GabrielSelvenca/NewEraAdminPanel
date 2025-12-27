@@ -529,25 +529,69 @@ export default function ConfigPage() {
                 />
               </div>
 
-              <div className="space-y-2 pt-4 border-t border-zinc-800">
-                <Label className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Mensagem de Compra Aprovada
-                </Label>
-                <Textarea
-                  value={config.purchaseApprovedMessage || "Olá, {user-mention}!\n\nSua compra de **{robux} Robux** foi aprovada!\nValor pago: **R$ {value}**\n\nAguarde até que um entregador te chame neste ticket!"}
-                  onChange={(e) => updateField("purchaseApprovedMessage", e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 min-h-[120px] font-mono text-sm"
-                  placeholder="Mensagem enviada quando o pagamento é aprovado..."
-                />
-                <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg p-3 space-y-1">
-                  <p className="font-semibold text-zinc-400 mb-2">Placeholders disponíveis:</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{user}"}</code> → ID do usuário</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{user-mention}"}</code> → Menção do usuário (@usuario)</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{robux}"}</code> → Quantidade de Robux comprada</p>
-                  <p><code className="bg-zinc-700 px-1 rounded">{"{value}"}</code> → Valor pago (ex: 41.50)</p>
-                  <p className="text-zinc-600 mt-2">Use **texto** para negrito no Discord</p>
+              <div className="space-y-4 pt-4 border-t border-zinc-800">
+                <h3 className="font-semibold text-white">Mensagem de Compra Aprovada (Canal do Cliente)</h3>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Mensagem
+                  </Label>
+                  <Textarea
+                    value={config.purchaseApprovedMessage || "Olá, {user-mention}!\n\nSua compra de **{robux} Robux** foi aprovada!\nValor pago: **R$ {value}**\n\nAguarde até que um entregador te chame neste ticket!"}
+                    onChange={(e) => updateField("purchaseApprovedMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 min-h-[100px] font-mono text-sm"
+                    placeholder="Mensagem enviada quando o pagamento é aprovado..."
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Banner (URL de imagem 16:9)
+                  </Label>
+                  <Input
+                    value={config.purchaseApprovedBanner || ""}
+                    onChange={(e) => updateField("purchaseApprovedBanner", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700"
+                    placeholder="https://exemplo.com/banner.png"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-zinc-800">
+                <h3 className="font-semibold text-white">Mensagem de Log de Compra (Canal de Logs)</h3>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Mensagem de Agradecimento
+                  </Label>
+                  <Textarea
+                    value={config.purchaseLogMessage || "🎉 **Nova Compra!**\n\nComprador: {user-mention}\nQuantidade: **{robux} Robux**\nValor: **R$ {value}**\n\nObrigado por comprar conosco! 💜"}
+                    onChange={(e) => updateField("purchaseLogMessage", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 min-h-[100px] font-mono text-sm"
+                    placeholder="Mensagem enviada no canal de logs..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Banner (URL de imagem 16:9)
+                  </Label>
+                  <Input
+                    value={config.purchaseLogBanner || ""}
+                    onChange={(e) => updateField("purchaseLogBanner", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700"
+                    placeholder="https://exemplo.com/banner-log.png"
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg p-3 space-y-1">
+                <p className="font-semibold text-zinc-400 mb-2">Placeholders disponíveis:</p>
+                <p><code className="bg-zinc-700 px-1 rounded">{"{user}"}</code> → ID do usuário</p>
+                <p><code className="bg-zinc-700 px-1 rounded">{"{user-mention}"}</code> → Menção do usuário (@usuario)</p>
+                <p><code className="bg-zinc-700 px-1 rounded">{"{robux}"}</code> → Quantidade de Robux comprada</p>
+                <p><code className="bg-zinc-700 px-1 rounded">{"{value}"}</code> → Valor pago (ex: 41.50)</p>
+                <p className="text-zinc-600 mt-2">Use **texto** para negrito no Discord</p>
               </div>
             </div>
           </AccordionContent>
