@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, Hash, AlertCircle } from "lucide-react";
+import { Save, Loader2, Hash, AlertCircle, DollarSign, Gamepad2 } from "lucide-react";
+import Link from "next/link";
 
 interface DiscordServerData {
   guildId: string;
@@ -81,6 +82,22 @@ export default function ConfigGamesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 border-b border-zinc-800 pb-4">
+        <Link href="/dashboard/config">
+          <Button variant="outline" className="border-zinc-700 hover:bg-zinc-800">
+            <DollarSign className="w-4 h-4 mr-2" />
+            Robux
+          </Button>
+        </Link>
+        <Link href="/dashboard/config/games">
+          <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+            <Gamepad2 className="w-4 h-4 mr-2" />
+            Jogos (Gamepass)
+          </Button>
+        </Link>
+      </div>
+
       <div>
         <h1 className="text-3xl font-bold text-zinc-100">Configurações - Jogos</h1>
         <p className="text-zinc-400 mt-2">Configure o canal de setup para jogos (outras opções em breve)</p>

@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign, Upload } from "lucide-react";
+import { Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, MessageSquare, RefreshCw, DollarSign, Upload, Gamepad2 } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 import { ImageCropEditor } from "@/components/image-crop-editor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import Link from "next/link";
 
 interface DiscordServerData {
   guildId: string;
@@ -137,6 +138,22 @@ export default function ConfigPage() {
 
   return (
     <div className="space-y-6">
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 border-b border-zinc-800 pb-4">
+        <Link href="/dashboard/config">
+          <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+            <DollarSign className="w-4 h-4 mr-2" />
+            Robux
+          </Button>
+        </Link>
+        <Link href="/dashboard/config/games">
+          <Button variant="outline" className="border-zinc-700 hover:bg-zinc-800">
+            <Gamepad2 className="w-4 h-4 mr-2" />
+            Jogos (Gamepass)
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 border border-zinc-700 rounded-xl p-6">
         <div className="flex items-center justify-between">
