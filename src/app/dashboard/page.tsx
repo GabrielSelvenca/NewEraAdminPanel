@@ -1,112 +1,78 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShoppingCart, Gamepad2, Gem } from "lucide-react";
-import { useGeneralStats, useGames } from "@/hooks";
-import { LoadingState } from "@/components/shared";
+import { Users, Shield, CheckCircle } from "lucide-react";
+import { useContext } from "react";
+import { UserContext } from "@/lib/user-context";
 
 export default function DashboardPage() {
-  const { stats, loading: statsLoading } = useGeneralStats();
-  const { games, loading: gamesLoading } = useGames();
-  
-  const loading = statsLoading || gamesLoading;
-
-  if (loading) {
-    return <LoadingState message="Carregando dashboard..." />;
-  }
-
-  const statCards = [
-    {
-      title: "Faturamento",
-      value: `R$ ${(stats?.totalAmount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-      icon: DollarSign,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      title: "Vendas",
-      value: stats?.totalSales || 0,
-      icon: ShoppingCart,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-    },
-    {
-      title: "Jogos",
-      value: games.length,
-      icon: Gamepad2,
-      color: "text-purple-500",
-      bg: "bg-purple-500/10",
-    },
-    {
-      title: "Robux Vendidos",
-      value: (stats?.totalRobux || 0).toLocaleString("pt-BR"),
-      icon: Gem,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
-  ];
+  const user = useContext(UserContext);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-zinc-100">Dashboard</h1>
-        <p className="text-zinc-400 mt-1">Visão geral do sistema</p>
+        <p className="text-zinc-400 mt-1">Bem-vindo, {user?.name || 'Usuário'}!</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => (
-          <Card key={stat.title} className="bg-zinc-900 border-zinc-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-400">
-                {stat.title}
-              </CardTitle>
-              <div className={`p-2 rounded-lg ${stat.bg}`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Seu Cargo
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Shield className="w-5 h-5 text-emerald-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-500 capitalize">
+              {user?.role || 'N/A'}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Usuário
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <Users className="w-5 h-5 text-blue-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-500">
+              {user?.username || 'N/A'}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Status
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-500">
+              Online
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-zinc-100">Jogos Cadastrados</CardTitle>
+          <CardTitle className="text-zinc-100">Sistema NewEra</CardTitle>
         </CardHeader>
         <CardContent>
-          {games.length === 0 ? (
-            <p className="text-zinc-500">Nenhum jogo cadastrado ainda.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {games.map((game) => (
-                <div
-                  key={game.id}
-                  className="p-4 bg-zinc-800 rounded-lg flex items-center gap-4"
-                >
-                  {game.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={game.imageUrl}
-                      alt={game.name}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center">
-                      <Gamepad2 className="w-6 h-6 text-zinc-500" />
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-medium text-zinc-100">{game.name}</p>
-                    <p className="text-sm text-zinc-500">
-                      {game.products?.length || 0} produtos
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="text-zinc-400">
+            Painel administrativo do sistema NewEra. Use o menu lateral para navegar.
+          </p>
         </CardContent>
       </Card>
     </div>

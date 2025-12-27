@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, Wallet, ShoppingCart, Ticket, DollarSign, CreditCard, ChevronDown, UserCog } from "lucide-react";
+import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, ChevronDown, UserCog } from "lucide-react";
 import { api } from "@/lib/api";
 import { FeatureFlags } from "@/lib/feature-toggle";
 import { useState, useContext } from "react";
@@ -12,20 +12,11 @@ import { UserContext } from "@/lib/user-context";
 // Roles: admin (full access), gerente (no users page), auxiliar (dashboard only)
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
-  { href: "/dashboard/games", label: "Jogos", icon: Gamepad2, requireFeature: 'gamesEnabled' as const, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/partners", label: "Parceiros", icon: Wallet, requireFeature: 'gamesEnabled' as const, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/sellers", label: "Vendedores", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingCart, requireFeature: 'marketplaceEnabled' as const, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
   { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null, allowedRoles: ['admin'] },
   { href: "/dashboard/settings", label: "Minha Conta", icon: UserCog, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
 ];
 
-const configSubItems = [
-  { href: "/dashboard/config", label: "Robux", icon: DollarSign, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/config/games", label: "Jogos", icon: Gamepad2, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
-  { href: "/dashboard/payment-settings", label: "Pagamento", icon: CreditCard, requireFeature: null, allowedRoles: ['admin', 'gerente'] },
-];
+const configSubItems: typeof menuItems = [];
 
 export function Sidebar() {
   const pathname = usePathname();
