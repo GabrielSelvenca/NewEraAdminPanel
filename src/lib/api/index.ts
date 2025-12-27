@@ -135,4 +135,9 @@ export const api = {
   // Roblox
   syncRoblox: roblox.sync.bind(roblox),
   importGamepass: roblox.importGamepass.bind(roblox),
+  
+  // Generic HTTP methods
+  get: client.get.bind(client),
+  post: client.post.bind(client),
+  delete: client.delete.bind(client),
 };

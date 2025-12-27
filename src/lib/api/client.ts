@@ -113,6 +113,25 @@ export class ApiClient {
       return false;
     }
   }
+
+  // Generic HTTP methods
+  async get<T>(endpoint: string): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, { method: 'GET' });
+    return { data };
+  }
+
+  async post<T>(endpoint: string, body?: unknown): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  }
+
+  async delete<T>(endpoint: string): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, { method: 'DELETE' });
+    return { data };
+  }
 }
 
 export const client = new ApiClient();
