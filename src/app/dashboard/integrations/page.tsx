@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
-import { Loader2, Link2, Unlink, ExternalLink, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Link2, Unlink, ExternalLink, CheckCircle2, XCircle, AlertCircle, Copy, RefreshCw } from 'lucide-react';
 
 interface LinkStatus {
   discord: {
@@ -25,34 +26,37 @@ interface LinkStatus {
   };
 }
 
+interface DiscordCodeResponse {
+  code: string;
+  expiresIn: number;
+  instructions: string;
+}
+
 export default function IntegrationsPage() {
   const [status, setStatus] = useState<LinkStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [linkingDiscord, setLinkingDiscord] = useState(false);
-  const [linkingRoblox, setLinkingRoblox] = useState(false);
-  const [unlinking, setUnlinking] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Discord
+  const [discordCode, setDiscordCode] = useState<string | null>(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [unlinkingDiscord, setUnlinkingDiscord] = useState(false);
+  
+  // Roblox
+  const [robloxUsername, setRobloxUsername] = useState('');
+  const [linkingRoblox, setLinkingRoblox] = useState(false);
+  const [unlinkingRoblox, setUnlinkingRoblox] = useState(false);
+  const [updatingBalance, setUpdatingBalance] = useState(false);
+  const [newBalance, setNewBalance] = useState('');
 
   useEffect(() => {
     loadStatus();
   }, []);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const provider = urlParams.get('provider');
-
-    if (code && provider) {
-      handleOAuthCallback(provider, code, state);
-      window.history.replaceState({}, '', '/dashboard/integrations');
-    }
-  }, []);
-
   const loadStatus = async () => {
     try {
-      const response = await api.get<LinkStatus>('/api/oauth/status');
+      const response = await api.get<LinkStatus>('/api/link/status');
       setStatus(response.data);
     } catch (err) {
       console.error('Erro ao carregar status:', err);
@@ -62,68 +66,104 @@ export default function IntegrationsPage() {
     }
   };
 
-  const handleOAuthCallback = async (provider: string, code: string, state: string | null) => {
+  // ==================== DISCORD ====================
+
+  const generateDiscordCode = async () => {
     try {
-      if (provider === 'discord') {
-        setLinkingDiscord(true);
-        await api.post('/api/oauth/discord/callback', { code, state });
-        setSuccess('Discord vinculado com sucesso!');
-      } else if (provider === 'roblox') {
-        setLinkingRoblox(true);
-        const codeVerifier = localStorage.getItem('roblox_code_verifier');
-        await api.post('/api/oauth/roblox/callback', { code, codeVerifier, state });
-        localStorage.removeItem('roblox_code_verifier');
-        setSuccess('Roblox vinculado com sucesso!');
-      }
+      setGeneratingCode(true);
+      setError(null);
+      const response = await api.post<DiscordCodeResponse>('/api/link/discord/generate-code', {});
+      setDiscordCode(response.data.code);
+      setSuccess('Código gerado! Use o comando /vincular no bot do Discord.');
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Erro ao gerar código');
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
+
+  const copyCode = () => {
+    if (discordCode) {
+      navigator.clipboard.writeText(discordCode);
+      setSuccess('Código copiado!');
+      setTimeout(() => setSuccess(null), 2000);
+    }
+  };
+
+  const unlinkDiscord = async () => {
+    try {
+      setUnlinkingDiscord(true);
+      setError(null);
+      await api.delete('/api/link/discord');
+      setSuccess('Discord desvinculado com sucesso!');
+      setDiscordCode(null);
       await loadStatus();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setError(error.message || 'Erro ao processar vinculação');
+      setError(error.message || 'Erro ao desvincular Discord');
     } finally {
-      setLinkingDiscord(false);
-      setLinkingRoblox(false);
+      setUnlinkingDiscord(false);
     }
   };
 
-  const linkDiscord = async () => {
-    try {
-      setLinkingDiscord(true);
-      setError(null);
-      const response = await api.get<{ url: string }>('/api/oauth/discord/url');
-      window.location.href = response.data.url;
-    } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(error.message || 'Erro ao iniciar vinculação Discord');
-      setLinkingDiscord(false);
-    }
-  };
+  // ==================== ROBLOX ====================
 
   const linkRoblox = async () => {
+    if (!robloxUsername.trim()) {
+      setError('Digite seu username do Roblox');
+      return;
+    }
+
     try {
       setLinkingRoblox(true);
       setError(null);
-      const response = await api.get<{ url: string; codeVerifier: string }>('/api/oauth/roblox/url');
-      localStorage.setItem('roblox_code_verifier', response.data.codeVerifier);
-      window.location.href = response.data.url;
+      await api.post('/api/link/roblox/link', { username: robloxUsername.trim() });
+      setSuccess('Roblox vinculado com sucesso!');
+      setRobloxUsername('');
+      await loadStatus();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setError(error.message || 'Erro ao iniciar vinculação Roblox');
+      setError(error.message || 'Erro ao vincular Roblox');
+    } finally {
       setLinkingRoblox(false);
     }
   };
 
-  const unlinkAccount = async (provider: 'discord' | 'roblox') => {
+  const updateBalance = async () => {
+    const balance = parseInt(newBalance);
+    if (isNaN(balance) || balance < 0) {
+      setError('Digite um saldo válido');
+      return;
+    }
+
     try {
-      setUnlinking(provider);
+      setUpdatingBalance(true);
       setError(null);
-      await api.delete(`/api/oauth/${provider}`);
-      setSuccess(`${provider === 'discord' ? 'Discord' : 'Roblox'} desvinculado com sucesso!`);
+      await api.put('/api/link/roblox/balance', { balance });
+      setSuccess('Saldo atualizado!');
+      setNewBalance('');
       await loadStatus();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setError(error.message || 'Erro ao desvincular conta');
+      setError(error.message || 'Erro ao atualizar saldo');
     } finally {
-      setUnlinking(null);
+      setUpdatingBalance(false);
+    }
+  };
+
+  const unlinkRoblox = async () => {
+    try {
+      setUnlinkingRoblox(true);
+      setError(null);
+      await api.delete('/api/link/roblox');
+      setSuccess('Roblox desvinculado com sucesso!');
+      await loadStatus();
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Erro ao desvincular Roblox');
+    } finally {
+      setUnlinkingRoblox(false);
     }
   };
 
@@ -184,7 +224,7 @@ export default function IntegrationsPage() {
               )}
             </div>
             <CardDescription className="text-zinc-500">
-              Vincule sua conta Discord para receber notificações de pedidos
+              Vincule via comando no bot do Discord
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -199,10 +239,10 @@ export default function IntegrationsPage() {
                 <Button
                   variant="destructive"
                   className="w-full"
-                  onClick={() => unlinkAccount('discord')}
-                  disabled={unlinking === 'discord'}
+                  onClick={unlinkDiscord}
+                  disabled={unlinkingDiscord}
                 >
-                  {unlinking === 'discord' ? (
+                  {unlinkingDiscord ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
                     <Unlink className="h-4 w-4 mr-2" />
@@ -211,18 +251,47 @@ export default function IntegrationsPage() {
                 </Button>
               </div>
             ) : (
-              <Button
-                className="w-full bg-[#5865F2] hover:bg-[#4752C4]"
-                onClick={linkDiscord}
-                disabled={linkingDiscord}
-              >
-                {linkingDiscord ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <div className="space-y-4">
+                {discordCode ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 p-3 bg-zinc-800 rounded-lg">
+                      <code className="text-2xl font-mono font-bold text-emerald-400 flex-1 text-center tracking-widest">
+                        {discordCode}
+                      </code>
+                      <Button variant="ghost" size="icon" onClick={copyCode}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-zinc-500 text-center">
+                      Use <code className="bg-zinc-800 px-1 rounded">/vincular {discordCode}</code> no bot
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-zinc-700"
+                        onClick={generateDiscordCode}
+                        disabled={generatingCode}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Novo código
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
-                  <Link2 className="h-4 w-4 mr-2" />
+                  <Button
+                    className="w-full bg-[#5865F2] hover:bg-[#4752C4]"
+                    onClick={generateDiscordCode}
+                    disabled={generatingCode}
+                  >
+                    {generatingCode ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Link2 className="h-4 w-4 mr-2" />
+                    )}
+                    Gerar Código
+                  </Button>
                 )}
-                Vincular Discord
-              </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -250,7 +319,7 @@ export default function IntegrationsPage() {
               )}
             </div>
             <CardDescription className="text-zinc-500">
-              Vincule sua conta Roblox para entregar gamepasses
+              Vincule informando seu username do Roblox
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -265,13 +334,30 @@ export default function IntegrationsPage() {
                     </p>
                   </div>
                 </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Novo saldo"
+                    value={newBalance}
+                    onChange={(e) => setNewBalance(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={updateBalance}
+                    disabled={updatingBalance}
+                    className="border-zinc-700"
+                  >
+                    {updatingBalance ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Atualizar'}
+                  </Button>
+                </div>
                 <Button
                   variant="destructive"
                   className="w-full"
-                  onClick={() => unlinkAccount('roblox')}
-                  disabled={unlinking === 'roblox'}
+                  onClick={unlinkRoblox}
+                  disabled={unlinkingRoblox}
                 >
-                  {unlinking === 'roblox' ? (
+                  {unlinkingRoblox ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
                     <Unlink className="h-4 w-4 mr-2" />
@@ -280,18 +366,27 @@ export default function IntegrationsPage() {
                 </Button>
               </div>
             ) : (
-              <Button
-                className="w-full bg-red-600 hover:bg-red-700"
-                onClick={linkRoblox}
-                disabled={linkingRoblox}
-              >
-                {linkingRoblox ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Link2 className="h-4 w-4 mr-2" />
-                )}
-                Vincular Roblox
-              </Button>
+              <div className="space-y-3">
+                <Input
+                  placeholder="Username do Roblox"
+                  value={robloxUsername}
+                  onChange={(e) => setRobloxUsername(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700"
+                  onKeyDown={(e) => e.key === 'Enter' && linkRoblox()}
+                />
+                <Button
+                  className="w-full bg-red-600 hover:bg-red-700"
+                  onClick={linkRoblox}
+                  disabled={linkingRoblox}
+                >
+                  {linkingRoblox ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Link2 className="h-4 w-4 mr-2" />
+                  )}
+                  Vincular Roblox
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -355,21 +450,21 @@ export default function IntegrationsPage() {
       {/* Informações */}
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-white">Por que vincular suas contas?</CardTitle>
+          <CardTitle className="text-white">Como vincular suas contas?</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3 text-zinc-400">
             <li className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Discord:</strong> Receba notificações de novos pedidos e seja mencionado quando um pedido for atribuído a você.</span>
+              <span><strong className="text-white">Discord:</strong> Clique em &quot;Gerar Código&quot;, copie o código e use o comando <code className="bg-zinc-800 px-1 rounded">/vincular</code> no bot do Discord.</span>
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Roblox:</strong> Seu saldo de Robux será verificado automaticamente para garantir que você pode entregar os pedidos.</span>
+              <span><strong className="text-white">Roblox:</strong> Digite seu username do Roblox e clique em vincular. O sistema verificará automaticamente se a conta existe.</span>
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <span><strong className="text-white">Mercado Pago:</strong> Receba pagamentos diretamente na sua conta quando um cliente pagar.</span>
+              <span><strong className="text-white">Mercado Pago:</strong> Configure seu Access Token nas configurações de pagamento para receber pagamentos.</span>
             </li>
           </ul>
         </CardContent>

@@ -139,5 +139,6 @@ export const api = {
   // Generic HTTP methods
   get: client.get.bind(client),
   post: client.post.bind(client),
+  put: client.put.bind(client),
   delete: client.delete.bind(client),
 };

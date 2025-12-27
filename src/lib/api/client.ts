@@ -132,6 +132,14 @@ export class ApiClient {
     const data = await this.request<T>(endpoint, { method: 'DELETE' });
     return { data };
   }
+
+  async put<T>(endpoint: string, body?: unknown): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  }
 }
 
 export const client = new ApiClient();
