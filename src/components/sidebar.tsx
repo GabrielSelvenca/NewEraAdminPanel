@@ -3,25 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Gamepad2, Users, Settings, LogOut, ChevronDown, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, LogOut, Zap } from "lucide-react";
 import { api } from "@/lib/api";
-import { FeatureFlags } from "@/lib/feature-toggle";
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import { UserContext } from "@/lib/user-context";
 
-// Roles: admin (full access), gerente (no users page), auxiliar (dashboard only)
 const menuItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
-  { href: "/dashboard/users", label: "Usuários", icon: Users, requireFeature: null, allowedRoles: ['admin'] },
-  { href: "/dashboard/settings", label: "Minha Conta", icon: UserCog, requireFeature: null, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
+  { href: "/dashboard/users", label: "Usuários", icon: Users, allowedRoles: ['admin'] },
+  { href: "/dashboard/settings", label: "Minha Conta", icon: UserCog, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
 ];
-
-const configSubItems: typeof menuItems = [];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [configOpen, setConfigOpen] = useState(true);
   const user = useContext(UserContext);
   const userRole = user?.role || 'auxiliar';
 
@@ -29,99 +24,82 @@ export function Sidebar() {
     try {
       await api.logout();
     } catch {
-      // Ignora erro de logout
+      // Ignora erro
     }
     router.push("/login");
   };
 
+  const filteredItems = menuItems.filter(item => item.allowedRoles.includes(userRole));
+
   return (
-    <aside className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col h-screen sticky top-0">
-      <div className="p-6 border-b border-zinc-800">
+    <aside className="w-72 bg-gradient-to-b from-zinc-900 to-zinc-950 border-r border-zinc-800/50 flex flex-col h-screen sticky top-0">
+      {/* Logo */}
+      <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-            <Gamepad2 className="w-5 h-5 text-emerald-500" />
+          <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-zinc-100">Nova Era</span>
+          <div>
+            <span className="text-xl font-bold text-white">NewEra</span>
+            <p className="text-xs text-zinc-500">Admin Panel</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
-        {menuItems
-          .filter((item) => (!item.requireFeature || FeatureFlags[item.requireFeature]) && item.allowedRoles.includes(userRole))
-          .map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                  isActive
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                )}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        
-        {/* Configurações com Menu Colapsável */}
-        <div>
-          <button
-            onClick={() => setConfigOpen(!configOpen)}
-            className="flex items-center justify-between w-full px-4 py-3 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">Configurações</span>
-            </div>
-            <ChevronDown 
-              className={cn(
-                "w-4 h-4 transition-transform duration-200",
-                configOpen ? "rotate-180" : ""
-              )}
-            />
-          </button>
-          
-          <div 
-            className={cn(
-              "ml-4 space-y-1 overflow-hidden transition-all duration-200",
-              configOpen ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"
-            )}
-          >
-            {configSubItems
-              .filter((item) => (!item.requireFeature || FeatureFlags[item.requireFeature]) && item.allowedRoles.includes(userRole))
-              .map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm",
-                      isActive
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                    )}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                );
-              })}
+      {/* User Info */}
+      <div className="mx-4 mb-4 p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            {user?.name?.charAt(0).toUpperCase() || 'U'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuário'}</p>
+            <p className="text-xs text-emerald-400 capitalize">{user?.role || 'N/A'}</p>
           </div>
         </div>
+      </div>
+
+      {/* Menu Label */}
+      <div className="px-6 mb-2">
+        <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Menu</span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 space-y-1">
+        {filteredItems.map((item) => {
+          const isActive = pathname === item.href || 
+            (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                isActive
+                  ? "bg-emerald-500/15 text-emerald-400 shadow-sm"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/70"
+              )}
+            >
+              <item.icon className={cn(
+                "w-5 h-5 transition-transform duration-200",
+                isActive ? "text-emerald-400" : "group-hover:scale-110"
+              )} />
+              <span className="font-medium">{item.label}</span>
+              {isActive && (
+                <div className="ml-auto w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="p-4 border-t border-zinc-800">
+      {/* Logout */}
+      <div className="p-4 border-t border-zinc-800/50">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
           <span className="font-medium">Sair</span>
         </button>
       </div>
