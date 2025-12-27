@@ -43,6 +43,8 @@ export default function ConfigPage() {
         api.getConfig(),
         api.getDiscordServerData().catch(() => null),
       ]);
+      console.log('📊 Config carregado:', configData);
+      console.log('🔷 Discord server data:', discordData);
       setConfig(configData);
       setServerData(discordData);
     } catch (err) {
