@@ -500,6 +500,12 @@ export default function ConfigPage() {
                   className="bg-zinc-800 border-zinc-700 min-h-[120px] font-mono text-sm"
                   placeholder="Mensagem que aparece no embed de compra de Robux..."
                 />
+                <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg p-3 space-y-1">
+                  <p className="font-semibold text-zinc-400 mb-2">Placeholders disponíveis:</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{store_name}"}</code> → Nome da loja (ex: NewEra Store)</p>
+                  <p><code className="bg-zinc-700 px-1 rounded">{"{price_per_k}"}</code> → Preço por 1000 Robux (ex: 41.50)</p>
+                  <p className="text-zinc-600 mt-2">Use **texto** para negrito no Discord</p>
+                </div>
               </div>
 
               <div className="pt-4 border-t border-zinc-800">
