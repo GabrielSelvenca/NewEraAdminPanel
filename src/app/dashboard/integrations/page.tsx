@@ -565,6 +565,79 @@ export default function IntegrationsPage() {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Tutorial Cookie Roblox */}
+      <Card className="bg-zinc-900 border-zinc-800 border-yellow-500/30">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            Como pegar o Cookie do Roblox (Saldo Automático)
+          </CardTitle>
+          <CardDescription className="text-zinc-400">
+            Siga os passos abaixo para configurar a atualização automática do seu saldo de Robux
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+              <div>
+                <p className="text-white font-medium">Abra o Roblox no navegador</p>
+                <p className="text-sm text-zinc-400">Acesse <a href="https://www.roblox.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">www.roblox.com</a> e faça login na sua conta</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+              <div>
+                <p className="text-white font-medium">Abra as Ferramentas de Desenvolvedor</p>
+                <p className="text-sm text-zinc-400">Pressione <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">F12</code> ou <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Ctrl + Shift + I</code> (Windows) / <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Cmd + Option + I</code> (Mac)</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+              <div>
+                <p className="text-white font-medium">Vá para a aba Application (Aplicativo)</p>
+                <p className="text-sm text-zinc-400">No menu superior das ferramentas, clique em <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Application</code> (pode estar em &quot;»&quot; se a tela for pequena)</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
+              <div>
+                <p className="text-white font-medium">Encontre os Cookies</p>
+                <p className="text-sm text-zinc-400">No menu lateral esquerdo, expanda <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">Cookies</code> e clique em <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-emerald-400">https://www.roblox.com</code></p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</span>
+              <div>
+                <p className="text-white font-medium">Copie o cookie .ROBLOSECURITY</p>
+                <p className="text-sm text-zinc-400">Procure por <code className="bg-zinc-700 px-1.5 py-0.5 rounded text-red-400">.ROBLOSECURITY</code> na lista, clique duas vezes no valor e copie (Ctrl+C)</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-zinc-800/50 rounded-lg">
+              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">6</span>
+              <div>
+                <p className="text-white font-medium">Cole aqui no painel</p>
+                <p className="text-sm text-zinc-400">Cole o cookie no campo acima e clique em &quot;Salvar&quot;. Seu saldo será atualizado automaticamente!</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p className="text-red-400 text-sm flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span><strong>Atenção:</strong> Nunca compartilhe seu cookie com ninguém! Ele dá acesso total à sua conta Roblox. Só use em sistemas que você confia.</span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
