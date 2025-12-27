@@ -1,16 +1,26 @@
-import { client } from './client';
+import { client, setToken, removeToken } from './client';
 import type { LoginResponse } from './types';
 
 export const auth = {
   async login(username: string, password: string): Promise<LoginResponse> {
-    return client.request<LoginResponse>('/api/admin/login', {
+    const response = await client.request<LoginResponse & { token: string }>('/api/admin/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
+    
+    if (response.token) {
+      setToken(response.token);
+    }
+    
+    return response;
   },
 
   async logout(): Promise<void> {
-    await client.request<void>('/api/admin/logout', { method: 'POST' });
+    try {
+      await client.request<void>('/api/admin/logout', { method: 'POST' });
+    } finally {
+      removeToken();
+    }
   },
 
   async getCurrentUser(): Promise<{ 
