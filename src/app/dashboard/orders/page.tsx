@@ -164,7 +164,7 @@ export default function OrdersPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-zinc-100">
-                  R$ {orders.filter((o) => o.status === "DELIVERED" || o.status === "COMPLETED").reduce((acc, o) => acc + o.finalPrice, 0).toFixed(2)}
+                  R$ {orders.filter((o) => o.status === "PAYMENT_CONFIRMED" || o.status === "DELIVERED" || o.status === "COMPLETED").reduce((acc, o) => acc + o.finalPrice, 0).toFixed(2)}
                 </p>
                 <p className="text-sm text-zinc-400">Faturado</p>
               </div>
