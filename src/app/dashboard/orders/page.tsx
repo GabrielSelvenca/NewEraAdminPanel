@@ -72,15 +72,37 @@ export default function OrdersPage() {
     setDelivering(orderId);
     try {
       const response = await api.post(`/api/orders/${orderId}/deliver`);
-      const data = response.data as { success?: boolean; message?: string };
+      const data = response.data as { success?: boolean; message?: string; requiresManualDelivery?: boolean };
       if (data.success) {
         toast.success("Entrega realizada com sucesso!");
         loadOrders();
       } else {
-        toast.error(data.message || "Falha na entrega");
+        toast.error(data.message || "Falha na entrega automática");
       }
     } catch {
       toast.error("Erro ao entregar pedido");
+    } finally {
+      setDelivering(null);
+    }
+  };
+
+  const handleManualDeliver = async (orderId: number) => {
+    if (!confirm("Tem certeza que deseja marcar este pedido como entregue?\n\nVerifique antes se você realmente comprou o gamepass do cliente.")) {
+      return;
+    }
+    
+    setDelivering(orderId);
+    try {
+      const response = await api.post(`/api/orders/${orderId}/deliver-manual`);
+      const data = response.data as { success?: boolean; message?: string };
+      if (data.success) {
+        toast.success("Pedido marcado como entregue!");
+        loadOrders();
+      } else {
+        toast.error(data.message || "Falha ao marcar como entregue");
+      }
+    } catch {
+      toast.error("Erro ao marcar pedido como entregue");
     } finally {
       setDelivering(null);
     }
@@ -261,19 +283,31 @@ export default function OrdersPage() {
                       </a>
                     )}
                     {(order.status === "PAYMENT_CONFIRMED" || order.status === "ASSIGNED") && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleDeliver(order.orderId)}
-                        disabled={delivering === order.orderId}
-                        className="gap-2 bg-green-600 hover:bg-green-700"
-                      >
-                        {delivering === order.orderId ? (
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Truck className="w-4 h-4" />
-                        )}
-                        Entregar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleDeliver(order.orderId)}
+                          disabled={delivering === order.orderId}
+                          className="gap-2 bg-green-600 hover:bg-green-700"
+                          title="Entrega automática via cookie"
+                        >
+                          {delivering === order.orderId ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Truck className="w-4 h-4" />
+                          )}
+                          Entregar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleManualDeliver(order.orderId)}
+                          disabled={delivering === order.orderId}
+                          title="Marcar como entregue manualmente"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
