@@ -79,7 +79,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard/config": {
+    "/dashboard/config/games": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -92,32 +92,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/config",
-      "dataRoute": "/dashboard/config.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/dashboard/orders": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "next-action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/orders",
-      "dataRoute": "/dashboard/orders.rsc",
+      "srcRoute": "/dashboard/config/games",
+      "dataRoute": "/dashboard/config/games.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -151,7 +127,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard": {
+    "/login": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -164,8 +140,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard",
-      "dataRoute": "/dashboard.rsc",
+      "srcRoute": "/login",
+      "dataRoute": "/login.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -175,7 +151,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard/coupons": {
+    "/dashboard/orders": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -188,8 +164,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/coupons",
-      "dataRoute": "/dashboard/coupons.rsc",
+      "srcRoute": "/dashboard/orders",
+      "dataRoute": "/dashboard/orders.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -199,7 +175,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard/settings": {
+    "/dashboard/config": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -212,8 +188,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/settings",
-      "dataRoute": "/dashboard/settings.rsc",
+      "srcRoute": "/dashboard/config",
+      "dataRoute": "/dashboard/config.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -247,7 +223,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/login": {
+    "/dashboard/settings": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -260,8 +236,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/login",
-      "dataRoute": "/login.rsc",
+      "srcRoute": "/dashboard/settings",
+      "dataRoute": "/dashboard/settings.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -271,7 +247,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard/users": {
+    "/dashboard": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -284,56 +260,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/users",
-      "dataRoute": "/dashboard/users.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/dashboard/webhooks": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "next-action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/webhooks",
-      "dataRoute": "/dashboard/webhooks.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/dashboard/integrations": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "next-action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/integrations",
-      "dataRoute": "/dashboard/integrations.rsc",
+      "srcRoute": "/dashboard",
+      "dataRoute": "/dashboard.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -367,6 +295,78 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/dashboard/users": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/dashboard/users",
+      "dataRoute": "/dashboard/users.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/dashboard/integrations": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/dashboard/integrations",
+      "dataRoute": "/dashboard/integrations.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/dashboard/webhooks": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/dashboard/webhooks",
+      "dataRoute": "/dashboard/webhooks.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/dashboard/transactions": {
       "experimentalBypassFor": [
         {
@@ -391,7 +391,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/dashboard/config/games": {
+    "/dashboard/coupons": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -404,8 +404,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/dashboard/config/games",
-      "dataRoute": "/dashboard/config/games.rsc",
+      "srcRoute": "/dashboard/coupons",
+      "dataRoute": "/dashboard/coupons.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",

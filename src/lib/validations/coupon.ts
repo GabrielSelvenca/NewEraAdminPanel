@@ -14,7 +14,7 @@ export const couponSchema = z.object({
     .positive('Valor do desconto deve ser positivo'),
   expiresAt: z
     .string()
-    .datetime('Data de expiração inválida')
+    .refine((val) => !val || !isNaN(Date.parse(val)), 'Data de expiração inválida')
     .optional()
     .or(z.literal('')),
   maxUses: z
