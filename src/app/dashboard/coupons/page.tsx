@@ -11,6 +11,7 @@ import { Plus, Trash2, Loader2, Ticket, Calendar, Hash, Percent, DollarSign } fr
 import { LoadingState } from "@/components/shared";
 import { toast } from "@/lib/error-handling";
 import { couponSchema } from "@/lib/validations";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -154,33 +155,44 @@ export default function CouponsPage() {
 
               <div className="space-y-2">
                 <Label>Valor do Desconto</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.discountValue}
-                  onChange={(e) => setFormData({ ...formData, discountValue: parseFloat(e.target.value) || 0 })}
-                  className="bg-zinc-800 border-zinc-700"
-                  placeholder={formData.discountType === "percentage" ? "10" : "5.00"}
-                />
+                <div className="relative">
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={formData.discountValue || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+                      setFormData({ ...formData, discountValue: parseFloat(val) || 0 });
+                    }}
+                    className="bg-zinc-800 border-zinc-700 pr-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder={formData.discountType === "percentage" ? "10" : "5.00"}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+                    {formData.discountType === "percentage" ? "%" : "R$"}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <Label>Data de Expiração (Opcional)</Label>
-                <Input
-                  type="datetime-local"
+                <DateTimePicker
                   value={formData.expiresAt}
-                  onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700"
+                  onChange={(value) => setFormData({ ...formData, expiresAt: value })}
+                  placeholder="Selecionar data e hora"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label>Limite de Usos (Opcional)</Label>
                 <Input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={formData.maxUses}
-                  onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700"
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    setFormData({ ...formData, maxUses: val });
+                  }}
+                  className="bg-zinc-800 border-zinc-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="Deixe vazio para ilimitado"
                 />
               </div>
