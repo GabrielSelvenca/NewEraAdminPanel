@@ -53,7 +53,7 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/api/orders");
+      const response = await api.get("/api/orders/my");
       const data = response.data as { orders?: Order[] } | Order[];
       setOrders(Array.isArray(data) ? data : data.orders || []);
     } catch (error) {
