@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, UserCog, LogOut, Zap, Settings, Ticket, Link2 } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, LogOut, Zap, Settings, Ticket, Link2, Package } from "lucide-react";
 import { api } from "@/lib/api";
 import { useContext } from "react";
 import { UserContext } from "@/lib/user-context";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
+  { href: "/dashboard/orders", label: "Pedidos", icon: Package, allowedRoles: ['admin', 'gerente', 'auxiliar'] },
   { href: "/dashboard/users", label: "Usuários", icon: Users, allowedRoles: ['admin'] },
   { href: "/dashboard/coupons", label: "Cupons", icon: Ticket, allowedRoles: ['admin', 'gerente'] },
   { href: "/dashboard/config", label: "Config. Bot", icon: Settings, allowedRoles: ['admin', 'gerente'] },
