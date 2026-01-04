@@ -72,14 +72,15 @@ export default function OrdersPage() {
     setDelivering(orderId);
     try {
       const response = await api.post(`/api/orders/${orderId}/deliver`);
-      if (response.data.success) {
+      const data = response.data as { success?: boolean; message?: string };
+      if (data.success) {
         toast.success("Entrega realizada com sucesso!");
         loadOrders();
       } else {
-        toast.error(response.data.message || "Falha na entrega");
+        toast.error(data.message || "Falha na entrega");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao entregar pedido");
+    } catch {
+      toast.error("Erro ao entregar pedido");
     } finally {
       setDelivering(null);
     }
