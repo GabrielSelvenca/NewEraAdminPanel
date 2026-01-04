@@ -69,17 +69,22 @@ export default function OrdersPage() {
   }, []);
 
   const handleDeliver = async (orderId: number) => {
+    console.log("[DELIVER] Iniciando entrega do pedido:", orderId);
     setDelivering(orderId);
     try {
-      const response = await api.post(`/api/orders/${orderId}/deliver`);
-      const data = response.data as { success?: boolean; message?: string; requiresManualDelivery?: boolean };
+      console.log("[DELIVER] Fazendo request para /api/orders/" + orderId + "/deliver");
+      const response = await api.post(`/api/orders/${orderId}/deliver`) as { data: Record<string, unknown> };
+      console.log("[DELIVER] Response recebida:", response.data);
+      const data = response.data as { success?: boolean; message?: string; requiresManualDelivery?: boolean; gamepassId?: number; gamepassUrl?: string };
       if (data.success) {
         toast.success("Entrega realizada com sucesso!");
         loadOrders();
       } else {
+        console.error("[DELIVER] Falha na entrega:", data);
         toast.error(data.message || "Falha na entrega automática");
       }
-    } catch {
+    } catch (err) {
+      console.error("[DELIVER] Erro na requisição:", err);
       toast.error("Erro ao entregar pedido");
     } finally {
       setDelivering(null);
