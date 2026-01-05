@@ -1,22 +1,20 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neweraapi.squareweb.app';
 
-const TOKEN_KEY = 'auth_token';
+// Token é gerenciado via httpOnly cookie pela API
+// Mantemos uma cópia em memória apenas para o header Authorization (fallback)
+let inMemoryToken: string | null = null;
 
 export function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return inMemoryToken;
 }
 
 export function setToken(token: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(TOKEN_KEY, token);
-  }
+  // Armazena em memória (não localStorage) - cookie httpOnly é o principal
+  inMemoryToken = token;
 }
 
 export function removeToken(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(TOKEN_KEY);
-  }
+  inMemoryToken = null;
 }
 
 export class ApiClient {
@@ -86,7 +84,9 @@ export class ApiClient {
       } catch (error: unknown) {
         const err = error as Error;
         if ((err.name === 'AbortError' || err.message?.includes('fetch')) && attempt < this.maxRetries - 1) {
-          console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, err.message);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, err.message);
+          }
           lastError = err;
           await this.sleep(this.retryDelay * (attempt + 1));
           continue;
