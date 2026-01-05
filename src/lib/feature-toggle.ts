@@ -9,9 +9,5 @@ export function isFeatureEnabled(feature: keyof typeof FeatureFlags): boolean {
 
 export function logFeatureStatus() {
   if (typeof window !== 'undefined') {
-    console.log('=== FEATURE TOGGLES (CLIENT) ===');
-    console.log('Games Module:', FeatureFlags.gamesEnabled ? 'ENABLED' : 'DISABLED');
-    console.log('Marketplace Module:', FeatureFlags.marketplaceEnabled ? 'ENABLED' : 'DISABLED');
-    console.log('================================');
-  }
+    }
 }

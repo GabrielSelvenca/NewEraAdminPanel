@@ -47,8 +47,7 @@ export default function ConfigPage() {
       setConfig(configData);
       setServerData(discordData);
     } catch (err) {
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

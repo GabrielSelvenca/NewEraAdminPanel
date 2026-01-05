@@ -72,7 +72,6 @@ export default function GameEditPage() {
       setActive(data.active);
       setImageUrl(data.imageUrl || "");
     } catch (err) {
-      console.error(err);
       router.push("/dashboard/games");
     } finally {
       setLoading(false);
@@ -85,7 +84,7 @@ export default function GameEditPage() {
       const stats = await api.getSalesStats(period);
       setSalesStats(stats);
     } catch (err) {
-      console.error("Erro ao carregar estatísticas:", err);
+      // Erro silencioso
     } finally {
       setLoadingStats(false);
     }

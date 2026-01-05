@@ -37,8 +37,7 @@ export default function CouponsPage() {
       const data = await api.getCoupons();
       setCoupons(data);
     } catch (err) {
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

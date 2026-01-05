@@ -85,8 +85,7 @@ export class ApiClient {
         const err = error as Error;
         if ((err.name === 'AbortError' || err.message?.includes('fetch')) && attempt < this.maxRetries - 1) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn(`API request failed (attempt ${attempt + 1}/${this.maxRetries}):`, err.message);
-          }
+            }
           lastError = err;
           await this.sleep(this.retryDelay * (attempt + 1));
           continue;

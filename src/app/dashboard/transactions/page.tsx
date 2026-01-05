@@ -55,8 +55,6 @@ export default function TransactionsPage() {
       setTransactions(response.data.orders || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
-      console.error('Erro ao carregar transações:', error);
-      console.error('Falha ao carregar transações');
       alert('Erro ao carregar transações');
     } finally {
       setLoading(false);

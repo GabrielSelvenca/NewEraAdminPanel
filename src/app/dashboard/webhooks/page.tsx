@@ -49,8 +49,6 @@ export default function WebhooksPage() {
       setEvents(response.data.events || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
-      console.error('Erro ao carregar webhooks:', error);
-      console.error('Falha ao carregar webhooks');
       alert('Erro ao carregar webhooks');
     } finally {
       setLoading(false);
@@ -70,8 +68,7 @@ export default function WebhooksPage() {
       const failed = failedRes.total;
       setStats({ total, processed, failed });
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
-    }
+      }
   };
 
   const getEventBadge = (event: WebhookEvent) => {

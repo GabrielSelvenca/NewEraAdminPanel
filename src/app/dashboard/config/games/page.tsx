@@ -39,8 +39,7 @@ export default function ConfigGamesPage() {
       setConfig(configData);
       setServerData(discordData);
     } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

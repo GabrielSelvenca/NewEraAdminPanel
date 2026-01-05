@@ -28,8 +28,7 @@ export default function GamesPage() {
       const data = await api.getGames();
       setGames(data);
     } catch (err) {
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

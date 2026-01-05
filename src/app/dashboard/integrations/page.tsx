@@ -76,7 +76,6 @@ export default function IntegrationsPage() {
       const response = await api.get<LinkStatus>('/api/link/status');
       setStatus(response.data);
     } catch (err) {
-      console.error('Erro ao carregar status:', err);
       setError('Não foi possível carregar o status das integrações');
     } finally {
       setLoading(false);
@@ -89,8 +88,7 @@ export default function IntegrationsPage() {
       setCurrentUser(user);
       setMpCpfCnpj(user.cpfCnpj || '');
     } catch (err) {
-      console.error('Erro ao carregar usuário:', err);
-    }
+      }
   };
 
   // ==================== DISCORD ====================

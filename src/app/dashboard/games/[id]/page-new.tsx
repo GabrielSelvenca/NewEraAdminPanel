@@ -50,8 +50,7 @@ export default function GameEditPage() {
       setName(data.name);
       setActive(data.active);
       setImageUrl(data.imageUrl || "");
-    } catch (err) {
-      console.error(err);
+    } catch {
       router.push("/dashboard/games");
     } finally {
       setLoading(false);

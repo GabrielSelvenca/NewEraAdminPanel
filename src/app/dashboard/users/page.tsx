@@ -53,8 +53,7 @@ export default function UsersPage() {
       const data = await api.getUsers();
       setUsers(data);
     } catch (err) {
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };
@@ -71,7 +70,6 @@ export default function UsersPage() {
         if (roles.length > 0) setRole(roles[0]);
       }
     } catch (err) {
-      console.error(err);
       // Fallback: usa role do contexto se API falhar
       if (currentUser?.role === "admin") {
         setAllowedRoles(["admin", "gerente", "auxiliar"]);

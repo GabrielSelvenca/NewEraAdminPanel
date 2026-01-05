@@ -41,7 +41,6 @@ export default function PartnersPage() {
       const partnersData = await api.getPartners().catch(() => []);
       setPartners(partnersData);
     } catch (err) {
-      console.error(err);
       setError("Erro ao carregar dados");
     } finally {
       setLoading(false);
@@ -54,8 +53,7 @@ export default function PartnersPage() {
       await api.updatePartner(id, data);
       await loadData();
     } catch (err) {
-      console.error(err);
-    }
+      }
   };
 
   const handleEditPartner = (partner: Partner) => {

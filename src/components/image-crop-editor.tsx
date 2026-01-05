@@ -99,8 +99,7 @@ export function ImageCropEditor({ image, open, onClose, onSave, aspect = 16 / 9 
       onSave(croppedImage);
       onClose();
     } catch (e) {
-      console.error("Error cropping image:", e);
-    }
+      }
   };
 
   return (

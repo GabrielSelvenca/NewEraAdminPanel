@@ -47,8 +47,7 @@ export default function DeliveriesPage() {
       setDeliveries(deliveriesData);
       setStats(statsData);
     } catch (err) {
-      console.error(err);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };
@@ -67,7 +66,6 @@ export default function DeliveriesPage() {
       setSelectedDelivery(null);
       await loadData();
     } catch (err) {
-      console.error(err);
       toast.error("Erro ao atualizar status", err instanceof Error ? err.message : undefined);
     } finally {
       setUpdating(false);

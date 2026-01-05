@@ -54,8 +54,6 @@ export function extractErrorMessage(error: unknown): string {
 export function handleError(error: unknown, customMessage?: string): void {
   const message = customMessage || extractErrorMessage(error);
   
-  console.error('Error caught:', error);
-  
   toast.error('Erro', message);
 }
 
