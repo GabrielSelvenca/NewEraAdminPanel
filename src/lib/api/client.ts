@@ -38,7 +38,7 @@ export class ApiClient {
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
+        const timeout = setTimeout(() => controller.abort(), 15000);
 
         const response = await fetch(`${API_URL}${endpoint}`, {
           ...options,
