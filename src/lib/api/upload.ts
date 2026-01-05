@@ -1,3 +1,5 @@
+import { getToken } from './client';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neweraapi.squareweb.app';
 
 export const upload = {
@@ -5,9 +7,13 @@ export const upload = {
     const formData = new FormData();
     formData.append('file', file);
 
+    const token = getToken();
+    const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+
     const response = await fetch(`${API_URL}/api/upload/image`, {
       method: 'POST',
       credentials: 'include',
+      headers,
       body: formData,
     });
 
