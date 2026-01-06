@@ -1,4 +1,4 @@
-// File: C:\Users\gabri\Desktop\Projetos CS Studios\NewEraAdminPanel\src\app\dashboard\games\[id]\page.tsx
+// File: C:\Users\gabri\Desktop\Projeto Riverun\NewEraAdminPanel\src\app\dashboard\games\[id]\page.tsx
 import * as entry from '../../../../../../src/app/dashboard/games/[id]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

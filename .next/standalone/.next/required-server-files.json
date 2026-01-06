@@ -99,7 +99,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel",
+    "outputFileTracingRoot": "C:\\Users\\gabri\\Desktop\\Projeto Riverun\\NewEraAdminPanel",
     "experimental": {
       "useSkewCookie": false,
       "cacheLife": {
@@ -289,10 +289,10 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel"
+      "root": "C:\\Users\\gabri\\Desktop\\Projeto Riverun\\NewEraAdminPanel"
     }
   },
-  "appDir": "C:\\Users\\gabri\\Desktop\\Projetos CS Studios\\NewEraAdminPanel",
+  "appDir": "C:\\Users\\gabri\\Desktop\\Projeto Riverun\\NewEraAdminPanel",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",

@@ -1,4 +1,4 @@
-// File: C:\Users\gabri\Desktop\Projetos CS Studios\NewEraAdminPanel\src\app\dashboard\integrations\page.tsx
+// File: C:\Users\gabri\Desktop\Projeto Riverun\NewEraAdminPanel\src\app\dashboard\integrations\page.tsx
 import * as entry from '../../../../../src/app/dashboard/integrations/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
