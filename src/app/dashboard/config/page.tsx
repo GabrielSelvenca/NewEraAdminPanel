@@ -130,6 +130,15 @@ export default function ConfigPage() {
       .replace(/\{max_order\}/g, String(config.maxOrderAmount || 100000));
   };
 
+  const processGamePlaceholders = (text: string): string => {
+    if (!config) return text;
+    return text
+      .replace(/\{store_name\}/g, config.storeName || "Nova Era Store")
+      .replace(/\{price_per_k\}/g, `R$ ${(config.pricePerKGamepass || 35.00).toFixed(2)}`)
+      .replace(/\{min_order\}/g, String(config.minOrderAmount || 1000))
+      .replace(/\{max_order\}/g, String(config.maxOrderAmount || 100000));
+  };
+
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: "bannerRobux" | "bannerGamepass" | "purchaseApprovedBanner" | "purchaseLogBanner") => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -720,7 +729,7 @@ export default function ConfigPage() {
       >
         <DiscordEmbedPreview
           title={`🎮 ${config.storeName || "Nova Era Store"} - Jogos`}
-          description={processPlaceholders(config.embedGamepassMessage || `Compre itens exclusivos para seus jogos!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
+          description={processGamePlaceholders(config.embedGamepassMessage || `Compre itens exclusivos para seus jogos!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
           color={config.storeColor || "#10b981"}
           imageUrl={config.bannerGamepass}
           pricePerKRobux={config.pricePerKGamepass || 35.00}
