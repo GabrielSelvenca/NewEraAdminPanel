@@ -431,170 +431,299 @@ export default function GameEditPage() {
         </div>
 
         {/* Items */}
-        <div className="lg:col-span-2 bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
-              <Package className="w-5 h-5" />Itens / Gifts ({items.length})
-            </h2>
-            <Dialog open={itemDialogOpen} onOpenChange={(open) => { setItemDialogOpen(open); if (!open) resetItemForm(); }}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                  <Plus className="w-4 h-4 mr-2" />Novo Item
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-zinc-900 border-zinc-800">
-                <DialogHeader>
-                  <DialogTitle className="text-zinc-100">Criar Item</DialogTitle>
-                  <DialogDescription className="text-zinc-400">Configure o novo item/gift para venda</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-zinc-300">Nome do Item</Label>
-                    <Input value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder="Ex: 1000 Moedas, VIP Pass..." className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-zinc-300">Descrição (opcional)</Label>
-                    <Textarea value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-zinc-300">URL da Imagem (opcional)</Label>
-                    <Input value={itemImageUrl} onChange={(e) => setItemImageUrl(e.target.value)} placeholder="https://..." className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-zinc-300">Preço em Robux</Label>
-                    <Input type="number" value={itemPriceRobux} onChange={(e) => setItemPriceRobux(e.target.value)} placeholder="500" className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                    <p className="text-zinc-500 text-xs mt-1">O preço em R$ será calculado automaticamente</p>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-zinc-300">Estoque Limitado</Label>
-                      <p className="text-zinc-500 text-xs">Limitar vendas diárias</p>
-                    </div>
-                    <Switch checked={itemHasStockLimit} onCheckedChange={setItemHasStockLimit} />
-                  </div>
-                  {itemHasStockLimit && (
-                    <div>
-                      <Label className="text-zinc-300">Limite Diário</Label>
-                      <Input type="number" value={itemDailyStockLimit} onChange={(e) => setItemDailyStockLimit(e.target.value)} placeholder="10" className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                    </div>
-                  )}
-                  {error && <p className="text-red-400 text-sm">{error}</p>}
-                  <Button onClick={handleCreateItem} disabled={creatingItem || !itemName.trim()} className="w-full bg-emerald-600 hover:bg-emerald-700">
-                    {creatingItem ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}Criar Item
+        <div className="lg:col-span-2 space-y-4">
+          {/* Header Card */}
+          <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-emerald-500" />
+                  Itens do Jogo
+                </h2>
+                <p className="text-zinc-500 text-sm mt-1">
+                  {items.filter(i => i.active).length} ativo{items.filter(i => i.active).length !== 1 ? 's' : ''} de {items.length} cadastrado{items.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <Dialog open={itemDialogOpen} onOpenChange={(open) => { setItemDialogOpen(open); if (!open) resetItemForm(); }}>
+                <DialogTrigger asChild>
+                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    <Plus className="w-4 h-4 mr-2" />Novo Item
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-zinc-100 flex items-center gap-2">
+                      <Package className="w-5 h-5 text-emerald-500" />
+                      Criar Novo Item
+                    </DialogTitle>
+                    <DialogDescription className="text-zinc-400">
+                      Configure o item/gift que será vendido neste jogo
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <Label className="text-zinc-300">Nome do Item *</Label>
+                        <Input value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder="Ex: 1000 Moedas, VIP Pass..." className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-zinc-300">Descrição</Label>
+                        <Textarea value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} placeholder="Detalhes sobre o item..." className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1 min-h-[60px]" />
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-zinc-300">URL da Imagem</Label>
+                        <Input value={itemImageUrl} onChange={(e) => setItemImageUrl(e.target.value)} placeholder="https://..." className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+                        {itemImageUrl && (
+                          <div className="mt-2 w-16 h-16 rounded-lg bg-zinc-800 overflow-hidden border border-zinc-700">
+                            <Image src={itemImageUrl} alt="Preview" width={64} height={64} className="object-cover w-full h-full" unoptimized />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-zinc-300">Preço (Robux) *</Label>
+                        <Input type="number" value={itemPriceRobux} onChange={(e) => setItemPriceRobux(e.target.value)} placeholder="500" className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-zinc-300">Preço Estimado (R$)</Label>
+                        <div className="bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-2 mt-1 text-emerald-400 font-medium">
+                          R$ {((parseInt(itemPriceRobux) || 0) * 0.035).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-zinc-800 pt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-zinc-300">Estoque Limitado</Label>
+                          <p className="text-zinc-500 text-xs">Limitar vendas por dia</p>
+                        </div>
+                        <Switch checked={itemHasStockLimit} onCheckedChange={setItemHasStockLimit} />
+                      </div>
+                      {itemHasStockLimit && (
+                        <Input type="number" value={itemDailyStockLimit} onChange={(e) => setItemDailyStockLimit(e.target.value)} placeholder="Limite diário" className="bg-zinc-800 border-zinc-700 text-zinc-100" />
+                      )}
+                    </div>
+                    
+                    {error && <p className="text-red-400 text-sm bg-red-500/10 p-2 rounded-lg">{error}</p>}
+                    <Button onClick={handleCreateItem} disabled={creatingItem || !itemName.trim()} className="w-full bg-emerald-600 hover:bg-emerald-700">
+                      {creatingItem ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}Criar Item
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Edit Item Dialog */}
           <Dialog open={editItemDialogOpen} onOpenChange={(open) => { setEditItemDialogOpen(open); if (!open) resetItemForm(); }}>
-            <DialogContent className="bg-zinc-900 border-zinc-800">
+            <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-zinc-100">Editar Item</DialogTitle>
-                <DialogDescription className="text-zinc-400">Altere as configurações do item</DialogDescription>
+                <DialogTitle className="text-zinc-100 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-cyan-500" />
+                  Editar Item
+                </DialogTitle>
+                <DialogDescription className="text-zinc-400">
+                  Altere as configurações do item
+                </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-zinc-300">Nome do Item</Label>
-                  <Input value={itemName} onChange={(e) => setItemName(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Descrição</Label>
-                  <Textarea value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                </div>
-                <div>
-                  <Label className="text-zinc-300">URL da Imagem</Label>
-                  <Input value={itemImageUrl} onChange={(e) => setItemImageUrl(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Preço em Robux</Label>
-                  <Input type="number" value={itemPriceRobux} onChange={(e) => setItemPriceRobux(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">Estoque Limitado</Label>
-                  <Switch checked={itemHasStockLimit} onCheckedChange={setItemHasStockLimit} />
-                </div>
-                {itemHasStockLimit && (
-                  <div>
-                    <Label className="text-zinc-300">Limite Diário</Label>
-                    <Input type="number" value={itemDailyStockLimit} onChange={(e) => setItemDailyStockLimit(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+              <div className="space-y-4 mt-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <Label className="text-zinc-300">Nome do Item</Label>
+                    <Input value={itemName} onChange={(e) => setItemName(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">Item Ativo</Label>
-                  <Switch checked={itemActive} onCheckedChange={setItemActive} />
+                  <div className="col-span-2">
+                    <Label className="text-zinc-300">Descrição</Label>
+                    <Textarea value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1 min-h-[60px]" />
+                  </div>
+                  <div className="col-span-2">
+                    <Label className="text-zinc-300">URL da Imagem</Label>
+                    <Input value={itemImageUrl} onChange={(e) => setItemImageUrl(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+                    {itemImageUrl && (
+                      <div className="mt-2 w-16 h-16 rounded-lg bg-zinc-800 overflow-hidden border border-zinc-700">
+                        <Image src={itemImageUrl} alt="Preview" width={64} height={64} className="object-cover w-full h-full" unoptimized />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Preço (Robux)</Label>
+                    <Input type="number" value={itemPriceRobux} onChange={(e) => setItemPriceRobux(e.target.value)} className="bg-zinc-800 border-zinc-700 text-zinc-100 mt-1" />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Preço Estimado (R$)</Label>
+                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-2 mt-1 text-emerald-400 font-medium">
+                      R$ {((parseInt(itemPriceRobux) || 0) * 0.035).toFixed(2)}
+                    </div>
+                  </div>
                 </div>
-                {error && <p className="text-red-400 text-sm">{error}</p>}
+                
+                <div className="border-t border-zinc-800 pt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-zinc-300">Estoque Limitado</Label>
+                      <p className="text-zinc-500 text-xs">Limitar vendas por dia</p>
+                    </div>
+                    <Switch checked={itemHasStockLimit} onCheckedChange={setItemHasStockLimit} />
+                  </div>
+                  {itemHasStockLimit && (
+                    <Input type="number" value={itemDailyStockLimit} onChange={(e) => setItemDailyStockLimit(e.target.value)} placeholder="Limite diário" className="bg-zinc-800 border-zinc-700 text-zinc-100" />
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-zinc-300">Item Ativo</Label>
+                      <p className="text-zinc-500 text-xs">Disponível para venda</p>
+                    </div>
+                    <Switch checked={itemActive} onCheckedChange={setItemActive} />
+                  </div>
+                </div>
+                
+                {error && <p className="text-red-400 text-sm bg-red-500/10 p-2 rounded-lg">{error}</p>}
                 <Button onClick={handleSaveItem} disabled={savingItem || !itemName.trim()} className="w-full bg-emerald-600 hover:bg-emerald-700">
-                  {savingItem ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar
+                  {savingItem ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar Alterações
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
 
+          {/* Items List */}
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-zinc-500">
-              <Package className="w-10 h-10 mb-3" />
-              <p>Nenhum item cadastrado</p>
-              <p className="text-sm">Clique em &quot;Novo Item&quot; para adicionar</p>
+            <div className="bg-zinc-900 rounded-xl border border-zinc-800 border-dashed">
+              <div className="flex flex-col items-center justify-center py-16 text-zinc-500">
+                <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-zinc-600" />
+                </div>
+                <p className="font-medium text-zinc-400">Nenhum item cadastrado</p>
+                <p className="text-sm mt-1">Adicione itens para começar a vender neste jogo</p>
+                <Button onClick={() => setItemDialogOpen(true)} className="mt-4 bg-emerald-600 hover:bg-emerald-700">
+                  <Plus className="w-4 h-4 mr-2" />Adicionar Primeiro Item
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {items.map((item) => (
-                <div key={item.id} className={`bg-zinc-800/50 rounded-lg p-3 flex items-center gap-3 group hover:bg-zinc-800 transition-colors ${!item.active ? 'opacity-60' : ''}`}>
-                  <div className="cursor-grab text-zinc-600 hover:text-zinc-400">
-                    <GripVertical className="w-4 h-4" />
-                  </div>
-                  <div className="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {item.imageUrl ? (
-                      <Image src={item.imageUrl} alt={item.name} width={48} height={48} className="object-cover" unoptimized />
-                    ) : (
-                      <Package className="w-5 h-5 text-zinc-500" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-zinc-100 truncate">{item.name}</p>
-                      {!item.active && <span className="text-xs bg-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded">Inativo</span>}
+                <div 
+                  key={item.id} 
+                  className={`bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden hover:border-zinc-700 transition-all group ${!item.active ? 'opacity-70' : ''}`}
+                >
+                  <div className="p-4">
+                    <div className="flex gap-4">
+                      {/* Item Image */}
+                      <div className="w-20 h-20 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-zinc-700">
+                        {item.imageUrl ? (
+                          <Image src={item.imageUrl} alt={item.name} width={80} height={80} className="object-cover w-full h-full" unoptimized />
+                        ) : (
+                          <Package className="w-8 h-8 text-zinc-600" />
+                        )}
+                      </div>
+                      
+                      {/* Item Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="font-semibold text-zinc-100 truncate">{item.name}</h4>
+                            {item.description && (
+                              <p className="text-zinc-500 text-xs mt-0.5 line-clamp-1">{item.description}</p>
+                            )}
+                          </div>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+                            item.active 
+                              ? 'bg-emerald-500/20 text-emerald-400' 
+                              : 'bg-zinc-700 text-zinc-400'
+                          }`}>
+                            {item.active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                            {item.active ? 'Ativo' : 'Inativo'}
+                          </div>
+                        </div>
+                        
+                        {/* Prices */}
+                        <div className="flex items-center gap-4 mt-3">
+                          <div>
+                            <p className="text-xs text-zinc-500">Robux</p>
+                            <p className="text-yellow-400 font-bold">{item.priceRobux.toLocaleString()} R$</p>
+                          </div>
+                          <div className="w-px h-8 bg-zinc-800" />
+                          <div>
+                            <p className="text-xs text-zinc-500">Preço</p>
+                            <p className="text-emerald-400 font-bold">R$ {(item.priceRobux * 0.035).toFixed(2)}</p>
+                          </div>
+                          {item.hasStockLimit && (
+                            <>
+                              <div className="w-px h-8 bg-zinc-800" />
+                              <div>
+                                <p className="text-xs text-zinc-500">Estoque Hoje</p>
+                                <p className="text-cyan-400 font-bold">{item.availableToday ?? item.dailyStockLimit}/{item.dailyStockLimit}</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="text-yellow-400">{item.priceRobux.toLocaleString()} R$</span>
-                      {item.hasStockLimit && (
-                        <span className="text-zinc-500">{item.availableToday ?? item.dailyStockLimit}/{item.dailyStockLimit} hoje</span>
-                      )}
-                      <span className="text-zinc-500">• {item.totalSales} vendas</span>
+                    
+                    {/* Stats & Actions */}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1.5 text-zinc-400">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span><strong className="text-zinc-200">{item.totalSales || 0}</strong> vendas</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-zinc-400">
+                          <DollarSign className="w-4 h-4" />
+                          <span><strong className="text-emerald-400">R$ {((item.totalSales || 0) * item.priceRobux * 0.035).toFixed(0)}</strong></span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleToggleItemActive(item)} 
+                          className={`h-8 w-8 p-0 ${item.active ? 'text-zinc-400 hover:text-orange-400' : 'text-emerald-400 hover:text-emerald-300'}`}
+                          title={item.active ? 'Desativar' : 'Ativar'}
+                        >
+                          {item.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEditItem(item)} 
+                          className="h-8 w-8 p-0 text-zinc-400 hover:text-cyan-400"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteItem(item.id, item.name)} 
+                          disabled={deletingItem === item.id}
+                          className="h-8 w-8 p-0 text-zinc-400 hover:text-red-400"
+                          title="Excluir"
+                        >
+                          {deletingItem === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="sm" onClick={() => handleToggleItemActive(item)} 
-                      className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-200" title={item.active ? 'Desativar' : 'Ativar'}>
-                      {item.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleEditItem(item)} 
-                      className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-200" title="Editar">
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteItem(item.id, item.name)} 
-                      disabled={deletingItem === item.id}
-                      className="h-8 w-8 p-0 text-red-400 hover:text-red-300" title="Deletar">
-                      {deletingItem === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
+          {/* Private Server Info */}
           {game.requiresPrivateServer && (
-            <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-400">
-                <Server className="w-4 h-4" />
-                <span className="text-sm font-medium">Servidor Privado Configurado</span>
+            <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/30 p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <Server className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-blue-300">Servidor Privado Configurado</span>
+                  {game.privateServerLink && (
+                    <p className="text-blue-400/70 text-xs mt-0.5 truncate">{game.privateServerLink}</p>
+                  )}
+                </div>
               </div>
-              {game.privateServerLink && (
-                <p className="text-blue-300/70 text-xs mt-1 truncate">{game.privateServerLink}</p>
-              )}
             </div>
           )}
         </div>
