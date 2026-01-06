@@ -196,6 +196,7 @@ export default function ConfigPage() {
   }) => (
     <div className="glass-card overflow-hidden">
       <button
+        type="button"
         onClick={onToggle}
         className="w-full p-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors"
       >
@@ -829,6 +830,7 @@ export default function ConfigPage() {
         {/* Dynamic Tabs */}
         <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl w-fit">
           <button
+            type="button"
             onClick={() => setActiveTab('robux')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'robux'
@@ -840,6 +842,7 @@ export default function ConfigPage() {
             Robux
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('games')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'games'
