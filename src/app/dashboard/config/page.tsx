@@ -7,15 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Save, Loader2, FolderOpen, Hash, Palette, Image as ImageIcon, 
   MessageSquare, RefreshCw, Upload, Gamepad2, DollarSign,
-  ChevronDown, ChevronUp, Eye, CheckCircle, AlertCircle
+  ChevronDown, ChevronUp, Eye, CheckCircle, AlertCircle, Info
 } from "lucide-react";
 import { DiscordEmbedPreview } from "@/components/discord-embed-preview";
 import { ImageCropEditor } from "@/components/image-crop-editor";
-import Link from "next/link";
 
 interface DiscordServerData {
   guildId: string;
@@ -25,6 +24,8 @@ interface DiscordServerData {
   textChannels: { id: string; name: string }[];
   roles: { id: string; name: string }[];
 }
+
+type TabType = 'robux' | 'games';
 
 const container = {
   hidden: { opacity: 0 },
@@ -46,6 +47,9 @@ export default function ConfigPage() {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string>("");
   const [cropField, setCropField] = useState<"bannerRobux" | "bannerGamepass" | "purchaseApprovedBanner" | "purchaseLogBanner">("bannerRobux");
+  
+  // Active tab
+  const [activeTab, setActiveTab] = useState<TabType>('robux');
   
   // Collapsible sections
   const [showDiscord, setShowDiscord] = useState(false);
@@ -156,7 +160,7 @@ export default function ConfigPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
       </div>
     );
   }
@@ -193,75 +197,32 @@ export default function ConfigPage() {
         </div>
         {open ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
       </button>
-      {open && <div className="px-4 pb-4 space-y-4">{children}</div>}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="px-4 pb-4 space-y-4">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 
-  return (
+  // Tab Content Components
+  const RobuxTabContent = () => (
     <motion.div 
       className="space-y-5"
-      variants={container}
-      initial="hidden"
-      animate="show"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.2 }}
     >
-      {/* Header */}
-      <motion.div variants={item} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Palette className="w-6 h-6 text-pink-400" />
-            Visual & Mensagens
-          </h1>
-          <p className="text-zinc-500 text-sm mt-0.5">Personalize a aparência do bot</p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/dashboard/config/games">
-            <Button variant="outline" size="sm" className="border-zinc-700 hover:bg-zinc-800">
-              <Gamepad2 className="w-4 h-4 mr-2" />
-              Jogos
-            </Button>
-          </Link>
-          {!serverData && (
-            <Button 
-              onClick={handleSync} 
-              disabled={saving} 
-              variant="outline" 
-              size="sm"
-              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${saving ? 'animate-spin' : ''}`} />
-              Sync
-            </Button>
-          )}
-          <Button 
-            onClick={handleSave} 
-            disabled={saving} 
-            size="sm"
-            className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            Salvar
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Toast */}
-      {message && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
-            message.type === 'success' 
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-              : 'bg-red-500/10 text-red-400 border border-red-500/20'
-          }`}
-        >
-          {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-          <span>{message.text}</span>
-        </motion.div>
-      )}
-
-      {/* Store Config - Always visible */}
-      <motion.div variants={item} className="glass-card p-5">
+      {/* Store Config */}
+      <div className="glass-card p-5">
         <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
           <DollarSign className="w-4 h-4 text-emerald-400" />
           Configurações da Loja
@@ -305,245 +266,433 @@ export default function ConfigPage() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Visual Section */}
-      <motion.div variants={item}>
-        <Section
-          title="Mensagens & Embeds"
-          icon={MessageSquare}
-          iconColor="bg-pink-500/10 text-pink-400"
-          open={showVisual}
-          onToggle={() => setShowVisual(!showVisual)}
-        >
-          {/* Banner */}
-          <div className="space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-2">
-              <ImageIcon className="w-3 h-3" />
-              Banner Robux
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                value={config.bannerRobux || ""}
-                onChange={(e) => updateField("bannerRobux", e.target.value)}
-                className="bg-zinc-800/50 border-zinc-700 flex-1"
-                placeholder="URL da imagem ou faça upload"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={uploading}
-                onClick={() => document.getElementById('banner-robux-upload')?.click()}
-                className="border-zinc-700 hover:bg-zinc-700"
-              >
-                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              </Button>
-              <input
-                id="banner-robux-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(e, "bannerRobux")}
-              />
-            </div>
-          </div>
-
-          {/* Embed Message */}
-          <div className="space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase">Mensagem do Embed</Label>
-            <Textarea
-              value={config.embedRobuxMessage || ""}
-              onChange={(e) => updateField("embedRobuxMessage", e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 min-h-[100px] font-mono text-sm"
-              placeholder="Compre Robux com segurança..."
+      <Section
+        title="Mensagens & Embeds"
+        icon={MessageSquare}
+        iconColor="bg-pink-500/10 text-pink-400"
+        open={showVisual}
+        onToggle={() => setShowVisual(!showVisual)}
+      >
+        {/* Banner */}
+        <div className="space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase flex items-center gap-2">
+            <ImageIcon className="w-3 h-3" />
+            Banner Robux
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              value={config.bannerRobux || ""}
+              onChange={(e) => updateField("bannerRobux", e.target.value)}
+              className="bg-zinc-800/50 border-zinc-700 flex-1"
+              placeholder="URL da imagem ou faça upload"
             />
-            <div className="text-xs text-zinc-600 bg-zinc-800/30 rounded p-2">
-              <span className="text-zinc-500">Placeholders:</span>{" "}
-              <code className="text-pink-400">{"{store_name}"}</code>{" "}
-              <code className="text-pink-400">{"{price_per_k}"}</code>{" "}
-              <code className="text-pink-400">{"{min_order}"}</code>{" "}
-              <code className="text-pink-400">{"{max_order}"}</code>
-            </div>
-          </div>
-
-          {/* Approved Message */}
-          <div className="pt-4 border-t border-zinc-800 space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase">Mensagem de Aprovação</Label>
-            <Textarea
-              value={config.purchaseApprovedMessage || ""}
-              onChange={(e) => updateField("purchaseApprovedMessage", e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
-              placeholder="Sua compra foi aprovada..."
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              onClick={() => document.getElementById('banner-robux-upload')?.click()}
+              className="border-zinc-700 hover:bg-zinc-700"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            </Button>
+            <input
+              id="banner-robux-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleImageUpload(e, "bannerRobux")}
             />
-            <div className="flex gap-2">
-              <Input
-                value={config.purchaseApprovedBanner || ""}
-                onChange={(e) => updateField("purchaseApprovedBanner", e.target.value)}
-                className="bg-zinc-800/50 border-zinc-700 flex-1"
-                placeholder="Banner de aprovação (URL)"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => document.getElementById('banner-approved-upload')?.click()}
-                className="border-zinc-700"
-              >
-                <Upload className="w-4 h-4" />
-              </Button>
-              <input
-                id="banner-approved-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(e, "purchaseApprovedBanner")}
-              />
-            </div>
           </div>
+        </div>
 
-          {/* Log Message */}
-          <div className="pt-4 border-t border-zinc-800 space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase">Mensagem de Log</Label>
-            <Textarea
-              value={config.purchaseLogMessage || ""}
-              onChange={(e) => updateField("purchaseLogMessage", e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
-              placeholder="Nova compra realizada..."
-            />
-            <div className="flex gap-2">
-              <Input
-                value={config.purchaseLogBanner || ""}
-                onChange={(e) => updateField("purchaseLogBanner", e.target.value)}
-                className="bg-zinc-800/50 border-zinc-700 flex-1"
-                placeholder="Banner de log (URL)"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => document.getElementById('banner-log-upload')?.click()}
-                className="border-zinc-700"
-              >
-                <Upload className="w-4 h-4" />
-              </Button>
-              <input
-                id="banner-log-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(e, "purchaseLogBanner")}
-              />
-            </div>
+        {/* Embed Message */}
+        <div className="space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem do Embed</Label>
+          <Textarea
+            value={config.embedRobuxMessage || ""}
+            onChange={(e) => updateField("embedRobuxMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[100px] font-mono text-sm"
+            placeholder="Compre Robux com segurança..."
+          />
+          <div className="text-xs text-zinc-600 bg-zinc-800/30 rounded p-2">
+            <span className="text-zinc-500">Placeholders:</span>{" "}
+            <code className="text-pink-400">{"{store_name}"}</code>{" "}
+            <code className="text-pink-400">{"{price_per_k}"}</code>{" "}
+            <code className="text-pink-400">{"{min_order}"}</code>{" "}
+            <code className="text-pink-400">{"{max_order}"}</code>
           </div>
-        </Section>
-      </motion.div>
+        </div>
+
+        {/* Approved Message */}
+        <div className="pt-4 border-t border-zinc-800 space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem de Aprovação</Label>
+          <Textarea
+            value={config.purchaseApprovedMessage || ""}
+            onChange={(e) => updateField("purchaseApprovedMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
+            placeholder="Sua compra foi aprovada..."
+          />
+          <div className="flex gap-2">
+            <Input
+              value={config.purchaseApprovedBanner || ""}
+              onChange={(e) => updateField("purchaseApprovedBanner", e.target.value)}
+              className="bg-zinc-800/50 border-zinc-700 flex-1"
+              placeholder="Banner de aprovação (URL)"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => document.getElementById('banner-approved-upload')?.click()}
+              className="border-zinc-700"
+            >
+              <Upload className="w-4 h-4" />
+            </Button>
+            <input
+              id="banner-approved-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleImageUpload(e, "purchaseApprovedBanner")}
+            />
+          </div>
+        </div>
+
+        {/* Log Message */}
+        <div className="pt-4 border-t border-zinc-800 space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem de Log</Label>
+          <Textarea
+            value={config.purchaseLogMessage || ""}
+            onChange={(e) => updateField("purchaseLogMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
+            placeholder="Nova compra realizada..."
+          />
+          <div className="flex gap-2">
+            <Input
+              value={config.purchaseLogBanner || ""}
+              onChange={(e) => updateField("purchaseLogBanner", e.target.value)}
+              className="bg-zinc-800/50 border-zinc-700 flex-1"
+              placeholder="Banner de log (URL)"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => document.getElementById('banner-log-upload')?.click()}
+              className="border-zinc-700"
+            >
+              <Upload className="w-4 h-4" />
+            </Button>
+            <input
+              id="banner-log-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleImageUpload(e, "purchaseLogBanner")}
+            />
+          </div>
+        </div>
+      </Section>
 
       {/* Preview Section */}
-      <motion.div variants={item}>
-        <Section
-          title="Preview do Embed"
-          icon={Eye}
-          iconColor="bg-cyan-500/10 text-cyan-400"
-          open={showPreview}
-          onToggle={() => setShowPreview(!showPreview)}
-        >
-          <DiscordEmbedPreview
-            title={`💎 ${config.storeName || "Nova Era Store"}`}
-            description={processPlaceholders(config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
-            color={config.storeColor || "#257e24"}
-            imageUrl={config.bannerRobux}
-          />
-        </Section>
-      </motion.div>
+      <Section
+        title="Preview do Embed"
+        icon={Eye}
+        iconColor="bg-cyan-500/10 text-cyan-400"
+        open={showPreview}
+        onToggle={() => setShowPreview(!showPreview)}
+      >
+        <DiscordEmbedPreview
+          title={`💎 ${config.storeName || "Nova Era Store"}`}
+          description={processPlaceholders(config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
+          color={config.storeColor || "#257e24"}
+          imageUrl={config.bannerRobux}
+        />
+      </Section>
 
       {/* Discord Section */}
-      <motion.div variants={item}>
-        <Section
-          title="Categorias & Canais"
-          icon={FolderOpen}
-          iconColor="bg-blue-500/10 text-blue-400"
-          open={showDiscord}
-          onToggle={() => setShowDiscord(!showDiscord)}
-        >
-          {!serverData && (
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-400 mb-4">
-              💡 Clique em &quot;Sync&quot; para carregar categorias e canais do Discord
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-zinc-400 text-xs uppercase">Categoria Carrinhos</Label>
-              {serverData ? (
-                <Select value={config.categoryCarts || ""} onValueChange={(value) => updateField("categoryCarts", value)}>
-                  <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {serverData.categories.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input value={config.categoryCarts || ""} onChange={(e) => updateField("categoryCarts", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-zinc-400 text-xs uppercase">Categoria Aprovados</Label>
-              {serverData ? (
-                <Select value={config.categoryApproved || ""} onValueChange={(value) => updateField("categoryApproved", value)}>
-                  <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {serverData.categories.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input value={config.categoryApproved || ""} onChange={(e) => updateField("categoryApproved", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Logs Compras</Label>
-              {serverData ? (
-                <Select value={config.channelLogsPurchases || ""} onValueChange={(value) => updateField("channelLogsPurchases", value)}>
-                  <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input value={config.channelLogsPurchases || ""} onChange={(e) => updateField("channelLogsPurchases", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Logs Entregas</Label>
-              {serverData ? (
-                <Select value={config.channelLogsDeliveries || ""} onValueChange={(value) => updateField("channelLogsDeliveries", value)}>
-                  <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input value={config.channelLogsDeliveries || ""} onChange={(e) => updateField("channelLogsDeliveries", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Setup Robux</Label>
-              {serverData ? (
-                <Select value={config.channelSetupRobux || ""} onValueChange={(value) => updateField("channelSetupRobux", value)}>
-                  <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input value={config.channelSetupRobux || ""} onChange={(e) => updateField("channelSetupRobux", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
-              )}
-            </div>
+      <Section
+        title="Categorias & Canais"
+        icon={FolderOpen}
+        iconColor="bg-blue-500/10 text-blue-400"
+        open={showDiscord}
+        onToggle={() => setShowDiscord(!showDiscord)}
+      >
+        {!serverData && (
+          <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-400 mb-4">
+            💡 Clique em &quot;Sync&quot; para carregar categorias e canais do Discord
           </div>
-        </Section>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase">Categoria Carrinhos</Label>
+            {serverData ? (
+              <Select value={config.categoryCarts || ""} onValueChange={(value) => updateField("categoryCarts", value)}>
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.categories.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={config.categoryCarts || ""} onChange={(e) => updateField("categoryCarts", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase">Categoria Aprovados</Label>
+            {serverData ? (
+              <Select value={config.categoryApproved || ""} onValueChange={(value) => updateField("categoryApproved", value)}>
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.categories.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={config.categoryApproved || ""} onChange={(e) => updateField("categoryApproved", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Logs Compras</Label>
+            {serverData ? (
+              <Select value={config.channelLogsPurchases || ""} onValueChange={(value) => updateField("channelLogsPurchases", value)}>
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={config.channelLogsPurchases || ""} onChange={(e) => updateField("channelLogsPurchases", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Logs Entregas</Label>
+            {serverData ? (
+              <Select value={config.channelLogsDeliveries || ""} onValueChange={(value) => updateField("channelLogsDeliveries", value)}>
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={config.channelLogsDeliveries || ""} onChange={(e) => updateField("channelLogsDeliveries", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-1"><Hash className="w-3 h-3" /> Canal Setup Robux</Label>
+            {serverData ? (
+              <Select value={config.channelSetupRobux || ""} onValueChange={(value) => updateField("channelSetupRobux", value)}>
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.textChannels.map((ch) => <SelectItem key={ch.id} value={ch.id}>{ch.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={config.channelSetupRobux || ""} onChange={(e) => updateField("channelSetupRobux", e.target.value)} className="bg-zinc-800/50 border-zinc-700" placeholder="ID" />
+            )}
+          </div>
+        </div>
+      </Section>
+    </motion.div>
+  );
+
+  const GamesTabContent = () => (
+    <motion.div 
+      className="space-y-5"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      {/* Info Banner */}
+      <div className="glass-card p-4 border-l-2 border-l-blue-500">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-blue-500/10">
+            <Info className="w-4 h-4 text-blue-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-blue-400 font-medium text-sm">Funcionalidade em Desenvolvimento</p>
+            <p className="text-zinc-400 text-sm mt-1">
+              Por enquanto, você pode apenas configurar o <strong className="text-white">canal de setup</strong>. 
+              O bot enviará uma mensagem &quot;Em breve&quot; neste canal.
+              Mais configurações de jogos estarão disponíveis em breve.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Channel Setup */}
+      <div className="glass-card p-5">
+        <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
+          <Hash className="w-4 h-4 text-emerald-400" />
+          Canal de Setup
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase">Canal de Setup de Jogos</Label>
+            <p className="text-sm text-zinc-500">
+              Canal onde será enviada a mensagem de setup para compra de gamepasses
+            </p>
+            {serverData ? (
+              <Select
+                value={config.channelSetupGamepass || ""}
+                onValueChange={(value) => updateField("channelSetupGamepass", value)}
+              >
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
+                  <SelectValue placeholder="Selecione o canal" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.textChannels.map((channel) => (
+                    <SelectItem key={channel.id} value={channel.id}>
+                      # {channel.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="flex gap-2">
+                <Input 
+                  value={config.channelSetupGamepass || ""} 
+                  onChange={(e) => updateField("channelSetupGamepass", e.target.value)} 
+                  className="bg-zinc-800/50 border-zinc-700" 
+                  placeholder="ID do canal" 
+                />
+                <Button 
+                  onClick={handleSync} 
+                  variant="outline" 
+                  className="border-blue-500/50 text-blue-400"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Coming Soon Features */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="glass-card p-5 opacity-50">
+          <h3 className="font-semibold text-zinc-400 flex items-center gap-2 mb-2">
+            <Gamepad2 className="w-4 h-4" />
+            Jogos Disponíveis
+          </h3>
+          <p className="text-sm text-zinc-500">Em breve você poderá gerenciar jogos e gamepasses disponíveis.</p>
+        </div>
+        <div className="glass-card p-5 opacity-50">
+          <h3 className="font-semibold text-zinc-400 flex items-center gap-2 mb-2">
+            <DollarSign className="w-4 h-4" />
+            Preços por Jogo
+          </h3>
+          <p className="text-sm text-zinc-500">Configure preços personalizados para cada jogo.</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <motion.div 
+      className="space-y-5"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Header with Tabs */}
+      <motion.div variants={item} className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Palette className="w-6 h-6 text-pink-400" />
+              Visual & Mensagens
+            </h1>
+            <p className="text-zinc-500 text-sm mt-0.5">Personalize a aparência do bot</p>
+          </div>
+          <div className="flex gap-2">
+            {!serverData && (
+              <Button 
+                onClick={handleSync} 
+                disabled={saving} 
+                variant="outline" 
+                size="sm"
+                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${saving ? 'animate-spin' : ''}`} />
+                Sync
+              </Button>
+            )}
+            <Button 
+              onClick={handleSave} 
+              disabled={saving} 
+              size="sm"
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Salvar
+            </Button>
+          </div>
+        </div>
+
+        {/* Dynamic Tabs */}
+        <div className="flex gap-1 p-1 bg-zinc-800/50 rounded-xl w-fit">
+          <button
+            onClick={() => setActiveTab('robux')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'robux'
+                ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
+            }`}
+          >
+            <DollarSign className="w-4 h-4" />
+            Robux
+          </button>
+          <button
+            onClick={() => setActiveTab('games')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'games'
+                ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50'
+            }`}
+          >
+            <Gamepad2 className="w-4 h-4" />
+            Jogos (Gamepass)
+          </button>
+        </div>
       </motion.div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {message && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+              message.type === 'success' 
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+            }`}
+          >
+            {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+            <span>{message.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'robux' ? (
+          <RobuxTabContent key="robux" />
+        ) : (
+          <GamesTabContent key="games" />
+        )}
+      </AnimatePresence>
 
       <ImageCropEditor
         image={imageToCrop}

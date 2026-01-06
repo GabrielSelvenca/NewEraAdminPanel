@@ -60,12 +60,6 @@
       "namedRegex": "^/dashboard/config(?:/)?$"
     },
     {
-      "page": "/dashboard/config/games",
-      "regex": "^/dashboard/config/games(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/dashboard/config/games(?:/)?$"
-    },
-    {
       "page": "/dashboard/coupons",
       "regex": "^/dashboard/coupons(?:/)?$",
       "routeKeys": {},
