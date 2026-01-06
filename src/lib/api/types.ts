@@ -99,6 +99,9 @@ export interface BotConfig {
   purchaseApprovedBanner?: string;
   purchaseLogMessage?: string;
   purchaseLogBanner?: string;
+  // Mensagens específicas para Jogos
+  gameApprovedMessage?: string;
+  gameDeliveredMessage?: string;
   refreshRequested?: boolean;
   updatedAt?: string;
   // Tempos & Limites

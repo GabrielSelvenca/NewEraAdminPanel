@@ -514,90 +514,218 @@ export default function ConfigPage() {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Info Banner */}
-      <div className="glass-card p-4 border-l-2 border-l-blue-500">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/10">
-            <Info className="w-4 h-4 text-blue-400" />
+      {/* Link para gestão de jogos */}
+      <div className="glass-card p-4 border-l-2 border-l-emerald-500">
+        <div className="flex items-center justify-between">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Gamepad2 className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-emerald-400 font-medium text-sm">Gerenciar Jogos e Itens</p>
+              <p className="text-zinc-400 text-sm mt-1">
+                Para adicionar, editar ou remover jogos e itens, acesse a página de Jogos no menu lateral.
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-blue-400 font-medium text-sm">Funcionalidade em Desenvolvimento</p>
-            <p className="text-zinc-400 text-sm mt-1">
-              Por enquanto, você pode apenas configurar o <strong className="text-white">canal de setup</strong>. 
-              O bot enviará uma mensagem &quot;Em breve&quot; neste canal.
-              Mais configurações de jogos estarão disponíveis em breve.
-            </p>
-          </div>
+          <Button 
+            onClick={() => window.location.href = '/dashboard/games'}
+            variant="outline"
+            size="sm"
+            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+          >
+            <Gamepad2 className="w-4 h-4 mr-2" />
+            Ir para Jogos
+          </Button>
         </div>
       </div>
 
-      {/* Channel Setup */}
+      {/* Store Config para Jogos */}
       <div className="glass-card p-5">
         <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
-          <Hash className="w-4 h-4 text-emerald-400" />
-          Canal de Setup
+          <DollarSign className="w-4 h-4 text-emerald-400" />
+          Configurações de Preço
         </h3>
-        
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase">Canal de Setup de Jogos</Label>
-            <p className="text-sm text-zinc-500">
-              Canal onde será enviada a mensagem de setup para compra de gamepasses
-            </p>
-            {serverData ? (
-              <Select
-                value={config.channelSetupGamepass || ""}
-                onValueChange={(value) => updateField("channelSetupGamepass", value)}
-              >
-                <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
-                  <SelectValue placeholder="Selecione o canal" />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700">
-                  {serverData.textChannels.map((channel) => (
-                    <SelectItem key={channel.id} value={channel.id}>
-                      # {channel.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div className="flex gap-2">
-                <Input 
-                  value={config.channelSetupGamepass || ""} 
-                  onChange={(e) => updateField("channelSetupGamepass", e.target.value)} 
-                  className="bg-zinc-800/50 border-zinc-700" 
-                  placeholder="ID do canal" 
-                />
-                <Button 
-                  onClick={handleSync} 
-                  variant="outline" 
-                  className="border-blue-500/50 text-blue-400"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+            <Label className="text-zinc-400 text-xs uppercase">Preço por 1000 Robux (Jogos)</Label>
+            <p className="text-xs text-zinc-500 mb-2">Usado para calcular o preço dos itens baseado no custo em Robux</p>
+            <NumberInput
+              value={config.pricePerKGamepass || 35.00}
+              onChange={(val) => updateField("pricePerKGamepass", val)}
+              min={1}
+              max={200}
+              step={0.5}
+              decimals={2}
+              prefix="R$"
+              size="sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase">Cor do Embed de Jogos</Label>
+            <div className="flex gap-2">
+              <Input
+                type="color"
+                value={config.storeColor || "#10b981"}
+                onChange={(e) => updateField("storeColor", e.target.value)}
+                className="w-12 h-10 p-1 bg-zinc-800/50 border-zinc-700 cursor-pointer"
+              />
+              <Input
+                value={config.storeColor || "#10b981"}
+                onChange={(e) => updateField("storeColor", e.target.value)}
+                className="flex-1 bg-zinc-800/50 border-zinc-700 font-mono"
+                placeholder="#10b981"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Coming Soon Features */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-card p-5 opacity-50">
-          <h3 className="font-semibold text-zinc-400 flex items-center gap-2 mb-2">
-            <Gamepad2 className="w-4 h-4" />
-            Jogos Disponíveis
-          </h3>
-          <p className="text-sm text-zinc-500">Em breve você poderá gerenciar jogos e gamepasses disponíveis.</p>
-        </div>
-        <div className="glass-card p-5 opacity-50">
-          <h3 className="font-semibold text-zinc-400 flex items-center gap-2 mb-2">
-            <DollarSign className="w-4 h-4" />
-            Preços por Jogo
-          </h3>
-          <p className="text-sm text-zinc-500">Configure preços personalizados para cada jogo.</p>
+      {/* Canal de Setup */}
+      <div className="glass-card p-5">
+        <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
+          <Hash className="w-4 h-4 text-blue-400" />
+          Canal de Setup
+        </h3>
+        <div className="space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Canal de Setup de Jogos</Label>
+          <p className="text-sm text-zinc-500 mb-2">
+            Canal onde será enviada a mensagem de seleção de jogos para compra de itens
+          </p>
+          {serverData ? (
+            <Select
+              value={config.channelSetupGamepass || ""}
+              onValueChange={(value) => updateField("channelSetupGamepass", value)}
+            >
+              <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
+                <SelectValue placeholder="Selecione o canal" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700">
+                {serverData.textChannels.map((channel) => (
+                  <SelectItem key={channel.id} value={channel.id}>
+                    # {channel.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="flex gap-2">
+              <Input 
+                value={config.channelSetupGamepass || ""} 
+                onChange={(e) => updateField("channelSetupGamepass", e.target.value)} 
+                className="bg-zinc-800/50 border-zinc-700" 
+                placeholder="ID do canal" 
+              />
+              <Button 
+                onClick={handleSync} 
+                variant="outline" 
+                className="border-blue-500/50 text-blue-400"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Visual Section - Mensagens & Embeds */}
+      <Section
+        title="Mensagens & Embeds"
+        icon={MessageSquare}
+        iconColor="bg-pink-500/10 text-pink-400"
+        open={showVisual}
+        onToggle={() => setShowVisual(!showVisual)}
+      >
+        {/* Banner */}
+        <div className="space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase flex items-center gap-2">
+            <ImageIcon className="w-3 h-3" />
+            Banner de Jogos
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              value={config.bannerGamepass || ""}
+              onChange={(e) => updateField("bannerGamepass", e.target.value)}
+              className="bg-zinc-800/50 border-zinc-700 flex-1"
+              placeholder="URL da imagem ou faça upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              onClick={() => document.getElementById('banner-gamepass-upload')?.click()}
+              className="border-zinc-700 hover:bg-zinc-700"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            </Button>
+            <input
+              id="banner-gamepass-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleImageUpload(e, "bannerGamepass")}
+            />
+          </div>
+        </div>
+
+        {/* Embed Message */}
+        <div className="space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem do Embed de Jogos</Label>
+          <Textarea
+            value={config.embedGamepassMessage || ""}
+            onChange={(e) => updateField("embedGamepassMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[100px] font-mono text-sm"
+            placeholder="Compre itens exclusivos para seus jogos favoritos..."
+          />
+          <div className="text-xs text-zinc-600 bg-zinc-800/30 rounded p-2">
+            <span className="text-zinc-500">Placeholders:</span>{" "}
+            <code className="text-pink-400">{"{store_name}"}</code>{" "}
+            <code className="text-pink-400">{"{price_per_k}"}</code>{" "}
+            <code className="text-pink-400">{"{lista-jogos}"}</code>
+          </div>
+        </div>
+
+        {/* Approved Message (compartilhada com Robux ou pode criar específica) */}
+        <div className="pt-4 border-t border-zinc-800 space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem de Aprovação (Jogos)</Label>
+          <p className="text-xs text-zinc-500">Mensagem enviada quando o pagamento de itens de jogo é aprovado</p>
+          <Textarea
+            value={config.gameApprovedMessage || config.purchaseApprovedMessage || ""}
+            onChange={(e) => updateField("gameApprovedMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
+            placeholder="Sua compra foi aprovada! Aguarde o entregador no jogo..."
+          />
+        </div>
+
+        {/* Delivery Message */}
+        <div className="pt-4 border-t border-zinc-800 space-y-2">
+          <Label className="text-zinc-400 text-xs uppercase">Mensagem de Entrega (Jogos)</Label>
+          <p className="text-xs text-zinc-500">Mensagem enviada quando os itens são entregues no jogo</p>
+          <Textarea
+            value={config.gameDeliveredMessage || ""}
+            onChange={(e) => updateField("gameDeliveredMessage", e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 min-h-[80px] font-mono text-sm"
+            placeholder="Seus itens foram entregues com sucesso! 🎉"
+          />
+        </div>
+      </Section>
+
+      {/* Preview Section */}
+      <Section
+        title="Preview do Embed"
+        icon={Eye}
+        iconColor="bg-cyan-500/10 text-cyan-400"
+        open={showPreview}
+        onToggle={() => setShowPreview(!showPreview)}
+      >
+        <DiscordEmbedPreview
+          title={`🎮 ${config.storeName || "Nova Era Store"} - Jogos`}
+          description={processPlaceholders(config.embedGamepassMessage || `Compre itens exclusivos para seus jogos!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
+          color={config.storeColor || "#10b981"}
+          imageUrl={config.bannerGamepass}
+          pricePerKRobux={config.pricePerKGamepass || 35.00}
+        />
+      </Section>
     </motion.div>
   );
 
