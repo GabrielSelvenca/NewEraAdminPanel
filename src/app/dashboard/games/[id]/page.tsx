@@ -73,6 +73,34 @@ export default function GameEditPage() {
   const [stats, setStats] = useState<GameStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
+  // Preço por 1000 Robux (Gamepass)
+  const [pricePerK, setPricePerK] = useState<number>(35);
+
+  // Função para formatar valores em BRL
+  const formatBRL = (value: number) => {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  // Calcula preço em R$ baseado no Robux
+  const calculatePrice = (robux: number) => {
+    return (robux / 1000) * pricePerK;
+  };
+
+  // Carrega config com pricePerKGamepass
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const config = await api.getConfig();
+        if (config.pricePerKGamepass) {
+          setPricePerK(config.pricePerKGamepass);
+        }
+      } catch {
+        // Usa valor padrão
+      }
+    };
+    loadConfig();
+  }, []);
+
   const loadGame = useCallback(async () => {
     try {
       setLoading(true);
@@ -486,7 +514,7 @@ export default function GameEditPage() {
                       <div>
                         <Label className="text-zinc-300">Preço Estimado (R$)</Label>
                         <div className="bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-2 mt-1 text-emerald-400 font-medium">
-                          R$ {((parseInt(itemPriceRobux) || 0) * 0.035).toFixed(2)}
+                          R$ {formatBRL(calculatePrice(parseInt(itemPriceRobux) || 0))}
                         </div>
                       </div>
                     </div>
@@ -552,7 +580,7 @@ export default function GameEditPage() {
                   <div>
                     <Label className="text-zinc-300">Preço Estimado (R$)</Label>
                     <div className="bg-zinc-800/50 border border-zinc-700 rounded-md px-3 py-2 mt-1 text-emerald-400 font-medium">
-                      R$ {((parseInt(itemPriceRobux) || 0) * 0.035).toFixed(2)}
+                      R$ {formatBRL(calculatePrice(parseInt(itemPriceRobux) || 0))}
                     </div>
                   </div>
                 </div>
@@ -640,12 +668,12 @@ export default function GameEditPage() {
                         <div className="flex items-center gap-4 mt-3">
                           <div>
                             <p className="text-xs text-zinc-500">Robux</p>
-                            <p className="text-yellow-400 font-bold">{item.priceRobux.toLocaleString()} R$</p>
+                            <p className="text-yellow-400 font-bold">{item.priceRobux.toLocaleString('pt-BR')}</p>
                           </div>
                           <div className="w-px h-8 bg-zinc-800" />
                           <div>
                             <p className="text-xs text-zinc-500">Preço</p>
-                            <p className="text-emerald-400 font-bold">R$ {(item.priceRobux * 0.035).toFixed(2)}</p>
+                            <p className="text-emerald-400 font-bold">R$ {formatBRL(calculatePrice(item.priceRobux))}</p>
                           </div>
                           {item.hasStockLimit && (
                             <>
@@ -669,7 +697,7 @@ export default function GameEditPage() {
                         </div>
                         <div className="flex items-center gap-1.5 text-zinc-400">
                           <DollarSign className="w-4 h-4" />
-                          <span><strong className="text-emerald-400">R$ {((item.totalSales || 0) * item.priceRobux * 0.035).toFixed(0)}</strong></span>
+                          <span><strong className="text-emerald-400">R$ {formatBRL(calculatePrice(item.priceRobux) * (item.totalSales || 0))}</strong></span>
                         </div>
                       </div>
                       
