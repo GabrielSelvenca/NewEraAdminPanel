@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api, Game } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, RefreshCw, Link as LinkIcon, Gamepad2, Loader2, DollarSign, ShoppingCart, Pencil } from "lucide-react";
+import { Plus, RefreshCw, Link as LinkIcon, Gamepad2, Loader2, DollarSign, ShoppingCart, Pencil, Package, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import { toast } from "@/lib/error-handling";
 
 export default function GamesPage() {
   const router = useRouter();
@@ -22,33 +23,54 @@ export default function GamesPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  const loadGames = async () => {
+  const loadGames = useCallback(async () => {
     try {
       setLoading(true);
       const data = await api.getGames();
       setGames(data);
-    } catch (err) {
-      } finally {
+    } catch {
+      toast.error("Erro ao carregar jogos");
+    } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadGames();
-  }, []);
+  }, [loadGames]);
+
+  // Extrair PlaceId do link do Roblox
+  const extractPlaceId = (input: string): number | null => {
+    // Se já é um número
+    const directNum = parseInt(input);
+    if (!isNaN(directNum) && directNum > 0) return directNum;
+    
+    // Extrair de URL
+    const match = input.match(/roblox\.com\/games\/(\d+)/);
+    if (match) return parseInt(match[1]);
+    
+    return null;
+  };
 
   const handleSync = async () => {
     if (!syncUrl.trim()) return;
     setSyncing(true);
     setError("");
+    
+    const placeId = extractPlaceId(syncUrl.trim());
+    if (!placeId) {
+      setError("Link ou ID inválido. Use o link do jogo ou o PlaceId.");
+      setSyncing(false);
+      return;
+    }
+    
     try {
-      const result = await api.syncRoblox(syncUrl.trim());
+      const result = await api.createGameFromRoblox(placeId);
       setSyncDialogOpen(false);
       setSyncUrl("");
+      toast.success(`Jogo "${result.game.name}" criado com sucesso!`);
       await loadGames();
-      if (result.game) {
-        router.push(`/dashboard/games/${result.game.id}`);
-      }
+      router.push(`/dashboard/games/${result.game.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao sincronizar");
     } finally {
@@ -61,10 +83,11 @@ export default function GamesPage() {
     setCreating(true);
     setError("");
     try {
-      const game = await api.createGame({ name: gameName.trim(), active: true });
+      const result = await api.createGame({ name: gameName.trim(), active: false });
       setManualDialogOpen(false);
       setGameName("");
-      router.push(`/dashboard/games/${game.id}`);
+      toast.success("Jogo criado com sucesso!");
+      router.push(`/dashboard/games/${result.game.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar jogo");
     } finally {
@@ -169,7 +192,7 @@ export default function GamesPage() {
           {games.map((game) => (
             <div
               key={game.id}
-              className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden hover:border-zinc-700 transition-colors group"
+              className={`bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden hover:border-zinc-700 transition-colors group ${!game.active ? 'opacity-70' : ''}`}
             >
               <div className="relative aspect-video bg-zinc-800">
                 {game.imageUrl ? (
@@ -185,29 +208,47 @@ export default function GamesPage() {
                     <Gamepad2 className="w-12 h-12 text-zinc-700" />
                   </div>
                 )}
-                {!game.active && (
-                  <div className="absolute top-2 right-2 bg-zinc-900/80 px-2 py-1 rounded text-xs text-zinc-400">
-                    Inativo
-                  </div>
-                )}
+                <div className="absolute top-2 right-2 flex gap-1">
+                  {game.requiresPrivateServer && (
+                    <div className="bg-blue-500/80 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                      <Package className="w-3 h-3" />PS
+                    </div>
+                  )}
+                  {!game.active ? (
+                    <div className="bg-zinc-900/80 px-2 py-1 rounded text-xs text-zinc-400 flex items-center gap-1">
+                      <EyeOff className="w-3 h-3" />Inativo
+                    </div>
+                  ) : (
+                    <div className="bg-emerald-500/80 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                      <Eye className="w-3 h-3" />Ativo
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-zinc-100 truncate mb-3">{game.name}</h3>
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <h3 className="font-semibold text-zinc-100 truncate mb-1">{game.name}</h3>
+                <p className="text-zinc-500 text-xs mb-3">{game.activeItemsCount || 0} de {game.itemsCount || 0} itens ativos</p>
+                <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="bg-zinc-800/50 rounded-lg p-2">
-                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1">
+                    <div className="flex items-center gap-1 text-zinc-400 text-xs mb-1">
                       <ShoppingCart className="w-3 h-3" />
-                      Vendas
                     </div>
-                    <p className="text-zinc-100 font-semibold">{game.totalSales || 0}</p>
+                    <p className="text-zinc-100 font-semibold text-sm">{game.totalSales || 0}</p>
                   </div>
                   <div className="bg-zinc-800/50 rounded-lg p-2">
-                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1">
+                    <div className="flex items-center gap-1 text-zinc-400 text-xs mb-1">
                       <DollarSign className="w-3 h-3" />
-                      Receita
                     </div>
-                    <p className="text-emerald-400 font-semibold">
-                      R$ {(game.totalRevenue || 0).toFixed(2)}
+                    <p className="text-emerald-400 font-semibold text-sm">
+                      R$ {((game.totalRevenue || 0) / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                  <div className="bg-zinc-800/50 rounded-lg p-2">
+                    <div className="flex items-center gap-1 text-yellow-400 text-xs mb-1">
+                      R$
+                    </div>
+                    <p className="text-yellow-400 font-semibold text-sm">
+                      {((game.totalRobuxSold || 0) / 1000).toFixed(1)}k
                     </p>
                   </div>
                 </div>
@@ -216,7 +257,7 @@ export default function GamesPage() {
                   className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-100"
                 >
                   <Pencil className="w-4 h-4 mr-2" />
-                  Editar
+                  Gerenciar
                 </Button>
               </div>
             </div>

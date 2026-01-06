@@ -11,16 +11,45 @@ export interface LoginResponse {
 export interface Game {
   id: number;
   name: string;
-  robloxGameId?: string;
-  robloxPlaceId?: string;
+  description?: string;
+  robloxUniverseId?: number;
+  robloxPlaceId?: number;
   imageUrl?: string;
   bannerUrl?: string;
-  description?: string;
-  creator?: string;
   active: boolean;
-  products?: Product[];
-  totalSales?: number;
-  totalRevenue?: number;
+  displayOrder: number;
+  requiresPrivateServer: boolean;
+  privateServerLink?: string;
+  splitPixEnabled: boolean;
+  splitPixConfig?: string;
+  totalSales: number;
+  totalRevenue: number;
+  totalRobuxSold: number;
+  itemsCount?: number;
+  activeItemsCount?: number;
+  items?: GameItem[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GameItem {
+  id: number;
+  gameId: number;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  priceRobux: number;
+  active: boolean;
+  displayOrder: number;
+  hasStockLimit: boolean;
+  dailyStockLimit?: number;
+  soldToday: number;
+  isAvailable: boolean;
+  availableToday?: number;
+  totalSales: number;
+  totalRevenue: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Product {

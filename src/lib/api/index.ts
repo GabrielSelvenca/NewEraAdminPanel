@@ -4,6 +4,7 @@ export { client } from './client';
 // Modules
 export { auth } from './auth';
 export { games } from './games';
+export { gameItems } from './gameItems';
 export { products } from './products';
 export { partners } from './partners';
 export { sales } from './sales';
@@ -20,6 +21,7 @@ export { upload } from './upload';
 export type {
   LoginResponse,
   Game,
+  GameItem,
   Product,
   BotConfig,
   SalesStats,
@@ -41,6 +43,7 @@ export type {
 import { client } from './client';
 import { auth } from './auth';
 import { games } from './games';
+import { gameItems } from './gameItems';
 import { products } from './products';
 import { partners } from './partners';
 import { sales } from './sales';
@@ -67,8 +70,22 @@ export const api = {
   getGames: games.getAll.bind(games),
   getGame: games.getById.bind(games),
   createGame: games.create.bind(games),
+  createGameFromRoblox: games.createFromRoblox.bind(games),
   updateGame: games.update.bind(games),
   deleteGame: games.delete.bind(games),
+  reorderGames: games.reorder.bind(games),
+  getGameStats: games.getStats.bind(games),
+  getActiveGames: games.getActive.bind(games),
+
+  // Game Items
+  getGameItems: gameItems.getByGameId.bind(gameItems),
+  getGameItem: gameItems.getById.bind(gameItems),
+  createGameItem: gameItems.create.bind(gameItems),
+  updateGameItem: gameItems.update.bind(gameItems),
+  deleteGameItem: gameItems.delete.bind(gameItems),
+  reorderGameItems: gameItems.reorder.bind(gameItems),
+  resetGameItemsStock: gameItems.resetStock.bind(gameItems),
+  getAvailableGameItems: gameItems.getAvailable.bind(gameItems),
   
   // Products
   getProducts: products.getByGameId.bind(products),

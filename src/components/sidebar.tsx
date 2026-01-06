@@ -7,6 +7,7 @@ import {
   LayoutDashboard, 
   Users, 
   UserCog, 
+  UserCheck,
   LogOut, 
   Ticket, 
   Package,
@@ -57,6 +58,12 @@ const menuItems: MenuItem[] = [
     label: "Cupons", 
     icon: Ticket, 
     allowedRoles: ['admin', 'gerente'] 
+  },
+  { 
+    href: "/dashboard/sellers", 
+    label: "Sellers & Auxiliares", 
+    icon: UserCheck, 
+    allowedRoles: ['admin'] 
   },
 ];
 

@@ -137,6 +137,12 @@
       "namedRegex": "^/dashboard/profile(?:/)?$"
     },
     {
+      "page": "/dashboard/sellers",
+      "regex": "^/dashboard/sellers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/sellers(?:/)?$"
+    },
+    {
       "page": "/dashboard/settings",
       "regex": "^/dashboard/settings(?:/)?$",
       "routeKeys": {},

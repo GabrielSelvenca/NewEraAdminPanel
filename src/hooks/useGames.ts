@@ -26,27 +26,28 @@ export function useGames() {
     setError(null);
     try {
       const result = await games.create(gameData);
-      setData(prev => [...prev, result]);
+      // Refresh list to get full game data
+      await loadGames();
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao criar jogo';
       setError(message);
       throw err;
     }
-  }, []);
+  }, [loadGames]);
 
   const updateGame = useCallback(async (id: number, gameData: Partial<Game>) => {
     setError(null);
     try {
-      const result = await games.update(id, gameData);
-      setData(prev => prev.map(g => g.id === id ? result : g));
-      return result;
+      await games.update(id, gameData);
+      // Refresh to get updated data
+      await loadGames();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar jogo';
       setError(message);
       throw err;
     }
-  }, []);
+  }, [loadGames]);
 
   const deleteGame = useCallback(async (id: number) => {
     setError(null);
