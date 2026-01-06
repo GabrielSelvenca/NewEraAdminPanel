@@ -18,7 +18,8 @@ import {
   Zap,
   ExternalLink,
   Shield,
-  Circle
+  Circle,
+  Gamepad2
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useContext, useState, useEffect, useRef } from "react";
@@ -46,6 +47,12 @@ const menuItems: MenuItem[] = [
     label: "Pedidos", 
     icon: Package, 
     allowedRoles: ['admin', 'gerente', 'auxiliar'] 
+  },
+  { 
+    href: "/dashboard/games", 
+    label: "Jogos", 
+    icon: Gamepad2, 
+    allowedRoles: ['admin', 'gerente'] 
   },
   { 
     href: "/dashboard/users", 
