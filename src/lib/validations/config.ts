@@ -13,9 +13,13 @@ export const botConfigSchema = z.object({
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida (formato: #RRGGBB)')
     .optional()
     .or(z.literal('')),
-  pricePerK: z
+  pricePerKRobux: z
     .number()
-    .min(0.01, 'Preço por K deve ser maior que 0')
+    .min(0.01, 'Preço por K (Robux) deve ser maior que 0')
+    .max(1000, 'Preço muito alto'),
+  pricePerKGamepass: z
+    .number()
+    .min(0.01, 'Preço por K (Gamepass) deve ser maior que 0')
     .max(1000, 'Preço muito alto'),
   paymentTimeoutMinutes: z
     .number()

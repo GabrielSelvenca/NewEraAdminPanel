@@ -288,14 +288,32 @@ export default function BotSettingsPage() {
           <SettingCard
             icon={DollarSign}
             iconColor="bg-emerald-500/20 text-emerald-400"
-            title="Preço por 1000 Robux"
-            description="Valor em reais por cada 1000 Robux"
+            title="Preço Robux (por 1000)"
+            description="Valor para comprar Robux diretamente"
           >
             <NumberInput
-              value={config.pricePerK || 27.99}
-              onChange={(val) => updateField("pricePerK", val)}
+              value={config.pricePerKRobux || 41.50}
+              onChange={(val) => updateField("pricePerKRobux", val)}
               min={1}
-              max={100}
+              max={200}
+              step={0.5}
+              decimals={2}
+              prefix="R$"
+            />
+          </SettingCard>
+
+          <SettingCard
+            icon={DollarSign}
+            iconColor="bg-purple-500/20 text-purple-400"
+            title="Preço Gamepass (por 1000)"
+            description="Valor para comprar em jogos (gamepasses)"
+            hint="Geralmente menor por conta da taxa do Roblox (30%)"
+          >
+            <NumberInput
+              value={config.pricePerKGamepass || 35.00}
+              onChange={(val) => updateField("pricePerKGamepass", val)}
+              min={1}
+              max={200}
               step={0.5}
               decimals={2}
               prefix="R$"
@@ -306,15 +324,17 @@ export default function BotSettingsPage() {
             icon={Gauge}
             iconColor="bg-cyan-500/20 text-cyan-400"
             title="Pedido Mínimo"
-            description="Quantidade mínima de Robux por pedido"
+            description="Valor mínimo em reais por pedido"
+            hint="Pode ser até R$ 1,00"
           >
             <NumberInput
-              value={config.minOrderAmount || 1000}
+              value={config.minOrderAmount || 1}
               onChange={(val) => updateField("minOrderAmount", val)}
-              min={100}
-              max={10000}
-              step={100}
-              suffix="R$"
+              min={1}
+              max={100}
+              step={1}
+              decimals={2}
+              prefix="R$"
             />
           </SettingCard>
 
@@ -322,34 +342,32 @@ export default function BotSettingsPage() {
             icon={Shield}
             iconColor="bg-red-500/20 text-red-400"
             title="Pedido Máximo"
-            description="Limite de segurança por pedido"
+            description="Limite de segurança em reais por pedido"
+            hint="Máximo de R$ 10.000,00"
           >
             <NumberInput
-              value={config.maxOrderAmount || 100000}
+              value={config.maxOrderAmount || 10000}
               onChange={(val) => updateField("maxOrderAmount", val)}
-              min={1000}
-              max={1000000}
-              step={1000}
-              suffix="R$"
+              min={100}
+              max={10000}
+              step={100}
+              decimals={2}
+              prefix="R$"
             />
           </SettingCard>
-
-          <SettingCard
-            icon={DollarSign}
-            iconColor="bg-amber-500/20 text-amber-400"
-            title="Taxa do Roblox"
-            description="Taxa cobrada pelo Roblox nas transações"
-            hint="Padrão do Roblox: 30%"
-          >
-            <NumberInput
-              value={config.robloxTaxPercent || 30}
-              onChange={(val) => updateField("robloxTaxPercent", val)}
-              min={0}
-              max={50}
-              step={1}
-              suffix="%"
-            />
-          </SettingCard>
+        </div>
+        
+        {/* Taxa do Roblox - Informativo */}
+        <div className="mt-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/20">
+              <DollarSign className="w-4 h-4 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-amber-400">Taxa do Roblox: 30%</p>
+              <p className="text-xs text-zinc-500">Taxa fixa cobrada pelo Roblox em todas as transações de gamepass</p>
+            </div>
+          </div>
         </div>
       </motion.div>
 

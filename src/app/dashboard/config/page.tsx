@@ -125,7 +125,7 @@ export default function ConfigPage() {
     if (!config) return text;
     return text
       .replace(/\{store_name\}/g, config.storeName || "Nova Era Store")
-      .replace(/\{price_per_k\}/g, `R$ ${(config.pricePerK || 27.99).toFixed(2)}`)
+      .replace(/\{price_per_k\}/g, `R$ ${(config.pricePerKRobux || 41.50).toFixed(2)}`)
       .replace(/\{min_order\}/g, String(config.minOrderAmount || 1000))
       .replace(/\{max_order\}/g, String(config.maxOrderAmount || 100000));
   };
@@ -239,12 +239,12 @@ export default function ConfigPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-400 text-xs uppercase">Preço por 1000 R$</Label>
+            <Label className="text-zinc-400 text-xs uppercase">Preço Robux (1000)</Label>
             <NumberInput
-              value={config.pricePerK || 27.99}
-              onChange={(val) => updateField("pricePerK", val)}
+              value={config.pricePerKRobux || 41.50}
+              onChange={(val) => updateField("pricePerKRobux", val)}
               min={1}
-              max={100}
+              max={200}
               step={0.5}
               decimals={2}
               prefix="R$"
@@ -413,6 +413,7 @@ export default function ConfigPage() {
           description={processPlaceholders(config.embedRobuxMessage || `Compre Robux com segurança!\n\nPreço: **{price_per_k}** por 1000 Robux`)}
           color={config.storeColor || "#257e24"}
           imageUrl={config.bannerRobux}
+          pricePerKRobux={config.pricePerKRobux || 41.50}
         />
       </Section>
 

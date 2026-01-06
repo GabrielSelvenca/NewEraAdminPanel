@@ -10,7 +10,7 @@ interface DiscordEmbedPreviewProps {
   timestamp?: boolean;
   storeName?: string;
   gamesList?: string[];
-  pricePerK?: number;
+  pricePerKRobux?: number;
   status?: string;
 }
 
@@ -24,7 +24,7 @@ export function DiscordEmbedPreview({
   timestamp = true,
   storeName = "Nova Era Store",
   gamesList = [],
-  pricePerK = 27.99,
+  pricePerKRobux = 41.50,
   status = "🟢 Disponível"
 }: DiscordEmbedPreviewProps) {
   
@@ -44,7 +44,7 @@ export function DiscordEmbedPreview({
     // {robux-price [valor]}
     processed = processed.replace(/\{robux-price\s+(\d+)\}/g, (_, robux) => {
       const amount = parseInt(robux);
-      const price = (amount / 1000) * pricePerK;
+      const price = (amount / 1000) * pricePerKRobux;
       return `R$ ${price.toFixed(2)}`;
     });
     

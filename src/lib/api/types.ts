@@ -52,9 +52,12 @@ export interface BotConfig {
   roleAdmin?: string;
   storeName?: string;
   storeColor?: string;
-  pricePerK: number;
-  minOrderAmount?: number;
-  maxOrderAmount?: number;
+  // Preços por 1000 Robux
+  pricePerKRobux: number;      // Preço para comprar Robux direto
+  pricePerKGamepass: number;   // Preço para comprar em jogos (gamepasses)
+  // Limites em R$ (reais)
+  minOrderAmount?: number;     // Mínimo em R$ (até R$ 1,00)
+  maxOrderAmount?: number;     // Máximo em R$ (até R$ 10.000,00)
   paymentTimeoutMinutes: number;
   cartInactivityMinutes: number;
   robloxApiKey?: string;
@@ -69,10 +72,10 @@ export interface BotConfig {
   purchaseLogBanner?: string;
   refreshRequested?: boolean;
   updatedAt?: string;
-  // Novos campos - Tempos & Limites
+  // Tempos & Limites
   deliveryCloseMinutes?: number;
   paymentCheckInterval?: number;
-  robloxTaxPercent?: number;
+  robloxTaxPercent?: number;   // Fixo em 30% - não editável
   autoDeliveryEnabled?: boolean;
   verifyDeliveryEnabled?: boolean;
   couponsEnabled?: boolean;
