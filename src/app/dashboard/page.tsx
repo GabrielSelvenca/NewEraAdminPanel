@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/lib/user-context";
 import { api } from "@/lib/api";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Package, 
   DollarSign, 
@@ -16,15 +16,23 @@ import {
   TrendingUp,
   Zap,
   Settings,
-  ExternalLink
+  ExternalLink,
+  Calendar,
+  ChevronDown
 } from "lucide-react";
 import Link from "next/link";
 
 interface DashboardStats {
-  todayOrders: number;
-  todayRevenue: number;
+  periodOrders: number;
+  periodRevenue: number;
   pendingDeliveries: number;
-  completedToday: number;
+  completedPeriod: number;
+}
+
+interface PeriodOption {
+  value: number;
+  label: string;
+  shortLabel: string;
 }
 
 const container = {
@@ -40,11 +48,23 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
+const periodOptions: PeriodOption[] = [
+  { value: 1, label: "Hoje", shortLabel: "1d" },
+  { value: 3, label: "Últimos 3 dias", shortLabel: "3d" },
+  { value: 7, label: "Últimos 7 dias", shortLabel: "7d" },
+  { value: 15, label: "Últimos 15 dias", shortLabel: "15d" },
+  { value: 30, label: "Últimos 30 dias", shortLabel: "30d" },
+  { value: 60, label: "Últimos 60 dias", shortLabel: "60d" },
+  { value: 90, label: "Últimos 90 dias", shortLabel: "90d" },
+];
+
 export default function DashboardPage() {
   const user = useContext(UserContext);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [botStatus, setBotStatus] = useState<'online' | 'offline' | 'loading'>('loading');
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(periodOptions[0]);
+  const [periodDropdownOpen, setPeriodDropdownOpen] = useState(false);
   const [recentOrders, setRecentOrders] = useState<Array<{
     orderId: number;
     status: string;
@@ -57,17 +77,21 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData();
     checkBotStatus();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod]);
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const ordersResponse = await api.get("/api/orders/my") as { data: { orders?: unknown[] } | unknown[] };
       const orders = Array.isArray(ordersResponse.data) 
         ? ordersResponse.data 
         : (ordersResponse.data?.orders || []);
       
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Calculate period start date
+      const periodStart = new Date();
+      periodStart.setDate(periodStart.getDate() - selectedPeriod.value);
+      periodStart.setHours(0, 0, 0, 0);
       
       interface OrderData {
         orderId?: number;
@@ -79,22 +103,22 @@ export default function DashboardPage() {
         buyerRobloxUsername?: string;
       }
       
-      const todayOrders = (orders as OrderData[]).filter((o: OrderData) => {
+      // Filter orders within selected period
+      const periodOrders = (orders as OrderData[]).filter((o: OrderData) => {
         const orderDate = new Date(o.paidAt || o.createdAt || '');
-        orderDate.setHours(0, 0, 0, 0);
-        return orderDate.getTime() === today.getTime();
+        return orderDate >= periodStart;
       });
       
-      const todayRevenue = todayOrders.reduce((acc: number, o: OrderData) => acc + (o.finalPrice || 0), 0);
+      const periodRevenue = periodOrders.reduce((acc: number, o: OrderData) => acc + (o.finalPrice || 0), 0);
       const pendingDeliveries = (orders as OrderData[]).filter((o: OrderData) => 
         o.status === 'PAYMENT_CONFIRMED' || o.status === 'ASSIGNED'
       ).length;
-      const completedToday = todayOrders.filter((o: OrderData) => 
+      const completedPeriod = periodOrders.filter((o: OrderData) => 
         o.status === 'DELIVERED' || o.status === 'COMPLETED'
       ).length;
       
-      // Get 5 most recent orders
-      const recent = (orders as OrderData[])
+      // Get 5 most recent orders from period
+      const recent = periodOrders
         .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
         .slice(0, 5)
         .map(o => ({
@@ -108,18 +132,18 @@ export default function DashboardPage() {
       
       setRecentOrders(recent);
       setStats({
-        todayOrders: todayOrders.length,
-        todayRevenue,
+        periodOrders: periodOrders.length,
+        periodRevenue,
         pendingDeliveries,
-        completedToday
+        completedPeriod
       });
     } catch (error) {
       console.error('Error loading stats:', error);
       setStats({
-        todayOrders: 0,
-        todayRevenue: 0,
+        periodOrders: 0,
+        periodRevenue: 0,
         pendingDeliveries: 0,
-        completedToday: 0
+        completedPeriod: 0
       });
     } finally {
       setLoading(false);
@@ -210,8 +234,68 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        {/* Status Pills */}
+        {/* Status Pills & Period Selector */}
         <div className="flex items-center gap-3">
+          {/* Period Selector */}
+          <div className="relative">
+            <motion.button
+              onClick={() => setPeriodDropdownOpen(!periodDropdownOpen)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800/80 border border-zinc-700/50 text-sm font-medium text-white hover:border-cyan-500/30 transition-all"
+            >
+              <Calendar className="w-4 h-4 text-cyan-400" />
+              <span>{selectedPeriod.label}</span>
+              <motion.div
+                animate={{ rotate: periodDropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
+              </motion.div>
+            </motion.button>
+
+            <AnimatePresence>
+              {periodDropdownOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setPeriodDropdownOpen(false)} 
+                  />
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 z-50 w-48 py-2 rounded-xl bg-zinc-900 border border-zinc-700/50 shadow-xl shadow-black/40"
+                  >
+                    {periodOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          setSelectedPeriod(option);
+                          setPeriodDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
+                          selectedPeriod.value === option.value
+                            ? 'bg-cyan-500/10 text-cyan-400'
+                            : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                        }`}
+                      >
+                        <span>{option.label}</span>
+                        {selectedPeriod.value === option.value && (
+                          <CheckCircle className="w-4 h-4" />
+                        )}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* API Status */}
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
             botStatus === 'online' 
               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
@@ -249,9 +333,12 @@ export default function DashboardPage() {
         <div className="glass-card p-4 border-l-2 border-l-emerald-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-zinc-500 uppercase tracking-wide">Faturamento Hoje</p>
+              <p className="text-xs text-zinc-500 uppercase tracking-wide flex items-center gap-1">
+                Faturamento
+                <span className="text-cyan-400/70">({selectedPeriod.shortLabel})</span>
+              </p>
               <p className="text-2xl font-bold text-white mt-1">
-                R$ {(stats?.todayRevenue || 0).toFixed(0)}
+                R$ {(stats?.periodRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             </div>
             <div className="p-2 rounded-lg bg-emerald-500/10">
@@ -263,8 +350,11 @@ export default function DashboardPage() {
         <div className="glass-card p-4 border-l-2 border-l-cyan-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-zinc-500 uppercase tracking-wide">Pedidos Hoje</p>
-              <p className="text-2xl font-bold text-white mt-1">{stats?.todayOrders || 0}</p>
+              <p className="text-xs text-zinc-500 uppercase tracking-wide flex items-center gap-1">
+                Pedidos
+                <span className="text-cyan-400/70">({selectedPeriod.shortLabel})</span>
+              </p>
+              <p className="text-2xl font-bold text-white mt-1">{stats?.periodOrders || 0}</p>
             </div>
             <div className="p-2 rounded-lg bg-cyan-500/10">
               <Package className="w-5 h-5 text-cyan-400" />
@@ -275,8 +365,11 @@ export default function DashboardPage() {
         <div className="glass-card p-4 border-l-2 border-l-purple-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-zinc-500 uppercase tracking-wide">Entregues Hoje</p>
-              <p className="text-2xl font-bold text-white mt-1">{stats?.completedToday || 0}</p>
+              <p className="text-xs text-zinc-500 uppercase tracking-wide flex items-center gap-1">
+                Entregues
+                <span className="text-cyan-400/70">({selectedPeriod.shortLabel})</span>
+              </p>
+              <p className="text-2xl font-bold text-white mt-1">{stats?.completedPeriod || 0}</p>
             </div>
             <div className="p-2 rounded-lg bg-purple-500/10">
               <CheckCircle className="w-5 h-5 text-purple-400" />
@@ -292,7 +385,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-white flex items-center gap-2">
                 <Activity className="w-4 h-4 text-cyan-400" />
-                Últimos Pedidos
+                Pedidos Recentes
+                <span className="text-xs font-normal text-zinc-500">
+                  ({selectedPeriod.label.toLowerCase()})
+                </span>
               </h2>
               <Link href="/dashboard/orders" className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
                 Ver todos <ArrowRight className="w-3 h-3" />
