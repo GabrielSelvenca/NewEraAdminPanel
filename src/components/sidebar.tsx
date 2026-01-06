@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { 
@@ -9,7 +8,6 @@ import {
   Users, 
   UserCog, 
   LogOut, 
-  Settings, 
   Ticket, 
   Link2, 
   Package,
@@ -17,7 +15,8 @@ import {
   Timer,
   Palette,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Zap
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useContext, useState } from "react";
@@ -157,19 +156,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-zinc-800/50">
         <div className="flex items-center gap-3">
-          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg glow-cyan overflow-hidden">
-            <Image 
-              src="/assets/icons/logo.png" 
-              alt="NewEra Logo"
-              width={48}
-              height={48}
-              className="object-cover"
-              onError={(e) => {
-                // Fallback se a imagem não existir
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement!.innerHTML = '<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
-              }}
-            />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg glow-cyan">
+            <Zap className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-xl font-bold gradient-text">NewEra</h1>

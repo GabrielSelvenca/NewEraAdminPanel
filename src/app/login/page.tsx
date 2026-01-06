@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, User, Sparkles } from "lucide-react";
+import { Loader2, Lock, User, Sparkles, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
@@ -52,19 +51,9 @@ export default function LoginPage() {
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg glow-cyan mb-6 overflow-hidden"
+              className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg glow-cyan mb-6"
             >
-              <Image 
-                src="/assets/icons/logo.png" 
-                alt="NewEra Logo"
-                width={80}
-                height={80}
-                className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = '<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>';
-                }}
-              />
+              <Zap className="w-10 h-10 text-white" />
             </motion.div>
             <h1 className="text-3xl font-bold gradient-text mb-2">NewEra Admin</h1>
             <p className="text-zinc-400">Entre para acessar o painel</p>

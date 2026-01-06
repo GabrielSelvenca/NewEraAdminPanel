@@ -1,20 +1,21 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neweraapi.squareweb.app';
 
-// Token é gerenciado via httpOnly cookie pela API
-// Mantemos uma cópia em memória apenas para o header Authorization (fallback)
-let inMemoryToken: string | null = null;
+const TOKEN_KEY = 'newera_auth_token';
 
+// Token é armazenado no localStorage para persistir entre recarregamentos
 export function getToken(): string | null {
-  return inMemoryToken;
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function setToken(token: string): void {
-  // Armazena em memória (não localStorage) - cookie httpOnly é o principal
-  inMemoryToken = token;
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function removeToken(): void {
-  inMemoryToken = null;
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 export class ApiClient {

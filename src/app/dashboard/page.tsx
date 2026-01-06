@@ -53,20 +53,50 @@ export default function DashboardPage() {
 
   const loadStats = async () => {
     try {
-      // TODO: Implementar endpoint de estatísticas real
-      // const data = await api.getDashboardStats();
-      // setStats(data);
+      // Tentar buscar dados reais da API
+      const ordersResponse = await api.get("/api/orders/my") as { data: { orders?: unknown[] } | unknown[] };
+      const orders = Array.isArray(ordersResponse.data) 
+        ? ordersResponse.data 
+        : (ordersResponse.data?.orders || []);
       
-      // Dados simulados por enquanto
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      interface OrderData {
+        status?: string;
+        createdAt?: string;
+        paidAt?: string;
+        finalPrice?: number;
+      }
+      
+      const todayOrders = (orders as OrderData[]).filter((o: OrderData) => {
+        const orderDate = new Date(o.paidAt || o.createdAt || '');
+        orderDate.setHours(0, 0, 0, 0);
+        return orderDate.getTime() === today.getTime();
+      });
+      
+      const todayRevenue = todayOrders.reduce((acc: number, o: OrderData) => acc + (o.finalPrice || 0), 0);
+      const pendingDeliveries = (orders as OrderData[]).filter((o: OrderData) => 
+        o.status === 'PAYMENT_CONFIRMED' || o.status === 'ASSIGNED'
+      ).length;
+      
       setStats({
-        todayOrders: 12,
-        todayRevenue: 847.50,
-        pendingDeliveries: 3,
-        activeUsers: 5,
-        weeklyGrowth: 23.5
+        todayOrders: todayOrders.length,
+        todayRevenue: todayRevenue,
+        pendingDeliveries: pendingDeliveries,
+        activeUsers: 0, // Será implementado quando houver endpoint de sellers
+        weeklyGrowth: 0
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+      // Mostrar zeros quando não conseguir carregar
+      setStats({
+        todayOrders: 0,
+        todayRevenue: 0,
+        pendingDeliveries: 0,
+        activeUsers: 0,
+        weeklyGrowth: 0
+      });
     } finally {
       setLoading(false);
     }
