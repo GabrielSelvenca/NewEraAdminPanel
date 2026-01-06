@@ -109,13 +109,16 @@ export default function DashboardPage() {
         return orderDate >= periodStart;
       });
       
-      const periodRevenue = periodOrders.reduce((acc: number, o: OrderData) => acc + (o.finalPrice || 0), 0);
+      // Only count DELIVERED or COMPLETED orders for revenue
+      const completedOrders = periodOrders.filter((o: OrderData) => 
+        o.status === 'DELIVERED' || o.status === 'COMPLETED'
+      );
+      
+      const periodRevenue = completedOrders.reduce((acc: number, o: OrderData) => acc + (o.finalPrice || 0), 0);
       const pendingDeliveries = (orders as OrderData[]).filter((o: OrderData) => 
         o.status === 'PAYMENT_CONFIRMED' || o.status === 'ASSIGNED'
       ).length;
-      const completedPeriod = periodOrders.filter((o: OrderData) => 
-        o.status === 'DELIVERED' || o.status === 'COMPLETED'
-      ).length;
+      const completedPeriod = completedOrders.length;
       
       // Get 5 most recent orders from period
       const recent = periodOrders
