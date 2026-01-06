@@ -338,7 +338,7 @@ export default function DashboardPage() {
                 <span className="text-cyan-400/70">({selectedPeriod.shortLabel})</span>
               </p>
               <p className="text-2xl font-bold text-white mt-1">
-                R$ {(stats?.periodRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                R$ {(stats?.periodRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
             <div className="p-2 rounded-lg bg-emerald-500/10">
