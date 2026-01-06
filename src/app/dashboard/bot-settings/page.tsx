@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { api, BotConfig } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { NumberInput } from "@/components/ui/number-input";
 import { motion } from "framer-motion";
 import { 
   Save, 
@@ -27,20 +26,27 @@ interface SettingCardProps {
   title: string;
   description: string;
   children: React.ReactNode;
+  hint?: string;
 }
 
-const SettingCard = ({ icon: Icon, iconColor, title, description, children }: SettingCardProps) => (
-  <div className="glass-card p-6 hover-card">
+const SettingCard = ({ icon: Icon, iconColor, title, description, children, hint }: SettingCardProps) => (
+  <div className="glass-card p-5 hover-card border-l-2 border-l-transparent hover:border-l-cyan-500/50 transition-all">
     <div className="flex items-start gap-4">
       <div className={`p-3 rounded-xl ${iconColor}`}>
         <Icon className="w-5 h-5" />
       </div>
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 space-y-3">
         <div>
           <h3 className="font-semibold text-white">{title}</h3>
-          <p className="text-sm text-zinc-400 mt-1">{description}</p>
+          <p className="text-sm text-zinc-400 mt-0.5">{description}</p>
         </div>
         {children}
+        {hint && (
+          <p className="text-xs text-zinc-500 flex items-center gap-1">
+            <span className="w-1 h-1 rounded-full bg-cyan-500" />
+            {hint}
+          </p>
+        )}
       </div>
     </div>
   </div>
@@ -50,7 +56,7 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
+    transition: { staggerChildren: 0.08 }
   }
 };
 
@@ -68,6 +74,13 @@ export default function BotSettingsPage() {
   useEffect(() => {
     loadConfig();
   }, []);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const loadConfig = async () => {
     try {
@@ -126,46 +139,45 @@ export default function BotSettingsPage() {
 
   return (
     <motion.div 
-      className="space-y-8"
+      className="space-y-6"
       variants={container}
       initial="hidden"
       animate="show"
     >
       {/* Header */}
-      <motion.div variants={item} className="page-header">
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-amber-400 text-sm font-medium mb-2">
-              <Timer className="w-4 h-4" />
-              <span>Configurações Avançadas</span>
-            </div>
-            <h1 className="text-4xl font-bold text-white">Tempos & Limites</h1>
-            <p className="text-zinc-400 mt-2">
-              Configure timeouts, valores mínimos/máximos e comportamentos do bot
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              onClick={loadConfig}
-              variant="outline" 
-              className="border-zinc-700 hover:bg-zinc-800"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Recarregar
-            </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={saving} 
-              className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:opacity-90 text-white border-0"
-            >
-              {saving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {saving ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-          </div>
+      <motion.div variants={item} className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Timer className="w-6 h-6 text-amber-400" />
+            Tempos & Limites
+          </h1>
+          <p className="text-zinc-500 text-sm mt-0.5">
+            Configure timeouts, valores e comportamentos do bot
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={loadConfig}
+            variant="outline" 
+            size="sm"
+            className="border-zinc-700 hover:bg-zinc-800"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Recarregar
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={saving} 
+            size="sm"
+            className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:opacity-90 text-white border-0"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2" />
+            )}
+            Salvar
+          </Button>
         </div>
       </motion.div>
 
@@ -189,195 +201,167 @@ export default function BotSettingsPage() {
         </motion.div>
       )}
 
-      {/* Settings Grid */}
-      <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Timeout de Pagamento */}
-        <SettingCard
-          icon={Clock}
-          iconColor="bg-blue-500/20 text-blue-400"
-          title="Timeout de Pagamento"
-          description="Tempo máximo de espera pelo pagamento PIX antes de expirar o pedido"
-        >
-          <div className="flex items-center gap-4">
-            <Input
-              type="number"
-              min="1"
-              max="120"
+      {/* Timeouts Section */}
+      <motion.div variants={item}>
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-blue-400" />
+          Timeouts
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SettingCard
+            icon={Clock}
+            iconColor="bg-blue-500/20 text-blue-400"
+            title="Timeout de Pagamento"
+            description="Tempo máximo de espera pelo pagamento PIX"
+            hint="Recomendado: 30 minutos"
+          >
+            <NumberInput
               value={config.paymentTimeoutMinutes || 30}
-              onChange={(e) => updateField("paymentTimeoutMinutes", parseInt(e.target.value) || 30)}
-              className="w-32 bg-zinc-900 border-zinc-700"
+              onChange={(val) => updateField("paymentTimeoutMinutes", val)}
+              min={5}
+              max={120}
+              step={5}
+              suffix="min"
             />
-            <span className="text-zinc-400">minutos</span>
-          </div>
-          <p className="text-xs text-zinc-500">Recomendado: 30 minutos</p>
-        </SettingCard>
+          </SettingCard>
 
-        {/* Timeout de Inatividade */}
-        <SettingCard
-          icon={Timer}
-          iconColor="bg-amber-500/20 text-amber-400"
-          title="Inatividade do Carrinho"
-          description="Tempo de inatividade antes de fechar automaticamente o canal do carrinho"
-        >
-          <div className="flex items-center gap-4">
-            <Input
-              type="number"
-              min="1"
-              max="60"
+          <SettingCard
+            icon={Timer}
+            iconColor="bg-amber-500/20 text-amber-400"
+            title="Inatividade do Carrinho"
+            description="Tempo para fechar canal por inatividade"
+            hint="Recomendado: 10 minutos"
+          >
+            <NumberInput
               value={config.cartInactivityMinutes || 10}
-              onChange={(e) => updateField("cartInactivityMinutes", parseInt(e.target.value) || 10)}
-              className="w-32 bg-zinc-900 border-zinc-700"
+              onChange={(val) => updateField("cartInactivityMinutes", val)}
+              min={5}
+              max={60}
+              step={5}
+              suffix="min"
             />
-            <span className="text-zinc-400">minutos</span>
-          </div>
-          <p className="text-xs text-zinc-500">Recomendado: 10 minutos</p>
-        </SettingCard>
+          </SettingCard>
 
-        {/* Tempo de Fechamento Pós-Entrega */}
-        <SettingCard
-          icon={Zap}
-          iconColor="bg-emerald-500/20 text-emerald-400"
-          title="Fechamento Pós-Entrega"
-          description="Tempo para fechar o canal após a entrega ser confirmada"
-        >
-          <div className="flex items-center gap-4">
-            <Input
-              type="number"
-              min="1"
-              max="30"
+          <SettingCard
+            icon={Zap}
+            iconColor="bg-emerald-500/20 text-emerald-400"
+            title="Fechamento Pós-Entrega"
+            description="Tempo para fechar canal após entrega"
+            hint="Recomendado: 5 minutos"
+          >
+            <NumberInput
               value={config.deliveryCloseMinutes || 5}
-              onChange={(e) => updateField("deliveryCloseMinutes", parseInt(e.target.value) || 5)}
-              className="w-32 bg-zinc-900 border-zinc-700"
+              onChange={(val) => updateField("deliveryCloseMinutes", val)}
+              min={1}
+              max={30}
+              step={1}
+              suffix="min"
             />
-            <span className="text-zinc-400">minutos</span>
-          </div>
-          <p className="text-xs text-zinc-500">Recomendado: 5 minutos</p>
-        </SettingCard>
+          </SettingCard>
 
-        {/* Intervalo de Verificação */}
-        <SettingCard
-          icon={RefreshCw}
-          iconColor="bg-purple-500/20 text-purple-400"
-          title="Intervalo de Verificação"
-          description="Intervalo entre verificações de status do pagamento"
-        >
-          <div className="flex items-center gap-4">
-            <Input
-              type="number"
-              min="3"
-              max="30"
+          <SettingCard
+            icon={RefreshCw}
+            iconColor="bg-purple-500/20 text-purple-400"
+            title="Intervalo de Verificação"
+            description="Intervalo entre checks de pagamento"
+            hint="Recomendado: 5 segundos"
+          >
+            <NumberInput
               value={config.paymentCheckInterval || 5}
-              onChange={(e) => updateField("paymentCheckInterval", parseInt(e.target.value) || 5)}
-              className="w-32 bg-zinc-900 border-zinc-700"
+              onChange={(val) => updateField("paymentCheckInterval", val)}
+              min={3}
+              max={30}
+              step={1}
+              suffix="seg"
             />
-            <span className="text-zinc-400">segundos</span>
-          </div>
-          <p className="text-xs text-zinc-500">Recomendado: 5 segundos</p>
-        </SettingCard>
+          </SettingCard>
+        </div>
       </motion.div>
 
-      {/* Valores Section */}
+      {/* Values Section */}
       <motion.div variants={item}>
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-emerald-400" />
           Valores e Limites
         </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* Preço por 1000 Robux */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <SettingCard
             icon={DollarSign}
             iconColor="bg-emerald-500/20 text-emerald-400"
             title="Preço por 1000 Robux"
-            description="Valor em reais cobrado por cada 1000 Robux vendidos"
+            description="Valor em reais por cada 1000 Robux"
           >
-            <div className="flex items-center gap-4">
-              <span className="text-zinc-400">R$</span>
-              <Input
-                type="number"
-                step="0.01"
-                min="1"
-                value={config.pricePerK?.toFixed(2) || "27.99"}
-                onChange={(e) => updateField("pricePerK", parseFloat(e.target.value) || 27.99)}
-                className="w-32 bg-zinc-900 border-zinc-700"
-              />
-            </div>
+            <NumberInput
+              value={config.pricePerK || 27.99}
+              onChange={(val) => updateField("pricePerK", val)}
+              min={1}
+              max={100}
+              step={0.5}
+              decimals={2}
+              prefix="R$"
+            />
           </SettingCard>
 
-          {/* Pedido Mínimo */}
           <SettingCard
             icon={Gauge}
             iconColor="bg-cyan-500/20 text-cyan-400"
             title="Pedido Mínimo"
             description="Quantidade mínima de Robux por pedido"
           >
-            <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                min="100"
-                step="100"
-                value={config.minOrderAmount || 1000}
-                onChange={(e) => updateField("minOrderAmount", parseInt(e.target.value) || 1000)}
-                className="w-32 bg-zinc-900 border-zinc-700"
-              />
-              <span className="text-zinc-400">Robux</span>
-            </div>
+            <NumberInput
+              value={config.minOrderAmount || 1000}
+              onChange={(val) => updateField("minOrderAmount", val)}
+              min={100}
+              max={10000}
+              step={100}
+              suffix="R$"
+            />
           </SettingCard>
 
-          {/* Pedido Máximo */}
           <SettingCard
             icon={Shield}
             iconColor="bg-red-500/20 text-red-400"
             title="Pedido Máximo"
-            description="Quantidade máxima de Robux por pedido (limite de segurança)"
+            description="Limite de segurança por pedido"
           >
-            <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                min="1000"
-                step="1000"
-                value={config.maxOrderAmount || 100000}
-                onChange={(e) => updateField("maxOrderAmount", parseInt(e.target.value) || 100000)}
-                className="w-32 bg-zinc-900 border-zinc-700"
-              />
-              <span className="text-zinc-400">Robux</span>
-            </div>
+            <NumberInput
+              value={config.maxOrderAmount || 100000}
+              onChange={(val) => updateField("maxOrderAmount", val)}
+              min={1000}
+              max={1000000}
+              step={1000}
+              suffix="R$"
+            />
           </SettingCard>
 
-          {/* Taxa do Roblox */}
           <SettingCard
             icon={DollarSign}
             iconColor="bg-amber-500/20 text-amber-400"
             title="Taxa do Roblox"
-            description="Porcentagem da taxa cobrada pelo Roblox nas transações"
+            description="Taxa cobrada pelo Roblox nas transações"
+            hint="Padrão do Roblox: 30%"
           >
-            <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                min="0"
-                max="50"
-                value={config.robloxTaxPercent || 30}
-                onChange={(e) => updateField("robloxTaxPercent", parseInt(e.target.value) || 30)}
-                className="w-32 bg-zinc-900 border-zinc-700"
-              />
-              <span className="text-zinc-400">%</span>
-            </div>
-            <p className="text-xs text-zinc-500">Padrão do Roblox: 30%</p>
+            <NumberInput
+              value={config.robloxTaxPercent || 30}
+              onChange={(val) => updateField("robloxTaxPercent", val)}
+              min={0}
+              max={50}
+              step={1}
+              suffix="%"
+            />
           </SettingCard>
         </div>
       </motion.div>
 
       {/* Toggles Section */}
       <motion.div variants={item}>
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-purple-400" />
           Funcionalidades
         </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           
-          {/* Auto-entrega */}
-          <div className="glass-card p-6 flex items-center justify-between">
+          <div className="glass-card p-5 flex items-center justify-between hover-card">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400">
                 <Zap className="w-5 h-5" />
@@ -385,7 +369,7 @@ export default function BotSettingsPage() {
               <div>
                 <h3 className="font-semibold text-white">Entrega Automática</h3>
                 <p className="text-sm text-zinc-400">
-                  Tentar entregar automaticamente após pagamento confirmado
+                  Entregar automaticamente após pagamento
                 </p>
               </div>
             </div>
@@ -395,8 +379,7 @@ export default function BotSettingsPage() {
             />
           </div>
 
-          {/* Verificação de Gamepass */}
-          <div className="glass-card p-6 flex items-center justify-between">
+          <div className="glass-card p-5 flex items-center justify-between hover-card">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400">
                 <Shield className="w-5 h-5" />
@@ -404,7 +387,7 @@ export default function BotSettingsPage() {
               <div>
                 <h3 className="font-semibold text-white">Verificação de Entrega</h3>
                 <p className="text-sm text-zinc-400">
-                  Verificar posse das gamepasses antes de confirmar entrega manual
+                  Verificar posse antes de confirmar
                 </p>
               </div>
             </div>
@@ -414,8 +397,7 @@ export default function BotSettingsPage() {
             />
           </div>
 
-          {/* Cupons */}
-          <div className="glass-card p-6 flex items-center justify-between">
+          <div className="glass-card p-5 flex items-center justify-between hover-card">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-pink-500/20 text-pink-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,7 +407,7 @@ export default function BotSettingsPage() {
               <div>
                 <h3 className="font-semibold text-white">Sistema de Cupons</h3>
                 <p className="text-sm text-zinc-400">
-                  Permitir uso de cupons de desconto nos pedidos
+                  Permitir cupons de desconto
                 </p>
               </div>
             </div>
@@ -435,8 +417,7 @@ export default function BotSettingsPage() {
             />
           </div>
 
-          {/* Logs Detalhados */}
-          <div className="glass-card p-6 flex items-center justify-between">
+          <div className="glass-card p-5 flex items-center justify-between hover-card">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400">
                 <AlertTriangle className="w-5 h-5" />
@@ -444,7 +425,7 @@ export default function BotSettingsPage() {
               <div>
                 <h3 className="font-semibold text-white">Logs Detalhados</h3>
                 <p className="text-sm text-zinc-400">
-                  Registrar logs detalhados de debug (afeta performance)
+                  Modo debug (afeta performance)
                 </p>
               </div>
             </div>
@@ -454,23 +435,6 @@ export default function BotSettingsPage() {
             />
           </div>
         </div>
-      </motion.div>
-
-      {/* Save Button Bottom */}
-      <motion.div variants={item} className="flex justify-end">
-        <Button 
-          onClick={handleSave} 
-          disabled={saving} 
-          size="lg"
-          className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:opacity-90 text-white border-0 px-8"
-        >
-          {saving ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : (
-            <Save className="w-5 h-5 mr-2" />
-          )}
-          {saving ? "Salvando..." : "Salvar Todas as Alterações"}
-        </Button>
       </motion.div>
     </motion.div>
   );

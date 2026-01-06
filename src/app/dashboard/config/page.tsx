@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { NumberInput } from "@/components/ui/number-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -239,13 +240,15 @@ export default function ConfigPage() {
           </div>
           <div className="space-y-2">
             <Label className="text-zinc-400 text-xs uppercase">Preço por 1000 R$</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="1"
-              value={config.pricePerK?.toFixed(2) || "27.99"}
-              onChange={(e) => updateField("pricePerK", parseFloat(e.target.value) || 27.99)}
-              className="bg-zinc-800/50 border-zinc-700"
+            <NumberInput
+              value={config.pricePerK || 27.99}
+              onChange={(val) => updateField("pricePerK", val)}
+              min={1}
+              max={100}
+              step={0.5}
+              decimals={2}
+              prefix="R$"
+              size="sm"
             />
           </div>
           <div className="space-y-2">
