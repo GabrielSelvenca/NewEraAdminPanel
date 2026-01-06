@@ -60,18 +60,21 @@ export class ApiClient {
         if (!response.ok) {
           const error = await response.text();
           
+          // Retry apenas para erros de servidor (5xx)
           if (response.status >= 500 && attempt < this.maxRetries - 1) {
             lastError = new Error(error || `Erro ${response.status}`);
             await this.sleep(this.retryDelay * (attempt + 1));
             continue;
           }
           
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new Event('api-offline'));
-          }
+          // NÃO disparar offline para erros 4xx (são erros de cliente, não de conexão)
+          // 401 = não autorizado, 403 = proibido, 404 = não encontrado, etc
+          // A API está online, só retornou um erro esperado
+          
           throw new Error(error || `Erro ${response.status}`);
         }
         
+        // API respondeu com sucesso - está online
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event('api-online'));
         }
@@ -84,19 +87,26 @@ export class ApiClient {
 
       } catch (error: unknown) {
         const err = error as Error;
-        if ((err.name === 'AbortError' || err.message?.includes('fetch')) && attempt < this.maxRetries - 1) {
-          if (process.env.NODE_ENV === 'development') {
-            }
+        // Erros de rede/timeout - tentar novamente
+        if ((err.name === 'AbortError' || err.message?.includes('fetch') || err.message?.includes('Failed to fetch')) && attempt < this.maxRetries - 1) {
           lastError = err;
           await this.sleep(this.retryDelay * (attempt + 1));
           continue;
+        }
+        
+        // Se for erro de rede real, marca como offline
+        if (err.name === 'AbortError' || err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('api-offline'));
+          }
         }
         
         throw error;
       }
     }
 
-    if (typeof window !== 'undefined') {
+    // Só dispara offline se realmente não conseguiu conectar após todas as tentativas
+    if (typeof window !== 'undefined' && lastError && (lastError.name === 'AbortError' || lastError.message?.includes('Failed to fetch') || lastError.message?.includes('NetworkError'))) {
       window.dispatchEvent(new Event('api-offline'));
     }
     throw lastError || new Error('Falha ao conectar com a API após múltiplas tentativas');
