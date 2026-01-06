@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Package, CheckCircle, Clock, RefreshCw, Truck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { 
+  Package, CheckCircle, Clock, RefreshCw, Truck, 
+  Search, Filter, ExternalLink, ChevronDown, AlertCircle,
+  DollarSign, Loader2
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -22,26 +27,25 @@ interface Order {
   paidAt?: string;
 }
 
-const statusColors: Record<string, string> = {
-  PAYMENT_PENDING: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  PAYMENT_CONFIRMED: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  ASSIGNED: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  DELIVERING: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  DELIVERED: "bg-green-500/20 text-green-400 border-green-500/30",
-  COMPLETED: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  CANCELLED: "bg-red-500/20 text-red-400 border-red-500/30",
-  EXPIRED: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
+const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  PAYMENT_PENDING: { label: "Aguardando", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
+  PAYMENT_CONFIRMED: { label: "Pago", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
+  ASSIGNED: { label: "Atribuído", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
+  DELIVERING: { label: "Entregando", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+  DELIVERED: { label: "Entregue", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  COMPLETED: { label: "Concluído", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  CANCELLED: { label: "Cancelado", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
+  EXPIRED: { label: "Expirado", color: "text-zinc-400", bg: "bg-zinc-500/10 border-zinc-500/20" },
 };
 
-const statusLabels: Record<string, string> = {
-  PAYMENT_PENDING: "Aguardando Pagamento",
-  PAYMENT_CONFIRMED: "Pago - Aguardando Entrega",
-  ASSIGNED: "Atribuído",
-  DELIVERING: "Entregando",
-  DELIVERED: "Entregue",
-  COMPLETED: "Concluído",
-  CANCELLED: "Cancelado",
-  EXPIRED: "Expirado",
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
 };
 
 export default function OrdersPage() {
@@ -49,6 +53,8 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [delivering, setDelivering] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("pending");
+  const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -56,7 +62,7 @@ export default function OrdersPage() {
       const response = await api.get("/api/orders/my");
       const data = response.data as { orders?: Order[] } | Order[];
       setOrders(Array.isArray(data) ? data : data.orders || []);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar pedidos");
     } finally {
       setLoading(false);
@@ -71,14 +77,14 @@ export default function OrdersPage() {
     setDelivering(orderId);
     try {
       const response = await api.post(`/api/orders/${orderId}/deliver`) as { data: Record<string, unknown> };
-      const data = response.data as { success?: boolean; message?: string; requiresManualDelivery?: boolean; gamepassId?: number; gamepassUrl?: string };
+      const data = response.data as { success?: boolean; message?: string };
       if (data.success) {
-        toast.success("Entrega realizada com sucesso!");
+        toast.success("Entrega realizada!");
         loadOrders();
       } else {
-        toast.error(data.message || "Falha na entrega automática");
+        toast.error(data.message || "Falha na entrega");
       }
-    } catch (err) {
+    } catch {
       toast.error("Erro ao entregar pedido");
     } finally {
       setDelivering(null);
@@ -86,7 +92,7 @@ export default function OrdersPage() {
   };
 
   const handleManualDeliver = async (orderId: number) => {
-    if (!confirm("Tem certeza que deseja marcar este pedido como entregue?\n\nVerifique antes se você realmente comprou o gamepass do cliente.")) {
+    if (!confirm("Confirmar entrega manual?\n\nVerifique se você realmente comprou o gamepass.")) {
       return;
     }
     
@@ -95,226 +101,267 @@ export default function OrdersPage() {
       const response = await api.post(`/api/orders/${orderId}/deliver-manual`);
       const data = response.data as { success?: boolean; message?: string };
       if (data.success) {
-        toast.success("Pedido marcado como entregue!");
+        toast.success("Entrega confirmada!");
         loadOrders();
       } else {
-        toast.error(data.message || "Falha ao marcar como entregue");
+        toast.error(data.message || "Erro na entrega");
       }
     } catch {
-      toast.error("Erro ao marcar pedido como entregue");
+      toast.error("Erro ao confirmar entrega");
     } finally {
       setDelivering(null);
     }
   };
 
   const filteredOrders = orders.filter((order) => {
-    if (filter === "pending") {
-      return order.status === "PAYMENT_CONFIRMED" || order.status === "ASSIGNED";
+    // Filter by status
+    if (filter === "pending" && !["PAYMENT_CONFIRMED", "ASSIGNED"].includes(order.status)) return false;
+    if (filter === "delivered" && !["DELIVERED", "COMPLETED"].includes(order.status)) return false;
+    if (filter !== "all" && filter !== "pending" && filter !== "delivered" && order.status !== filter) return false;
+    
+    // Filter by search
+    if (search) {
+      const searchLower = search.toLowerCase();
+      return (
+        order.buyerRobloxUsername.toLowerCase().includes(searchLower) ||
+        order.orderId.toString().includes(searchLower)
+      );
     }
-    if (filter === "delivered") {
-      return order.status === "DELIVERED" || order.status === "COMPLETED";
-    }
-    if (filter === "all") return true;
-    return order.status === filter;
+    return true;
   });
 
-  const pendingCount = orders.filter(
-    (o) => o.status === "PAYMENT_CONFIRMED" || o.status === "ASSIGNED"
-  ).length;
+  const stats = {
+    pending: orders.filter(o => ["PAYMENT_CONFIRMED", "ASSIGNED"].includes(o.status)).length,
+    delivered: orders.filter(o => ["DELIVERED", "COMPLETED"].includes(o.status)).length,
+    total: orders.length,
+    revenue: orders
+      .filter(o => ["PAYMENT_CONFIRMED", "DELIVERED", "COMPLETED"].includes(o.status))
+      .reduce((acc, o) => acc + o.finalPrice, 0)
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div 
+      className="space-y-5"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Header */}
+      <motion.div variants={item} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100">Pedidos</h1>
-          <p className="text-zinc-400 mt-1">Gerencie e entregue pedidos</p>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Package className="w-6 h-6 text-cyan-400" />
+            Pedidos
+          </h1>
+          <p className="text-zinc-500 text-sm mt-0.5">Gerencie e entregue pedidos</p>
         </div>
-        <Button onClick={loadOrders} variant="outline" className="gap-2">
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        <Button 
+          onClick={loadOrders} 
+          variant="outline" 
+          size="sm"
+          className="border-zinc-700 hover:bg-zinc-800"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Atualizar
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/20 rounded-lg">
-                <Clock className="w-6 h-6 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-zinc-100">{pendingCount}</p>
-                <p className="text-sm text-zinc-400">Pendentes</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-500/20 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-zinc-100">
-                  {orders.filter((o) => o.status === "DELIVERED" || o.status === "COMPLETED").length}
-                </p>
-                <p className="text-sm text-zinc-400">Entregues</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-500/20 rounded-lg">
-                <ShoppingCart className="w-6 h-6 text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-zinc-100">{orders.length}</p>
-                <p className="text-sm text-zinc-400">Total</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/20 rounded-lg">
-                <Package className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-zinc-100">
-                  R$ {orders.filter((o) => o.status === "PAYMENT_CONFIRMED" || o.status === "DELIVERED" || o.status === "COMPLETED").reduce((acc, o) => acc + o.finalPrice, 0).toFixed(2)}
-                </p>
-                <p className="text-sm text-zinc-400">Faturado</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex gap-2">
-        <Button
-          variant={filter === "pending" ? "default" : "outline"}
+      {/* Stats Bar */}
+      <motion.div variants={item} className="grid grid-cols-4 gap-3">
+        <button 
           onClick={() => setFilter("pending")}
-          className="gap-2"
+          className={`glass-card p-3 text-left transition-all ${filter === "pending" ? "border-amber-500/50 bg-amber-500/5" : ""}`}
         >
-          <Clock className="w-4 h-4" />
-          Pendentes ({pendingCount})
-        </Button>
-        <Button
-          variant={filter === "delivered" ? "default" : "outline"}
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-zinc-500 uppercase">Pendentes</span>
+          </div>
+          <p className="text-xl font-bold text-white mt-1">{stats.pending}</p>
+        </button>
+        
+        <button 
           onClick={() => setFilter("delivered")}
-          className="gap-2"
+          className={`glass-card p-3 text-left transition-all ${filter === "delivered" ? "border-emerald-500/50 bg-emerald-500/5" : ""}`}
         >
-          <CheckCircle className="w-4 h-4" />
-          Entregues
-        </Button>
-        <Button
-          variant={filter === "all" ? "default" : "outline"}
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-zinc-500 uppercase">Entregues</span>
+          </div>
+          <p className="text-xl font-bold text-white mt-1">{stats.delivered}</p>
+        </button>
+        
+        <button 
           onClick={() => setFilter("all")}
+          className={`glass-card p-3 text-left transition-all ${filter === "all" ? "border-cyan-500/50 bg-cyan-500/5" : ""}`}
         >
-          Todos
-        </Button>
-      </div>
+          <div className="flex items-center gap-2">
+            <Package className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-zinc-500 uppercase">Total</span>
+          </div>
+          <p className="text-xl font-bold text-white mt-1">{stats.total}</p>
+        </button>
+        
+        <div className="glass-card p-3">
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-zinc-500 uppercase">Faturado</span>
+          </div>
+          <p className="text-xl font-bold text-white mt-1">R$ {stats.revenue.toFixed(0)}</p>
+        </div>
+      </motion.div>
 
-      <Card className="bg-zinc-900 border-zinc-800">
-        <CardHeader>
-          <CardTitle className="text-zinc-100 flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            {filter === "pending" ? "Pedidos Pendentes" : filter === "delivered" ? "Pedidos Entregues" : "Todos os Pedidos"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <RefreshCw className="w-8 h-8 animate-spin text-zinc-500" />
-            </div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
-              <p className="text-zinc-400">Nenhum pedido encontrado</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredOrders.map((order) => (
-                <div
+      {/* Search & Filter Bar */}
+      <motion.div variants={item} className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Input
+            placeholder="Buscar por username ou ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 bg-zinc-800/50 border-zinc-700"
+          />
+        </div>
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => setShowFilters(!showFilters)}
+          className={`border-zinc-700 ${showFilters ? "bg-zinc-800" : ""}`}
+        >
+          <Filter className="w-4 h-4" />
+        </Button>
+      </motion.div>
+
+      {/* Filter Pills */}
+      {showFilters && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="flex flex-wrap gap-2"
+        >
+          {Object.entries(statusConfig).map(([key, config]) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                filter === key 
+                  ? `${config.bg} ${config.color}` 
+                  : "bg-zinc-800/50 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
+              }`}
+            >
+              {config.label}
+            </button>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Orders List */}
+      <motion.div variants={item} className="glass-card overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="text-center py-16">
+            <Package className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+            <p className="text-zinc-500">Nenhum pedido encontrado</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-zinc-800/50">
+            {filteredOrders.map((order) => {
+              const status = statusConfig[order.status] || statusConfig.EXPIRED;
+              const isPending = ["PAYMENT_CONFIRMED", "ASSIGNED"].includes(order.status);
+              
+              return (
+                <motion.div
                   key={order.orderId}
-                  className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
+                  variants={item}
+                  className="p-4 hover:bg-zinc-800/30 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-zinc-700/50 rounded-lg">
-                      <Package className="w-5 h-5 text-zinc-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-zinc-100">
-                          Pedido #{order.orderId}
-                        </span>
-                        <Badge className={statusColors[order.status] || "bg-zinc-500/20"}>
-                          {statusLabels[order.status] || order.status}
-                        </Badge>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                        <span className="text-xs font-mono text-zinc-400">#{order.orderId}</span>
                       </div>
-                      <div className="text-sm text-zinc-400 mt-1">
-                        <span className="font-medium text-zinc-300">{order.buyerRobloxUsername}</span>
-                        {" • "}
-                        <span>{order.robuxAmount} Robux</span>
-                        {" • "}
-                        <span>R$ {order.finalPrice.toFixed(2)}</span>
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-1">
-                        {order.paidAt
-                          ? `Pago em ${new Date(order.paidAt).toLocaleString("pt-BR")}`
-                          : `Criado em ${new Date(order.createdAt).toLocaleString("pt-BR")}`}
+                      
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{order.buyerRobloxUsername}</span>
+                          <Badge className={`${status.bg} ${status.color} text-xs border`}>
+                            {status.label}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                          <span>{order.robuxAmount.toLocaleString()} R$</span>
+                          <span>•</span>
+                          <span>R$ {order.finalPrice.toFixed(2)}</span>
+                          <span>•</span>
+                          <span>{formatDate(order.paidAt || order.createdAt)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {order.gamepassId > 0 && (
-                      <a
-                        href={`https://www.roblox.com/game-pass/${order.gamepassId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:underline"
-                      >
-                        Ver Gamepass
-                      </a>
-                    )}
-                    {(order.status === "PAYMENT_CONFIRMED" || order.status === "ASSIGNED") && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleDeliver(order.orderId)}
-                          disabled={delivering === order.orderId}
-                          className="gap-2 bg-green-600 hover:bg-green-700"
-                          title="Entrega automática via cookie"
+                    
+                    <div className="flex items-center gap-2">
+                      {order.gamepassId > 0 && (
+                        <a
+                          href={`https://www.roblox.com/game-pass/${order.gamepassId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg hover:bg-zinc-800 transition-colors"
+                          title="Ver Gamepass"
                         >
-                          {delivering === order.orderId ? (
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Truck className="w-4 h-4" />
-                          )}
-                          Entregar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleManualDeliver(order.orderId)}
-                          disabled={delivering === order.orderId}
-                          title="Marcar como entregue manualmente"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
+                          <ExternalLink className="w-4 h-4 text-zinc-500" />
+                        </a>
+                      )}
+                      
+                      {isPending && (
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            onClick={() => handleDeliver(order.orderId)}
+                            disabled={delivering === order.orderId}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-xs px-3"
+                          >
+                            {delivering === order.orderId ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <>
+                                <Truck className="w-3 h-3 mr-1" />
+                                Entregar
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleManualDeliver(order.orderId)}
+                            disabled={delivering === order.orderId}
+                            className="border-zinc-700 hover:bg-zinc-800 px-2"
+                            title="Marcar como entregue"
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Results count */}
+      {!loading && filteredOrders.length > 0 && (
+        <motion.p variants={item} className="text-xs text-zinc-600 text-center">
+          Exibindo {filteredOrders.length} de {orders.length} pedidos
+        </motion.p>
+      )}
+    </motion.div>
   );
 }

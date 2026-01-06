@@ -3,11 +3,30 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "@/lib/user-context";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, User, Lock, Save, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
+import { 
+  Loader2, User, Lock, Save, Eye, EyeOff, CheckCircle, 
+  AlertCircle, Shield, Crown, Sparkles
+} from "lucide-react";
+
+const roleConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  admin: { label: "Administrador", color: "text-red-400 bg-red-500/10", icon: Crown },
+  gerente: { label: "Gerente", color: "text-purple-400 bg-purple-500/10", icon: Shield },
+  auxiliar: { label: "Auxiliar", color: "text-blue-400 bg-blue-500/10", icon: User },
+};
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 export default function SettingsPage() {
   const user = useContext(UserContext);
@@ -32,6 +51,13 @@ export default function SettingsPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const handleUpdateProfile = async () => {
     if (!user) return;
     setLoading(true);
@@ -42,9 +68,9 @@ export default function SettingsPage() {
         name: name.trim() || undefined,
         username: username.trim() || undefined,
       });
-      setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
+      setMessage({ type: 'success', text: 'Perfil atualizado!' });
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao atualizar perfil' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao atualizar' });
     } finally {
       setLoading(false);
     }
@@ -54,12 +80,12 @@ export default function SettingsPage() {
     if (!user) return;
     
     if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'As senhas não coincidem' });
+      setMessage({ type: 'error', text: 'Senhas não coincidem' });
       return;
     }
 
     if (newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'A nova senha deve ter pelo menos 6 caracteres' });
+      setMessage({ type: 'error', text: 'Mínimo 6 caracteres' });
       return;
     }
 
@@ -71,180 +97,185 @@ export default function SettingsPage() {
         currentPassword: currentPassword || undefined,
         newPassword,
       });
-      setMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
+      setMessage({ type: 'success', text: 'Senha alterada!' });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao alterar senha' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Erro ao alterar' });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getRoleName = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Administrador';
-      case 'gerente': return 'Gerente';
-      case 'auxiliar': return 'Auxiliar';
-      default: return role;
     }
   };
 
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-zinc-100">Minha Conta</h1>
-        <p className="text-zinc-400 mt-1">Gerencie suas informações pessoais e senha</p>
-      </div>
+  const roleInfo = roleConfig[user.role] || roleConfig.auxiliar;
+  const RoleIcon = roleInfo.icon;
 
+  return (
+    <motion.div 
+      className="space-y-6 max-w-3xl"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Header */}
+      <motion.div variants={item}>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-cyan-400" />
+          Minha Conta
+        </h1>
+        <p className="text-zinc-500 text-sm mt-0.5">Gerencie suas informações pessoais</p>
+      </motion.div>
+
+      {/* Toast */}
       {message && (
-        <div className={`p-4 rounded-lg ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-          {message.text}
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+            message.type === 'success' 
+              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+              : 'bg-red-500/10 text-red-400 border border-red-500/20'
+          }`}
+        >
+          {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span>{message.text}</span>
+        </motion.div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Card */}
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-zinc-100 flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Informações do Perfil
-            </CardTitle>
-            <CardDescription className="text-zinc-400">
-              Atualize seu nome e usuário
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Nome</Label>
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome completo"
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+      {/* Profile Card */}
+      <motion.div variants={item} className="glass-card overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-cyan-500 to-emerald-500" />
+        <div className="p-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+              {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Usuário</Label>
-              <Input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="seu.usuario"
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
+            <div>
+              <h2 className="text-xl font-bold text-white">{user.name}</h2>
+              <p className="text-zinc-500">@{user.username}</p>
+              <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${roleInfo.color}`}>
+                <RoleIcon className="w-3 h-3" />
+                {roleInfo.label}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Cargo</Label>
-              <Input
-                type="text"
-                value={getRoleName(user.role)}
-                disabled
-                className="bg-zinc-800/50 border-zinc-700 text-zinc-400"
-              />
-              <p className="text-xs text-zinc-500">O cargo só pode ser alterado por um administrador</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-zinc-400 text-xs uppercase">Nome</Label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome"
+                  className="bg-zinc-800/50 border-zinc-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-400 text-xs uppercase">Usuário</Label>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="seu.usuario"
+                  className="bg-zinc-800/50 border-zinc-700"
+                />
+              </div>
             </div>
+
             <Button
               onClick={handleUpdateProfile}
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:opacity-90"
             >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
               Salvar Alterações
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </motion.div>
 
-        {/* Password Card */}
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-zinc-100 flex items-center gap-2">
-              <Lock className="w-5 h-5" />
-              Alterar Senha
-            </CardTitle>
-            <CardDescription className="text-zinc-400">
-              Atualize sua senha de acesso
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      {/* Password Card */}
+      <motion.div variants={item} className="glass-card overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+        <div className="p-6">
+          <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
+            <Lock className="w-4 h-4 text-amber-400" />
+            Alterar Senha
+          </h3>
+
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Senha Atual</Label>
+              <Label className="text-zinc-400 text-xs uppercase">Senha Atual</Label>
               <div className="relative">
                 <Input
                   type={showCurrentPassword ? "text" : "password"}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 pr-10"
+                  className="bg-zinc-800/50 border-zinc-700 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
                   {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Nova Senha</Label>
-              <div className="relative">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-zinc-400 text-xs uppercase">Nova Senha</Label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="bg-zinc-800/50 border-zinc-700 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-400 text-xs uppercase">Confirmar</Label>
                 <Input
-                  type={showNewPassword ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="bg-zinc-800 border-zinc-700 text-zinc-100 pr-10"
+                  className="bg-zinc-800/50 border-zinc-700"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300"
-                >
-                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Confirmar Nova Senha</Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="bg-zinc-800 border-zinc-700 text-zinc-100"
-              />
-            </div>
+
             <Button
               onClick={handleChangePassword}
               disabled={loading || !newPassword || !confirmPassword}
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              className="w-full bg-amber-600 hover:bg-amber-700"
             >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Lock className="w-4 h-4 mr-2" />
-              )}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
               Alterar Senha
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
