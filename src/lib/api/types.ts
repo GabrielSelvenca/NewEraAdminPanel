@@ -69,6 +69,14 @@ export interface BotConfig {
   purchaseLogBanner?: string;
   refreshRequested?: boolean;
   updatedAt?: string;
+  // Novos campos - Tempos & Limites
+  deliveryCloseMinutes?: number;
+  paymentCheckInterval?: number;
+  robloxTaxPercent?: number;
+  autoDeliveryEnabled?: boolean;
+  verifyDeliveryEnabled?: boolean;
+  couponsEnabled?: boolean;
+  debugLogsEnabled?: boolean;
 }
 
 export interface SalesStats {

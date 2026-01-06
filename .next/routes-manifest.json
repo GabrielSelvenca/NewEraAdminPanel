@@ -48,6 +48,12 @@
       "namedRegex": "^/dashboard(?:/)?$"
     },
     {
+      "page": "/dashboard/bot-settings",
+      "regex": "^/dashboard/bot\\-settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/bot\\-settings(?:/)?$"
+    },
+    {
       "page": "/dashboard/config",
       "regex": "^/dashboard/config(?:/)?$",
       "routeKeys": {},
