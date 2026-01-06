@@ -136,10 +136,7 @@ export function Sidebar() {
           )} />
           <span className="font-medium flex-1">{item.label}</span>
           {active && (
-            <motion.div 
-              layoutId="activeIndicator"
-              className="w-1.5 h-1.5 rounded-full bg-cyan-400"
-            />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
           )}
           {item.badge && (
             <span className="px-2 py-0.5 text-xs font-medium bg-cyan-500/20 text-cyan-400 rounded-full">
