@@ -71,6 +71,8 @@ export interface BotConfig {
   id: number;
   guildId?: string;
   categoryCarts?: string;
+  categoryCartsGamepass?: string;  // Categoria específica para carrinhos de jogos
+  categoryCartsRobux?: string;     // Categoria específica para carrinhos de robux
   categoryApproved?: string;
   categoryTickets?: string;
   channelLogsPurchases?: string;

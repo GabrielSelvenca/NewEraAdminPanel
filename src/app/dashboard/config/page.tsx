@@ -590,52 +590,98 @@ export default function ConfigPage() {
         </div>
       </div>
 
-      {/* Canal de Setup */}
-      <div className="glass-card p-5">
-        <h3 className="font-semibold text-white flex items-center gap-2 mb-4">
-          <Hash className="w-4 h-4 text-blue-400" />
-          Canal de Setup
-        </h3>
-        <div className="space-y-2">
-          <Label className="text-zinc-400 text-xs uppercase">Canal de Setup de Jogos</Label>
-          <p className="text-sm text-zinc-500 mb-2">
-            Canal onde será enviada a mensagem de seleção de jogos para compra de itens
-          </p>
-          {serverData ? (
-            <Select
-              value={config.channelSetupGamepass || ""}
-              onValueChange={(value) => updateField("channelSetupGamepass", value)}
-            >
-              <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
-                <SelectValue placeholder="Selecione o canal" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
-                {serverData.textChannels.map((channel) => (
-                  <SelectItem key={channel.id} value={channel.id}>
-                    # {channel.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <div className="flex gap-2">
+      {/* Categorias & Canais de Jogos */}
+      <Section
+        title="Categorias & Canais"
+        icon={FolderOpen}
+        iconColor="bg-blue-500/10 text-blue-400"
+        open={showDiscord}
+        onToggle={() => setShowDiscord(!showDiscord)}
+      >
+        {!serverData && (
+          <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-400 mb-4">
+            💡 Clique em &quot;Sync&quot; para carregar categorias e canais do Discord
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Categoria de Carrinhos de Jogos */}
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-2">
+              <FolderOpen className="w-3 h-3" />
+              Categoria Carrinhos de Jogos
+            </Label>
+            <p className="text-xs text-zinc-500">Onde os carrinhos de compra de jogos serão criados</p>
+            {serverData ? (
+              <Select 
+                value={config.categoryCartsGamepass || config.categoryCarts || ""} 
+                onValueChange={(value) => updateField("categoryCartsGamepass", value)}
+              >
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
+                  <SelectValue placeholder="Selecionar categoria" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input 
+                value={config.categoryCartsGamepass || ""} 
+                onChange={(e) => updateField("categoryCartsGamepass", e.target.value)} 
+                className="bg-zinc-800/50 border-zinc-700" 
+                placeholder="ID da categoria" 
+              />
+            )}
+          </div>
+
+          {/* Canal de Setup de Jogos */}
+          <div className="space-y-2">
+            <Label className="text-zinc-400 text-xs uppercase flex items-center gap-2">
+              <Hash className="w-3 h-3" />
+              Canal Setup de Jogos
+            </Label>
+            <p className="text-xs text-zinc-500">Onde a mensagem de seleção de jogos será enviada</p>
+            {serverData ? (
+              <Select
+                value={config.channelSetupGamepass || ""}
+                onValueChange={(value) => updateField("channelSetupGamepass", value)}
+              >
+                <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
+                  <SelectValue placeholder="Selecione o canal" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {serverData.textChannels.map((channel) => (
+                    <SelectItem key={channel.id} value={channel.id}>
+                      # {channel.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
               <Input 
                 value={config.channelSetupGamepass || ""} 
                 onChange={(e) => updateField("channelSetupGamepass", e.target.value)} 
                 className="bg-zinc-800/50 border-zinc-700" 
                 placeholder="ID do canal" 
               />
-              <Button 
-                onClick={handleSync} 
-                variant="outline" 
-                className="border-blue-500/50 text-blue-400"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+
+        <div className="mt-4 flex justify-end">
+          <Button 
+            onClick={handleSync} 
+            variant="outline" 
+            size="sm"
+            className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Sincronizar Discord
+          </Button>
+        </div>
+      </Section>
 
       {/* Visual Section - Mensagens & Embeds */}
       <Section
