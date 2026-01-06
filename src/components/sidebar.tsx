@@ -9,14 +9,12 @@ import {
   UserCog, 
   LogOut, 
   Ticket, 
-  Link2, 
   Package,
   Bot,
   Timer,
   Palette,
   ChevronRight,
   Zap,
-  Settings,
   ExternalLink,
   Shield,
   Circle
@@ -77,20 +75,7 @@ const botMenuItems: MenuItem[] = [
   },
 ];
 
-const settingsMenuItems: MenuItem[] = [
-  { 
-    href: "/dashboard/integrations", 
-    label: "Integrações", 
-    icon: Link2, 
-    allowedRoles: ['admin', 'gerente', 'auxiliar'] 
-  },
-  { 
-    href: "/dashboard/settings", 
-    label: "Minha Conta", 
-    icon: UserCog, 
-    allowedRoles: ['admin', 'gerente', 'auxiliar'] 
-  },
-];
+// Configurações pessoais agora estão no perfil do usuário (dropdown)
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -300,23 +285,13 @@ export function Sidebar() {
 
                 {/* Menu Items */}
                 <div className="p-2">
-                  <Link href="/dashboard/settings" onClick={() => setUserMenuOpen(false)}>
+                  <Link href="/dashboard/profile" onClick={() => setUserMenuOpen(false)}>
                     <motion.div
                       whileHover={{ x: 4 }}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all cursor-pointer"
                     >
-                      <Settings className="w-4 h-4" />
-                      <span className="text-sm font-medium">Minha Conta</span>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/dashboard/integrations" onClick={() => setUserMenuOpen(false)}>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all cursor-pointer"
-                    >
-                      <Link2 className="w-4 h-4" />
-                      <span className="text-sm font-medium">Integrações</span>
+                      <UserCog className="w-4 h-4" />
+                      <span className="text-sm font-medium">Meu Perfil</span>
                     </motion.div>
                   </Link>
 
@@ -408,17 +383,6 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Settings */}
-        <div>
-          <p className="px-4 mb-2 text-xs font-semibold text-zinc-600 uppercase tracking-wider">
-            Configurações
-          </p>
-          <div className="space-y-1">
-            {filterByRole(settingsMenuItems).map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
       </nav>
 
       {/* Logout */}

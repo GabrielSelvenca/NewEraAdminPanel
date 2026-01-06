@@ -129,8 +129,8 @@ const NumberInput = React.forwardRef<HTMLDivElement, NumberInputProps>(
             className={cn(
               buttonSizeClasses[size],
               "flex items-center justify-center rounded-xl",
-              "bg-zinc-800 border border-zinc-700",
-              "text-zinc-400 hover:text-white hover:bg-zinc-700 hover:border-zinc-600",
+              "bg-zinc-800 border border-zinc-600",
+              "text-zinc-300 hover:text-white hover:bg-zinc-700 hover:border-zinc-500",
               "transition-all duration-200",
               "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800 disabled:hover:text-zinc-400"
             )}
@@ -144,10 +144,10 @@ const NumberInput = React.forwardRef<HTMLDivElement, NumberInputProps>(
           className={cn(
             sizeClasses[size],
             "relative flex items-center rounded-xl overflow-hidden",
-            "bg-zinc-900 border transition-all duration-200",
+            "bg-zinc-800 border transition-all duration-200",
             isFocused
               ? "border-cyan-500 ring-2 ring-cyan-500/20"
-              : "border-zinc-700 hover:border-zinc-600",
+              : "border-zinc-600 hover:border-zinc-500",
             !showControls && "flex-1"
           )}
         >
@@ -209,8 +209,8 @@ const NumberInput = React.forwardRef<HTMLDivElement, NumberInputProps>(
             className={cn(
               buttonSizeClasses[size],
               "flex items-center justify-center rounded-xl",
-              "bg-zinc-800 border border-zinc-700",
-              "text-zinc-400 hover:text-white hover:bg-zinc-700 hover:border-zinc-600",
+              "bg-zinc-800 border border-zinc-600",
+              "text-zinc-300 hover:text-white hover:bg-zinc-700 hover:border-zinc-500",
               "transition-all duration-200",
               "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800 disabled:hover:text-zinc-400"
             )}
