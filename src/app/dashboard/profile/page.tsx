@@ -688,8 +688,8 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-bold text-white">{user.name}</h1>
               <p className="text-zinc-500">@{user.username}</p>
             </div>
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r ${roleInfo.gradient} text-white text-sm font-medium`}>
-              <RoleIcon className="w-4 h-4" />
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r ${roleInfo.gradient} text-white text-xs font-medium shadow-lg`}>
+              <RoleIcon className="w-3.5 h-3.5" />
               {roleInfo.label}
             </div>
           </div>
