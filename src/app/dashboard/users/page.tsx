@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { 
   Plus, RefreshCw, Users, Loader2, Trash2, Pencil, Key, 
-  Search, Shield, UserCog, Crown, User, CheckCircle
+  Search, Shield, UserCog, Crown, User, CheckCircle, AlertCircle
 } from "lucide-react";
 import { toast } from "@/lib/error-handling";
 
@@ -153,6 +153,21 @@ export default function UsersPage() {
     setPasswordDialogOpen(true);
   };
 
+  // Helper para extrair mensagem de erro
+  const extractErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) {
+      const msg = err.message;
+      // Tenta parsear se for JSON
+      try {
+        const parsed = JSON.parse(msg);
+        return parsed.error || parsed.message || msg;
+      } catch {
+        return msg;
+      }
+    }
+    return "Erro ao processar";
+  };
+
   const handleChangePassword = async () => {
     if (!passwordUserId) return;
     if (newPassword !== confirmPassword) {
@@ -174,7 +189,7 @@ export default function UsersPage() {
       toast.success("Senha alterada!");
       setPasswordDialogOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao alterar");
+      setError(extractErrorMessage(err));
     } finally {
       setChangingPassword(false);
     }
@@ -193,7 +208,7 @@ export default function UsersPage() {
       setPassword("");
       await loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao criar");
+      setError(extractErrorMessage(err));
     } finally {
       setCreating(false);
     }
@@ -284,7 +299,12 @@ export default function UsersPage() {
                     ))}
                   </select>
                 </div>
-                {error && <p className="text-red-400 text-sm">{error}</p>}
+                {error && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
+                )}
                 <Button 
                   onClick={handleCreate} 
                   disabled={creating || !username.trim() || !name.trim() || !password.trim()}
@@ -496,7 +516,12 @@ export default function UsersPage() {
                 </select>
               </div>
             )}
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
             <Button 
               onClick={handleEdit} 
               disabled={saving}
@@ -548,7 +573,12 @@ export default function UsersPage() {
                 className="bg-zinc-800/50 border-zinc-700"
               />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
             <Button 
               onClick={handleChangePassword} 
               disabled={changingPassword || !newPassword || !confirmPassword}
