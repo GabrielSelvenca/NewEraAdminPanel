@@ -271,10 +271,10 @@ export function Sidebar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute left-0 right-0 top-full mt-2 z-50 glass-card overflow-hidden"
+                className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-zinc-700/50 bg-zinc-900 shadow-xl shadow-black/40 overflow-hidden"
               >
                 {/* User Info Header */}
-                <div className="p-3 border-b border-zinc-800/50 bg-zinc-900/50">
+                <div className="p-3 border-b border-zinc-800 bg-zinc-800/50">
                   <p className="text-xs text-zinc-500 mb-1">Conectado como</p>
                   <p className="text-sm font-medium text-white truncate">{user?.username || user?.name}</p>
                   <div className="flex items-center gap-2 mt-2">
@@ -301,8 +301,8 @@ export function Sidebar() {
                 <div className="p-2">
                   <Link href="/dashboard/profile" onClick={() => setUserMenuOpen(false)}>
                     <motion.div
-                      whileHover={{ x: 4 }}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all cursor-pointer"
+                      whileHover={{ x: 4, backgroundColor: 'rgba(39, 39, 42, 0.8)' }}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white transition-all cursor-pointer"
                     >
                       <UserCog className="w-4 h-4" />
                       <span className="text-sm font-medium">Meu Perfil</span>
@@ -317,8 +317,8 @@ export function Sidebar() {
                       className="block"
                     >
                       <motion.div
-                        whileHover={{ x: 4 }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all cursor-pointer"
+                        whileHover={{ x: 4, backgroundColor: 'rgba(39, 39, 42, 0.8)' }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-400 hover:text-white transition-all cursor-pointer"
                       >
                         <ExternalLink className="w-4 h-4" />
                         <span className="text-sm font-medium">Portal Discord</span>
@@ -328,14 +328,14 @@ export function Sidebar() {
                 </div>
 
                 {/* Logout */}
-                <div className="p-2 border-t border-zinc-800/50">
+                <div className="p-2 border-t border-zinc-800">
                   <motion.button
-                    whileHover={{ x: 4 }}
+                    whileHover={{ x: 4, backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
                     }}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-red-400 hover:text-red-300 transition-all"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="text-sm font-medium">Sair da conta</span>
